@@ -230,12 +230,6 @@ function saveNote(date, modal, dayElement) {
     renderCalendar(translations[currentLanguage]);
 }
 
-// Modify getNoteForDate to filter by current language:
-function getNoteForDate(date) {
-    const dateKey = date.toISOString().split('T')[0];
-    if (!window.notes[dateKey]) return null;
-    return window.notes[dateKey].filter(note => !note.language || note.language === currentLanguage);
-}
 function renderNoteIndicator(dayElement, colorClass) {
     // Clear existing indicators
     dayElement.querySelectorAll('.note-indicator').forEach(el => el.remove());
@@ -297,13 +291,7 @@ function saveNotes() {
         hideLoading(loadingOverlay);
 	}
 }
-function deleteNote(date) {
-    const dateKey = date.toISOString().split('T')[0];
-    if (window.notes[dateKey]) {
-        delete window.notes[dateKey];
-        saveNotes();
-	}
-}
+
 
 // Initialize note functionality
 window.initNotes = function() {

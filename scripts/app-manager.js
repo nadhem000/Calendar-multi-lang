@@ -102,7 +102,7 @@ class AppManager {
 		const installBtn = document.getElementById('install-btn');
 		if (installBtn) {
 			installBtn.style.display = 'block';
-			installBtn.textContent = translations[currentLanguage]?.Install || 'Install App';
+			installBtn.textContent = translations[currentLanguage].Install || 'Install App';
 		}
 	}
 	
@@ -153,8 +153,8 @@ class AppManager {
 		const warning = document.createElement('div');
 		warning.className = 'storage-warning';
 		warning.innerHTML = `
-		<p>${translations[currentLanguage]?.storageWarning || 'Your storage is almost full. Some features may not work properly.'}</p>
-		<button id="clear-storage">${translations[currentLanguage]?.clearStorage || 'Clear old data'}</button>
+		<p>${translations[currentLanguage].storageWarning || 'Your storage is almost full. Some features may not work properly.'}</p>
+		<button id="clear-storage">${translations[currentLanguage].clearStorage || 'Clear old data'}</button>
 		`;
 		document.body.appendChild(warning);
 		
@@ -181,10 +181,10 @@ class AppManager {
 			}
 			
 			localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
-			alert(translations[currentLanguage]?.storageCleared || 'Old data cleared successfully');
+			alert(translations[currentLanguage].storageCleared || 'Old data cleared successfully');
 			} catch (error) {
 			console.error('Failed to clear old data:', error);
-			alert(translations[currentLanguage]?.storageError || 'Error clearing old data');
+			alert(translations[currentLanguage].storageError || 'Error clearing old data');
 		}
 	}
 	
@@ -213,8 +213,8 @@ class AppManager {
 		const notification = document.createElement('div');
 		notification.className = 'update-notification';
 		notification.innerHTML = `
-		<p>${translations[currentLanguage]?.updateAvailable || 'New version available!'}</p>
-		<button id="reload-app">${translations[currentLanguage]?.reload || 'Reload'}</button>
+		<p>${translations[currentLanguage].updateAvailable || 'New version available!'}</p>
+		<button id="reload-app">${translations[currentLanguage].reload || 'Reload'}</button>
 		`;
 		document.body.appendChild(notification);
 		
