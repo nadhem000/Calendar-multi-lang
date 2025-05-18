@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Calendar</title>
+		<link rel="stylesheet" href="styles/main.css">
+		<!-- Font Awesome CDN removed -->
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1 class="title">Calendar</h1>
+				<div class="language-selector">
+					<select id="language-select">
+						<option value="en">English</option>
+						<option value="ar">العربية (Arabic)</option>
+						<option value="fr">Français (French)</option>
+					</select>
+				</div><!-- Calendar System Selector -->
+				<select id="calendar-system">
+					<option value="gregorian">Gregorian</option>
+					<option value="hijri">Hijri</option>
+				</select>
+			</header>
+			
+			<div class="main-content">
+				<aside class="sidebar">
+					<div class="icon" id="plate-icon" title="Plate">
+						🍽️
+					</div>
+					<div class="icon" id="health-icon" title="Health">
+						❤️
+					</div>
+					<div class="icon" id="mechanics-icon" title="Mechanics">
+						⚙️
+					</div>
+				</aside>
+				
+				<main class="calendar-container">
+					<div class="calendar-header">
+						<button id="prev-month">◀</button>
+						<h2 id="month-year-display">Month Year</h2>
+						<button id="next-month">▶</button>
+						<button id="today-btn" class="today-button" title="Return to today">
+							📅 Today
+						</button>
+					</div>
+					<div id="today-date-label" class="today-date"></div>
+					<div class="weekdays">
+						<div>Sun</div>
+						<div>Mon</div>
+						<div>Tue</div>
+						<div>Wed</div>
+						<div>Thu</div>
+						<div>Fri</div>
+						<div>Sat</div>
+					</div>
+					<div class="days" id="calendar-days"></div>
+				</main>
+			</div>
+		</div>
+		<div id="app-controls">
+			<button id="install-btn" style="display:none;"></button>
+			<div id="storage-indicator-container">
+				<div id="storage-indicator"></div>
+			</div>
+			<div id="online-status" title="Online"></div>
+		</div>
+		<script src="scripts/app-manager.js"></script>
+		<script src="scripts/converter.js"></script>
+		<script src="scripts/languages.js"></script>
+		<script src="scripts/calendar.js"></script>
+		<script src="scripts/notes.js"></script>
+		<script src="scripts/main.js"></script>
+	</body>
+</html>

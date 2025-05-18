@@ -1,0 +1,844 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+.language-selector {
+    margin-bottom: 20px;
+}
+.language-selector select {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 1rem;
+}
+.main-content {
+    display: flex;
+    gap: 20px;
+}
+.sidebar {
+    width: 80px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+.icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.5rem; /* Larger for emoji visibility */
+    color: #2c3e50;
+    line-height: 1; /* Fix vertical alignment */
+}
+.icon:hover {
+    background-color: #3498db;
+    color: white;
+    transform: scale(1.1);
+}
+.calendar-container {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+.calendar-header h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    flex-grow: 1;
+    text-align: center;
+}
+.calendar-header button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #2c3e50;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+.calendar-header button:hover {
+    background-color: #f0f0f0;
+}
+/* Calendar header arrows */
+#prev-month, #next-month {
+    font-size: 1.2rem;
+    padding: 0 10px;
+}
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #7f8c8d;
+}
+/* Today button icon */
+#today-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+.days div {
+    height: 100px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.days div:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+.days div.empty {
+    color: #aaa;
+    background-color: #f5f5f5;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+.days div.today {
+    background-color: #3498db;
+    color: white;
+}
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+	}
+    .icon {
+        font-size: 1.3rem;
+    }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 20px;
+	}
+    .days div {
+        height: 70px;
+	}
+}
+.today-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    margin-left: auto;
+}
+.today-button:hover {
+    background-color: #2980b9;
+}
+/* RTL support */
+[dir="rtl"] .today-button {
+    margin-right: auto;
+    margin-left: 0;
+}
+[dir="ltr"] .today-button {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* For RTL languages */
+[dir="rtl"] .days div.empty {
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+/* For shadowed days (days from other months) */
+.shadow-day {
+    color: #aaa;
+    background-color: #f8f8f8;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    opacity: 0.7;
+}
+
+/* RTL support for shadowed days */
+[dir="rtl"] .shadow-day {
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+.today-date {
+    text-align: center;
+    margin: 10px 0 20px;
+    font-size: 1.1rem;
+    color: #555;
+    font-weight: bold;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+[dir="rtl"] .today-date {
+    text-align: right;
+}
+
+/* Darker color when viewing current month */
+.calendar-container .today-date {
+    color: #2c3e50;
+}
+/* Note Modal Styles */
+.note-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.note-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.note-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    max-width: 95vw;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.close-modal {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.color-picker {
+    display: flex;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    display: inline-block;
+    margin: 0 5px;
+    position: relative;
+}
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: #333;
+    transform: scale(1.1);
+}
+
+.note-type-selector {
+    display: flex;
+    margin-bottom: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.note-type-selector label {
+    font-size: 1.5em;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.note-type {
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s;
+    display: inline-block;
+    margin: 0 5px;
+    padding: 5px;
+}
+
+.note-type.selected {
+    opacity: 1;
+    color: #3498db;
+    transform: scale(1.1);
+}
+.note-type:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.note-text {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: none;
+}
+
+.note-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.note-buttons button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-note {
+    background: #4CAF50;
+    color: white;
+}
+
+.close-note {
+    background: #f44336;
+    color: white;
+}
+
+/* Note Indicator on Calendar Days */
+.note-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.note-color-red { background-color: #ff6b6b; }
+.note-color-blue { background-color: #48dbfb; }
+.note-color-green { background-color: #1dd1a1; }
+.note-color-yellow { background-color: #feca57; }
+.note-color-purple { background-color: #5f27cd; }
+.note-preview {
+    font-size: 0.65rem;
+    padding: 2px;
+    margin: 1px 0;
+    border-radius: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-color: rgba(255,255,255,0.7);
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+}
+.more-notes-indicator {
+    font-size: 0.6rem;
+    text-align: center;
+    margin-top: 2px;
+    color: #666;
+}
+
+/* Enhanced Note Modal */
+
+.note-input-section {
+    margin: 15px 0;
+}
+
+.note-tools {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+
+.note-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.note-actions button {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+
+.delete-note {
+    background-color: #f1f1f1;
+    color: #e74c3c;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.delete-note.hidden {
+    visibility: hidden;
+}
+
+/* Hover effects */
+.note-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.save-note:hover {
+    background-color: #2980b9;
+}
+
+.delete-note:hover {
+    background-color: #e0e0e0;
+    opacity: 0.8;
+}
+.day-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-weight: bold;
+    z-index: 2; /* Ensure day number stays above note indicator */
+}
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.note-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    color: white;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 5px 0;
+}
+.note-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+.existing-notes {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin: 15px 0;
+}
+
+.existing-notes h4 {
+    margin-bottom: 10px;
+    color: #555;
+}
+.existing-note {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+.note-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1;
+    word-break: break-word;
+    max-width: 70%;
+}
+
+.existing-note .delete-note {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.existing-note .delete-note:hover {
+    opacity: 1;
+}
+
+.note-color-gray {
+    background-color: #cccccc;
+    color: #333;
+}
+.existing-notes-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.existing-note-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    margin: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+}
+
+.existing-note-item:hover {
+    background-color: #f9f9f9;
+}
+
+.note-text-display {
+    flex-grow: 1;
+    padding: 3px;
+}
+
+.delete-existing-note {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px;
+    font-size: 1.2rem;
+}
+
+.delete-existing-note:hover {
+    color: #c0392b;
+}
+
+.note-input-section {
+    margin-top: 15px;
+}
+/* Loading overlay styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* App Manager Styles */
+#app-controls {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 1000;
+}
+
+#install-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#storage-indicator-container {
+    width: 100px;
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#storage-indicator {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+#online-status {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #4CAF50;
+}
+
+#online-status.offline {
+    background: #f44336;
+}
+
+.update-notification {
+    position: fixed;
+    bottom: 50px;
+    right: 10px;
+    background: #333;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.update-notification button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.storage-warning {
+    position: fixed;
+    bottom: 100px;
+    right: 10px;
+    background: #ff9800;
+    color: #333;
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.storage-warning button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+/* Accessibility Improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+fieldset {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+legend {
+    padding: 0 5px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Update color picker styles to work with radio inputs */
+.color-picker input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.color-picker input[type="radio"] + label {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin: 0 5px;
+    border: 2px solid transparent;
+}
+
+.color-picker input[type="radio"]:checked + label {
+    border-color: #333;
+    transform: scale(1.1);
+}
+
+.note-type-selector input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.note-type-selector input[type="radio"] + label {
+    display: inline-block;
+    font-size: 1.5em;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s;
+    margin: 0 5px;
+    padding: 5px;
+}
+
+.note-type-selector input[type="radio"]:checked + label {
+    opacity: 1;
+    transform: scale(1.1);
+}
+/* Color dots in calendar */
+.note-color-band {
+    display: flex;
+    gap: 2px;
+    padding: 0 2px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+.note-language {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 4px;
+}
+
+.color-dot {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    flex: 1;
+    min-width: 0;
+}
+.color-option input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+}
+/* Note Modal Mobile */
+
+@media (max-width: 480px) {
+    .note-modal-content {
+        padding: 15px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .note-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+    
+    .note-icon {
+        margin-bottom: 8px;
+    }
+    
+    .delete-note {
+        align-self: flex-end;
+        margin-top: 8px;
+    }
+    
+    .note-content {
+        max-width: 100%;
+    }
+    
+    .note-language {
+        order: 3;
+        width: 100%;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
