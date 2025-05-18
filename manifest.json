@@ -52,5 +52,31 @@
 			"type": "image/png",
 			"platform": "narrow"
 		}
-	]
+	],
+	"file_handlers": [
+		{
+			"action": "/handle-file",
+			"accept": {
+				"text/plain": [".txt"],
+				"image/*": [".jpg", ".jpeg", ".png"]
+			}
+		}
+	],
+	"share_target": {
+		"action": "/share-target",
+		"method": "POST",
+		"enctype": "multipart/form-data",
+		"params": {
+			"files": [
+				{
+					"name": "attachments",
+					"accept": ["text/plain", "image/*"]
+				}
+			]
+		}
+	},
+	"handle_links": {
+		"matches": ["https://calendar-multi-lang.netlify.app/*"],
+		"exclude_matches": ["https://calendar-multi-lang.netlify.app/admin/*"]
+	}
 }

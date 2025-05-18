@@ -89,7 +89,16 @@ translations[currentLanguage].delete
 <button type="submit" class="save-note">${translations[currentLanguage].save}</button>
 <button type="button" class="close-note">${translations[currentLanguage].close}</button>
 </div>
-</div>
+  <div class="attachments">
+    ${(window.notes[dateKey] || []).map((note, index) => `
+      ${(note.attachments || []).map(attach => `
+        ${attach.type === 'image' ? 
+          `<img src="${attach.url}" class="attachment-preview">` : 
+          `<div class="text-attachment">📄 ${attach.content.substring(0, 20)}...</div>`
+        }
+      `).join('')}
+    `).join('')}
+  </div>
 `;
 
 document.body.appendChild(modal);

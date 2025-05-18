@@ -41,7 +41,9 @@ const translations = {
 			"Shawwal",
 			"Dhu al-Qidah",
 			"Dhul-Hijjah"
-		]
+		],
+		back: "Back",
+		delai: "Frequency"
 	},
     ar: {
         title: "التقويم",
@@ -84,7 +86,9 @@ const translations = {
 			"شوال",
 			"ذو القعدة",
 			"ذو الحجة"
-		]
+		],
+		back: "رجوع",
+		delai: "التكرار"
 	},
     fr: {
         title: "Calendrier",
@@ -127,7 +131,9 @@ const translations = {
 			"Chawwal",
 			"Dhou al-Qi'dah",
 			"Dhoul Hijja"
-		]
+		],
+		back: "Retour",
+		delai: "Fréquence"
 	}
 };
 // Function to change language
@@ -139,11 +145,11 @@ function changeLanguage(lang) {
     const systemSelect = document.getElementById('calendar-system');
     if (systemSelect) {
         systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-            .map(([value, name]) => 
-                `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-            ).join('');
+		.map(([value, name]) => 
+			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+		).join('');
         currentCalendarSystem = prevSystem; // Restore previous system
-    }
+	}
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
     document.getElementById('plate-icon').setAttribute('title', langData.icons.plate);

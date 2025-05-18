@@ -14,14 +14,15 @@ class AppManager {
 			'./scripts/converter.js',
 			'./scripts/calendar.js',
 			'./scripts/notes.js',
+			'./scripts/addons.js',
 			'./scripts/main.js',
 			'./scripts/app-manager.js',
-	'./assets/icons/ios/icon-192.png',
-	'./assets/icons/android/icon-192.png',
-	'./assets/icons/android/icon-512.png',
-	'./assets/backgrounds/background.jpg',
-	'./assets/screenshots/screenshot_01.png',
-	'./assets/screenshots/screenshot_02.png'
+			'./assets/icons/ios/icon-192.png',
+			'./assets/icons/android/icon-192.png',
+			'./assets/icons/android/icon-512.png',
+			'./assets/backgrounds/background.jpg',
+			'./assets/screenshots/screenshot_01.png',
+			'./assets/screenshots/screenshot_02.png'
 		]
         this.init();
 		
@@ -33,9 +34,7 @@ class AppManager {
 	}
 	
 	// Service Worker Registration
-	
 	async registerServiceWorker() {
-		// Add protocol check
 		const isLocalEnvironment = window.location.protocol === 'file:';
 		
 		if (isLocalEnvironment) {
@@ -46,7 +45,35 @@ class AppManager {
 		if ('serviceWorker' in navigator) {
 			try {
 				const registration = await navigator.serviceWorker.register('./sw.js');
-				// ... rest of existing code ...
+				
+				// Add update handling
+				registration.addEventListener('updatefound', () => {
+					const newWorker = registration.installing;
+					newWorker.addEventListener('statechange', () => {
+						if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+							this.showUpdateNotification();
+						}
+					});
+				});
+				
+				// Check for immediate updates
+				if (registration.waiting) {
+					this.showUpdateNotification();
+				}
+				
+				// Initialize service worker communication
+				if (registration.active) {
+					registration.active.postMessage({ 
+						type: 'INIT', 
+						cacheName: this.CACHE_NAME 
+					});
+				}
+				
+				// Track updates from other tabs
+				navigator.serviceWorker.addEventListener('controllerchange', () => {
+					window.location.reload();
+				});
+				
 				} catch (error) {
 				console.error('ServiceWorker registration failed:', error);
 			}
@@ -233,4 +260,51 @@ class AppManager {
 // Initialize AppManager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
 	window.appManager = new AppManager();
-});	
+});
+
+// classe simplifiée
+class FileManager {
+	static async processFile(file) {
+		const noteDate = new Date().toISOString().split('T')[0]; // Date actuelle
+		
+		if (file.type.startsWith('image/')) {
+			const imageUrl = await this.storeImage(file);
+			this.linkToNote(noteDate, {type: 'image', url: imageUrl});
+			} else if (file.type === 'text/plain') {
+			const text = await file.text();
+			this.linkToNote(noteDate, {type: 'text', content: text});
+		}
+	}
+	
+	static async storeImage(file) {
+		return new Promise((resolve) => {
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				localStorage.setItem(`img-${Date.now()}`, e.target.result);
+				resolve(e.target.result);
+			};
+			reader.readAsDataURL(file);
+		});
+	}
+	
+	static linkToNote(date, attachment) {
+		if (!window.notes[date]) window.notes[date] = [{}];
+		
+		const lastNoteIndex = window.notes[date].length - 1;
+		if (!window.notes[date][lastNoteIndex].attachments) {
+			window.notes[date][lastNoteIndex].attachments = [];
+		}
+		
+		window.notes[date][lastNoteIndex].attachments.push(attachment);
+		saveNotes(); // Assurez-vous que saveNotes() est accessible
+	}
+} // Fermeture de classe ajoutée
+
+// Initialisation après la classe
+if ('launchQueue' in window) {
+	window.launchQueue.setConsumer((launchParams) => {
+		if (launchParams.files.length > 0) {
+			FileManager.processFile(launchParams.files[0]);
+		}
+	});
+}

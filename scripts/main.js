@@ -15,7 +15,22 @@ function hideLoading(overlay) {
         overlay.parentNode.removeChild(overlay);
 	}
 }
+function handleAppRouting() {
+  const path = window.location.pathname;
+  
+  // Exemple : /event/123 → Affiche l'événement
+  if (path.startsWith('/event/')) {
+    const eventId = path.split('/')[2];
+    showEventDetails(eventId);
+  }
+  
+  // Ajoutez d'autres routes
+}
 
+document.addEventListener('DOMContentLoaded', () => {
+  handleAppRouting();
+  window.addEventListener('hashchange', handleAppRouting);
+});
 
 
 
@@ -43,15 +58,16 @@ document.addEventListener('DOMContentLoaded', function() {
 			currentLanguage = this.value;
 			// Force full calendar re-render
 			renderCalendar(changeLanguage(currentLanguage));
-			});
+		});
 	}
     
     document.getElementById('next-month')?.addEventListener('click', nextMonth);
     document.getElementById('prev-month')?.addEventListener('click', prevMonth);
     
-    ['plate-icon', 'health-icon', 'mechanics-icon'].forEach(id => {
-        document.getElementById(id)?.addEventListener('click', () => {
-            setTimeout(() => alert(`${id.replace('-icon', '')} icon clicked!`), 0);
+    ['health-icon', 'plate-icon', 'mechanics-icon'].forEach(id => {
+		document.getElementById(id)?.addEventListener('click', function() {
+			const category = this.id.replace('-icon', '');
+			showTipsModal(category);
 		});
 	});
 });
