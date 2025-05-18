@@ -1,18 +1,30 @@
 // Service Worker for Offline Functionality
 const CACHE_NAME = 'calendar-cache-v2'; // Must match config.js
+const isLocalEnvironment = (() => {
+    try {
+        return self.location.protocol === 'file:';
+    } catch (e) {
+        return false;
+    }
+})();
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/styles/main.css',
-    '/scripts/languages.js',
-    '/scripts/converter.js',
-    '/scripts/calendar.js',
-    '/scripts/notes.js',
-    '/scripts/main.js',
-    '/scripts/app-manager.js'
+    './',
+    './index.html',
+    './styles/main.css',
+    './scripts/languages.js',
+    './scripts/converter.js',
+    './scripts/calendar.js',
+    './scripts/notes.js',
+    './scripts/main.js',
+    './scripts/app-manager.js'
   ];
 
 self.addEventListener('install', (event) => {
+    if (isLocalEnvironment) {
+        console.log('Local environment detected, skipping cache');
+        return;
+    }
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(ASSETS_TO_CACHE))
@@ -35,6 +47,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    if (isLocalEnvironment) return;
+    
     event.respondWith(
         caches.match(event.request)
             .then(response => response || fetch(event.request))

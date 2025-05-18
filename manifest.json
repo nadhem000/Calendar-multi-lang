@@ -50,7 +50,7 @@
 			"src": "assets/screenshots/screenshot_02.png",
 			"sizes": "705x416",
 			"type": "image/png",
-			"platform": "narrow"
+			"platform": "wide"
 		}
 	]
 }

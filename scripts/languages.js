@@ -132,15 +132,18 @@ const translations = {
 };
 // Function to change language
 function changeLanguage(lang) {
-    currentLanguage = lang; // Add this to ensure consistency
+    const prevSystem = currentCalendarSystem;
+    currentLanguage = lang;
     const langData = translations[lang];
     // Update calendar system options
-	const systemSelect = document.getElementById('calendar-system');
-	if (systemSelect) {
-		systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-		.map(([value, name]) => `<option value="${value}">${name}</option>`)
-		.join('');
-	}
+    const systemSelect = document.getElementById('calendar-system');
+    if (systemSelect) {
+        systemSelect.innerHTML = Object.entries(langData.calendarSystems)
+            .map(([value, name]) => 
+                `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+            ).join('');
+        currentCalendarSystem = prevSystem; // Restore previous system
+    }
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
     document.getElementById('plate-icon').setAttribute('title', langData.icons.plate);

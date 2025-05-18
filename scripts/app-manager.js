@@ -6,15 +6,15 @@ class AppManager {
 	constructor() {
 		this.CACHE_NAME = 'calendar-cache-v2'; // Hardcode value
 		this.ASSETS_TO_CACHE = [
-			'/',
-			'/index.html',
-			'/styles/main.css',
-			'/scripts/languages.js',
-			'/scripts/converter.js',
-			'/scripts/calendar.js',
-			'/scripts/notes.js',
-			'/scripts/main.js',
-			'/scripts/app-manager.js'
+			'./',
+			'./index.html',
+			'./styles/main.css',
+			'./scripts/languages.js',
+			'./scripts/converter.js',
+			'./scripts/calendar.js',
+			'./scripts/notes.js',
+			'./scripts/main.js',
+			'./scripts/app-manager.js'
 		]
         this.init();
 		
@@ -26,21 +26,20 @@ class AppManager {
 	}
 	
 	// Service Worker Registration
+	
 	async registerServiceWorker() {
+		// Add protocol check
+		const isLocalEnvironment = window.location.protocol === 'file:';
+		
+		if (isLocalEnvironment) {
+			console.log('Local environment detected - skipping Service Worker');
+			return;
+		}
+		
 		if ('serviceWorker' in navigator) {
 			try {
-				const registration = await navigator.serviceWorker.register('/sw.js');
-				console.log('ServiceWorker registration successful');
-				
-				// Update cache when new content is available
-				registration.addEventListener('updatefound', () => {
-					const newWorker = registration.installing;
-					newWorker.addEventListener('statechange', () => {
-						if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-							this.showUpdateNotification();
-						}
-					});
-				});
+				const registration = await navigator.serviceWorker.register('./sw.js');
+				// ... rest of existing code ...
 				} catch (error) {
 				console.error('ServiceWorker registration failed:', error);
 			}
