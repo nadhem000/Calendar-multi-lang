@@ -1,0 +1,56 @@
+{
+	"name": "Multi-Task Calendar",
+	"short_name": "Multi-Task Calendar",
+	"id": "MultiTaskCalendar",
+	"description": "A multi-task calendar application with notes support",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#4CAF50",
+	"orientation": "portrait",
+	"start_url": "/",
+	"scope": "/",
+	"edge_side_panel": {
+		"preferred_width": 400
+	},
+	"display_override": [
+		"window-controls-overlay",
+		"standalone",
+		"browser"
+	],
+	"launch_handler": {
+		"client_mode": "auto"
+	},
+	"categories": ["productivity", "education", "kids"],
+	"dir": "auto",
+	"iarc_rating_id": "e58c174a-81d2-5c3c-32cc-34b8de4a52e9",
+	"lang": "en",
+	"prefer_related_applications": false,
+	"icons": [
+		{
+			"src": "assets/icons/android/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "assets/icons/android/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		}
+	],
+	"screenshots": [
+		{
+			"src": "assets/screenshots/screenshot_01.png",
+			"sizes": "1128x536",
+			"type": "image/png",
+			"platform": "wide"
+		},
+		{
+			"src": "assets/screenshots/screenshot_02.png",
+			"sizes": "705x416",
+			"type": "image/png",
+			"platform": "narrow"
+		}
+	]
+}
