@@ -7,6 +7,9 @@ const isLocalEnvironment = (() => {
         return false;
 	}
 })();
+const BACKGROUND_SYNC_TAG = 'sync-notes';
+const PERIODIC_SYNC_TAG = 'periodic-update';
+const SYNC_QUEUE = 'sync-queue';
 const ASSETS_TO_CACHE = [
     './',
 	'./manifest.json',
@@ -70,12 +73,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    if (isLocalEnvironment) return;
-    
-    event.respondWith(
-        caches.match(event.request)
-		.then(response => response || fetch(event.request))
-	);
+  if (isLocalEnvironment) return;
+
+  const url = new URL(event.request.url);
+
+  // Gestion prioritaire du partage
+  if (url.pathname === '/share-target') {
+    event.respondWith(handleShare(event.request));
+    return;
+  }
+
+  // Gestion des liens d'application
+  if (event.request.mode === 'navigate') {
+    event.respondWith(handleAppNavigation(event.request));
+    return;
+  }
+
+  // Stratégie de cache par défaut
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetchWithFallback(event.request))
+  );
 });
 // Gestion des fichiers partagés
 self.addEventListener('fetch', (event) => {
@@ -116,4 +134,48 @@ async function handleShare(request) {
 	await Promise.all(files.map(file => tx.store.add(file)));
 	
 	return Response.redirect('/note-with-attachment?shared=1', 303);
+}
+
+// Modifiez l'événement fetch pour gérer les requêtes en échec
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === BACKGROUND_SYNC_TAG) {
+    event.waitUntil(processSyncQueue());
+  }
+});
+
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === PERIODIC_SYNC_TAG) {
+    event.waitUntil(backgroundUpdate());
+  }
+});
+
+async function processSyncQueue() {
+  const db = await openDB();
+  const tx = db.transaction(SYNC_QUEUE, 'readwrite');
+  const queue = tx.objectStore(SYNC_QUEUE);
+  
+  let cursor = await queue.openCursor();
+  while (cursor) {
+    const {url, data} = cursor.value;
+    try {
+      await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {'Content-Type': 'application/json'}
+      });
+      await cursor.delete();
+    } catch (error) {
+      console.error('Sync failed:', error);
+    }
+    cursor = await cursor.continue();
+  }
+}
+
+async function backgroundUpdate() {
+  // Exemple : Mettre à jour les notes du serveur
+  const updates = await fetch('/api/updates');
+  const data = await updates.json();
+  const cache = await caches.open(CACHE_NAME);
+  await cache.put('/data/notes', new Response(JSON.stringify(data)));
 }

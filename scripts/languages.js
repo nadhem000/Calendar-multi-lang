@@ -43,7 +43,10 @@ const translations = {
 			"Dhul-Hijjah"
 		],
 		back: "Back",
-		delai: "Frequency"
+		delai: "Frequency",
+		offlineSave: "Note saved offline. Will sync when online",
+		backgroundSync: "Background sync active",
+		periodicUpdate: "Daily updates enabled"
 	},
     ar: {
         title: "التقويم",
@@ -88,7 +91,10 @@ const translations = {
 			"ذو الحجة"
 		],
 		back: "رجوع",
-		delai: "التكرار"
+		delai: "التكرار",
+		offlineSave: "تم حفظ الملاحظة بدون اتصال. سيتم المزامنة عند الاتصال",
+		backgroundSync: "مزامنة الخلفية نشطة",
+		periodicUpdate: "تم تفعيل التحديثات اليومية"
 	},
     fr: {
         title: "Calendrier",
@@ -133,7 +139,10 @@ const translations = {
 			"Dhoul Hijja"
 		],
 		back: "Retour",
-		delai: "Fréquence"
+		delai: "Fréquence",
+		offlineSave: "Note sauvegardée hors ligne. Synchronisation automatique",
+		backgroundSync: "Synchronisation en arrière-plan activée",
+		periodicUpdate: "Mises à jour quotidiennes activées"
 	}
 };
 // Function to change language
