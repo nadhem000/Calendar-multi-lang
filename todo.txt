@@ -165,3 +165,27 @@ Here's a simplified, step-by-step version of potential improvements:
 
 credits:
 widget: https://www.flaticon.com/free-icon/calendar_4624053?term=calendar+pin&page=1&position=8&origin=search&related_id=4624053
+---
+**Protocol Handling**:
+   - Custom protocol `cal-multi-lang://` will trigger  PWA
+   - Only processes URLs from trusted partners
+   - Example usage from partner apps:
+     ```html
+     <a href="cal-multi-lang://open?url=https://calendar-multi-lang.netlify.app/today">
+       Open in Calendar
+     </a>
+1. Verify protocol handling:
+   ```javascript
+   // Test in browser console
+   window.location.href = "cal-multi-lang://open?url=https://calendar-multi-lang.netlify.app/today";
+   ```
+
+2. Test blocked URLs:
+   ```javascript
+   window.location.href = "cal-multi-lang://open?url=http://malicious.com";
+   ```
+
+
+
+
+

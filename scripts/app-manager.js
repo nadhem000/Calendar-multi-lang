@@ -380,6 +380,16 @@ class AppManager {
 			});
 		}
 	}
+	sanitizeURL(url) {
+		try {
+			const parsed = new URL(url);
+			if (!['https:', 'http:'].includes(parsed.protocol)) return null;
+			if (!parsed.hostname.endsWith('netlify.app')) return null;
+			return parsed.toString();
+			} catch {
+			return null;
+		}
+	}
 }
 
 class FileManager {

@@ -94,6 +94,31 @@ self.addEventListener('fetch', (event) => {
 		caches.match(event.request)
 		.then(response => response || fetchWithFallback(event.request))
 	);
+	if (url.pathname === '/handle-protocol') {
+		event.respondWith(handleProtocolRequest(url));
+		return;
+	}
+	
+	// New handler function
+	async function handleProtocolRequest(url) {
+		const urlParams = new URLSearchParams(url.search);
+		const externalUrl = urlParams.get('url');
+		
+		// Allowed origins (partner apps)
+		const allowedOrigins = [
+			'https://calendar-multi-lang.netlify.app',
+			'https://his-geo-quiz-test.netlify.app',
+			'https://noc-tunisia-chapter.netlify.app'
+		];
+		
+		if (externalUrl && allowedOrigins.some(origin => externalUrl.startsWith(origin))) {
+			// Valid URL - redirect securely
+			return Response.redirect(externalUrl, 302);
+			} else {
+			// Block untrusted URLs
+			return new Response('Invalid URL', { status: 403 });
+		}
+	}
 });
 // Gestion des fichiers partagés
 self.addEventListener('fetch', (event) => {
@@ -220,28 +245,28 @@ self.addEventListener('notificationclick', (event) => {
 	);
 });
 async function handleWidgetData() {
-  const today = new Date().toISOString().split('T')[0];
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match('/api/widget-data');
-  
-  if (cached) {
-    return cached;
-  }
-  
-  // Get fresh data
-  const notes = window.notes[today] || [];
-  const categories = Object.keys(window.iconTips[currentLanguage]);
-  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-  const tips = window.iconTips[currentLanguage][randomCategory];
-  const randomTip = tips[Math.floor(Math.random() * tips.length)];
-  
-  const response = new Response(JSON.stringify({
-    tip: randomTip,
-    notes: notes
-  }), {
+	const today = new Date().toISOString().split('T')[0];
+	const cache = await caches.open(CACHE_NAME);
+	const cached = await cache.match('/api/widget-data');
+	
+	if (cached) {
+		return cached;
+	}
+	
+	// Get fresh data
+	const notes = window.notes[today] || [];
+	const categories = Object.keys(window.iconTips[currentLanguage]);
+	const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+	const tips = window.iconTips[currentLanguage][randomCategory];
+	const randomTip = tips[Math.floor(Math.random() * tips.length)];
+	
+	const response = new Response(JSON.stringify({
+		tip: randomTip,
+		notes: notes
+	}), {
     headers: {'Content-Type': 'application/json'}
-  });
-  
-  await cache.put('/api/widget-data', response.clone());
-  return response;
+	});
+	
+	await cache.put('/api/widget-data', response.clone());
+	return response;
 }
