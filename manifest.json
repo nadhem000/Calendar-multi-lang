@@ -84,14 +84,27 @@
 	"widgets": [
 		{
 			"name": "Calendar Widget",
-			"short_name": "Calendar",
 			"description": "Shows daily tips and notes",
 			"tag": "calendar-widget",
 			"template": "/widget.html",
-			"screenshots": ["/assets/screenshots/widget-preview.png"],
+			"ms_ac_template": "scripts/widget.js",
 			"data": "/api/widget-data",
 			"update": 3600,
-			"types": ["calendar"]
+			"auth": false,
+			"types": ["calendar"],
+			"screenshots": [
+				{
+					"src": "assets/screenshots/screenshot_02.png",
+					"sizes": "705x416",
+					"label": "widget-preview"
+				}
+			],
+			"icons": [
+				{
+					"src": "assets/screenshots/widget-preview.png",
+					"sizes": "320x160"
+				}
+			]
 		}
 	]
-}
+}				
