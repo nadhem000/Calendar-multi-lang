@@ -179,3 +179,39 @@ async function backgroundUpdate() {
   const cache = await caches.open(CACHE_NAME);
   await cache.put('/data/notes', new Response(JSON.stringify(data)));
 }
+
+
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    const data = event.data.json();
+    const options = {
+      body: data.body,
+      icon: './assets/icons/android/icon-192.png',
+      badge: './assets/icons/android/icon-192.png',
+      data: {
+        url: data.url || '/'
+      }
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(data.title, options)
+    );
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({type: 'window'}).then(windowClients => {
+      const url = event.notification.data.url || '/';
+      for (let client of windowClients) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
+});

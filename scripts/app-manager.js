@@ -1,6 +1,3 @@
-/**
- * App Manager - Handles caching, installation, and storage management
- */
 class AppManager {
   constructor() {
     this.CACHE_NAME = 'calendar-cache-v2';
@@ -25,18 +22,17 @@ class AppManager {
     ];
     this.BACKGROUND_SYNC_TAG = 'background-sync';
     this.PERIODIC_SYNC_TAG = 'periodic-sync';
-    this.init();
   }
 
   async init() {
-    this.registerServiceWorker();
+    await this.registerServiceWorker();
     this.setupInstallPrompt();
     this.setupStorageManagement();
     this.setupBackgroundSync();
     this.registerPeriodicSync();
+    this.setupPushNotifications();
   }
-  
-  // Service Worker Registration
+
   async registerServiceWorker() {
     const isLocalEnvironment = window.location.protocol === 'file:';
     
@@ -49,7 +45,6 @@ class AppManager {
       try {
         const registration = await navigator.serviceWorker.register('./sw.js');
         
-        // Add update handling
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           newWorker.addEventListener('statechange', () => {
@@ -59,12 +54,10 @@ class AppManager {
           });
         });
         
-        // Check for immediate updates
         if (registration.waiting) {
           this.showUpdateNotification();
         }
         
-        // Initialize service worker communication
         if (registration.active) {
           registration.active.postMessage({ 
             type: 'INIT', 
@@ -72,18 +65,15 @@ class AppManager {
           });
         }
         
-        // Track updates from other tabs
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload();
         });
-        
       } catch (error) {
         console.error('ServiceWorker registration failed:', error);
       }
     }
   }
-  
-  // Cache Management
+
   async cacheAssets() {
     if ('caches' in window) {
       try {
@@ -106,8 +96,7 @@ class AppManager {
       })
     );
   }
-  
-  // PWA Installation
+
   setupInstallPrompt() {
     let deferredPrompt;
     
@@ -146,10 +135,8 @@ class AppManager {
     const installBtn = document.getElementById('install-btn');
     if (installBtn) installBtn.style.display = 'none';
   }
-  
-  // Storage Management
+
   setupStorageManagement() {
-    // Monitor storage usage
     if ('storage' in navigator && 'estimate' in navigator.storage) {
       navigator.storage.estimate().then(estimate => {
         console.log(`Using ${estimate.usage} out of ${estimate.quota} bytes`);
@@ -157,7 +144,6 @@ class AppManager {
       });
     }
     
-    // Handle storage pressure
     if ('storage' in navigator && 'persist' in navigator.storage) {
       navigator.storage.persist().then(persisted => {
         if (persisted) {
@@ -166,7 +152,7 @@ class AppManager {
       });
     }
   }
-  
+
   updateStorageUI(usageRatio) {
     const storageIndicator = document.getElementById('storage-indicator');
     if (storageIndicator) {
@@ -202,10 +188,8 @@ class AppManager {
   
   async clearOldData() {
     try {
-      // Clear old caches
       await this.clearOldCaches();
       
-      // Clear old notes (keep last 6 months)
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
@@ -223,8 +207,7 @@ class AppManager {
       alert(translations[currentLanguage].storageError || 'Error clearing old data');
     }
   }
-  
-  // Offline Status Monitoring
+
   monitorConnection() {
     const updateOnlineStatus = () => {
       const statusElement = document.getElementById('online-status');
@@ -242,21 +225,6 @@ class AppManager {
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
-  }
-  
-  // Update Notification
-  showUpdateNotification() {
-    const notification = document.createElement('div');
-    notification.className = 'update-notification';
-    notification.innerHTML = `
-      <p>${translations[currentLanguage].updateAvailable || 'New version available!'}</p>
-      <button id="reload-app">${translations[currentLanguage].reload || 'Reload'}</button>
-    `;
-    document.body.appendChild(notification);
-    
-    document.getElementById('reload-app').addEventListener('click', () => {
-      window.location.reload();
-    });
   }
 
   async setupBackgroundSync() {
@@ -281,7 +249,7 @@ class AppManager {
         if (status.state === 'granted') {
           const registration = await navigator.serviceWorker.ready;
           await registration.periodicSync.register(this.PERIODIC_SYNC_TAG, {
-            minInterval: 24 * 60 * 60 * 1000 // 24 hours
+            minInterval: 24 * 60 * 60 * 1000
           });
         }
       } catch (error) {
@@ -289,14 +257,108 @@ class AppManager {
       }
     }
   }
+
+  async setupPushNotifications() {
+    if ('Notification' in window && 'serviceWorker' in navigator) {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('Notification permission granted');
+          this.scheduleDailyNotifications();
+          this.setupNoteReminders();
+        }
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+      }
+    }
+  }
+
+  scheduleDailyNotifications() {
+    if ('Notification' in window) {
+      const now = new Date();
+      const firstNotification = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        9, 0, 0
+      );
+      
+      if (now > firstNotification) {
+        firstNotification.setDate(firstNotification.getDate() + 1);
+      }
+
+      const timeout = firstNotification.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        this.showDailyTipNotification();
+        setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
+      }, timeout);
+    }
+  }
+
+  showDailyTipNotification() {
+    if ('Notification' in window && window.iconTips && window.iconTips[currentLanguage]) {
+      const categories = Object.keys(window.iconTips[currentLanguage]);
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const tips = window.iconTips[currentLanguage][randomCategory];
+      
+      if (tips && tips.length > 0) {
+        const randomTip = tips[Math.floor(Math.random() * tips.length)];
+        const notification = new Notification(window.translations[currentLanguage].icons[randomCategory], {
+          body: `${randomTip.name}: ${randomTip.description}`,
+          icon: './assets/icons/android/icon-192.png',
+          tag: 'daily-tip'
+        });
+        
+        notification.onclick = () => {
+          if (window.showTipsModal) {
+            window.showTipsModal(randomCategory);
+          }
+        };
+      }
+    }
+  }
+
+  setupNoteReminders() {
+    setInterval(() => {
+      const today = new Date().toISOString().split('T')[0];
+      if (window.notes && window.notes[today] && window.notes[today].length > 0) {
+        const notification = new Notification(window.translations[currentLanguage].title, {
+          body: window.translations[currentLanguage].notesReminder.replace('{count}', window.notes[today].length),
+          icon: './assets/icons/android/icon-192.png',
+          tag: 'notes-reminder'
+        });
+      }
+    }, 24 * 60 * 60 * 1000);
+  }
+
+  showUpdateNotification() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const notification = new Notification(window.translations[currentLanguage].updateAvailable, {
+        body: window.translations[currentLanguage].reloadPrompt,
+        icon: './assets/icons/android/icon-192.png',
+        tag: 'update-notification'
+      });
+      
+      notification.onclick = () => {
+        window.location.reload();
+      };
+    } else {
+      const notification = document.createElement('div');
+      notification.className = 'update-notification';
+      notification.innerHTML = `
+        <p>${window.translations[currentLanguage].updateAvailable || 'New version available!'}</p>
+        <button id="reload-app">${window.translations[currentLanguage].reload || 'Reload'}</button>
+      `;
+      document.body.appendChild(notification);
+      
+      document.getElementById('reload-app').addEventListener('click', () => {
+        window.location.reload();
+      });
+    }
+  }
 }
 
-// Initialize AppManager when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  window.appManager = new AppManager();
-});
-
-// Simplified FileManager class
 class FileManager {
   static async processFile(file) {
     const noteDate = new Date().toISOString().split('T')[0];
@@ -334,7 +396,13 @@ class FileManager {
   }
 }
 
-// File launch handler
+document.addEventListener('DOMContentLoaded', () => {
+  window.appManager = new AppManager();
+  window.appManager.init().catch(error => {
+    console.error('Initialization error:', error);
+  });
+});
+
 if ('launchQueue' in window) {
   window.launchQueue.setConsumer((launchParams) => {
     if (launchParams.files.length > 0) {

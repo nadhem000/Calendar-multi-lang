@@ -78,5 +78,7 @@
 	"handle_links": {
 		"matches": ["https://calendar-multi-lang.netlify.app/*"],
 		"exclude_matches": ["https://calendar-multi-lang.netlify.app/admin/*"]
-	}
+	},
+	"gcm_sender_id": "103953800507",
+	"permissions": ["notifications"]
 }
