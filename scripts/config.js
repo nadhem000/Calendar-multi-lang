@@ -15,6 +15,8 @@ const CACHE_CONFIG = {
 		'./assets/icons/ios/icon-192.png',
 		'./assets/icons/android/icon-192.png',
 		'./assets/icons/android/icon-512.png',
+	'./assets/icons/health.png',
+	'./assets/icons/note.png',
 		'./assets/backgrounds/background.jpg',
 		'./assets/screenshots/screenshot_01.png',
 		'./assets/screenshots/screenshot_02.png'
