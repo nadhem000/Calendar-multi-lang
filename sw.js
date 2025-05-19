@@ -24,9 +24,7 @@ const ASSETS_TO_CACHE = [
 	'./assets/icons/android/icon-512.png',
 	'./assets/backgrounds/background.jpg',
 	'./assets/screenshots/screenshot_01.png',
-	'./assets/screenshots/screenshot_02.png',
-	'./handle-file',
-	'./note-with-attachment'
+	'./assets/screenshots/screenshot_02.png'
 ];
 
 const openDB = () => {
