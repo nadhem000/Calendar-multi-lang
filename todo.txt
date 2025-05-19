@@ -163,3 +163,5 @@ Here's a simplified, step-by-step version of potential improvements:
 
 ---
 
+credits:
+widget: https://www.flaticon.com/free-icon/calendar_4624053?term=calendar+pin&page=1&position=8&origin=search&related_id=4624053

@@ -80,5 +80,18 @@
 		"exclude_matches": ["https://calendar-multi-lang.netlify.app/admin/*"]
 	},
 	"gcm_sender_id": "103953800507",
-	"permissions": ["notifications"]
+	"permissions": ["notifications"],
+	"widgets": [
+		{
+			"name": "Calendar Widget",
+			"short_name": "Calendar",
+			"description": "Shows daily tips and notes",
+			"tag": "calendar-widget",
+			"template": "/widget.html",
+			"screenshots": ["/assets/screenshots/widget-preview.png"],
+			"data": "/api/widget-data",
+			"update": 3600,
+			"types": ["calendar"]
+		}
+	]
 }

@@ -47,8 +47,10 @@ const translations = {
 		offlineSave: "Note saved offline. Will sync when online",
 		backgroundSync: "Background sync active",
 		periodicUpdate: "Daily updates enabled",
-notesReminder: "You have {count} notes for today",
-dailyTip: "Daily Tip"
+		notesReminder: "You have {count} notes for today",
+		dailyTip: "Daily Tip",
+		noTipToday: "No tip for today",
+		noNotesToday: "No notes for today"
 	},
     ar: {
         title: "التقويم",
@@ -97,8 +99,10 @@ dailyTip: "Daily Tip"
 		offlineSave: "تم حفظ الملاحظة بدون اتصال. سيتم المزامنة عند الاتصال",
 		backgroundSync: "مزامنة الخلفية نشطة",
 		periodicUpdate: "تم تفعيل التحديثات اليومية",
-notesReminder: "لديك {count} ملاحظات لليوم",
-dailyTip: "نصيحة اليوم"
+		notesReminder: "لديك {count} ملاحظات لليوم",
+		dailyTip: "لا نصائح اليوم",
+		noTipToday: "لا ملاحظات اليوم",
+		noNotesToday: "No notes for today"
 	},
     fr: {
         title: "Calendrier",
@@ -147,8 +151,10 @@ dailyTip: "نصيحة اليوم"
 		offlineSave: "Note sauvegardée hors ligne. Synchronisation automatique",
 		backgroundSync: "Synchronisation en arrière-plan activée",
 		periodicUpdate: "Mises à jour quotidiennes activées",
-notesReminder: "T'as {count} notes pour aujourd'hui",
-dailyTip: "Conseil Quotidien"
+		notesReminder: "T'as {count} notes pour aujourd'hui",
+		dailyTip: "Conseil Quotidien",
+		noTipToday: "Pas des tips aujourd'hui",
+		noNotesToday: "Pas des notes aujourd'hui"
 	}
 };
 // Function to change language

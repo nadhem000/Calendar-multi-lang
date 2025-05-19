@@ -262,14 +262,17 @@ function loadNotes() {
 }
 
 function saveNotes() {
-    const loadingOverlay = showLoading();
-    try {
-        localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
-    } catch (e) {
-        console.error('Error saving notes:', e);
-    } finally {
-        hideLoading(loadingOverlay);
+  const loadingOverlay = showLoading();
+  try {
+    localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
+    if (window.appManager && window.appManager.updateWidget) {
+      window.appManager.updateWidget();
     }
+  } catch (e) {
+    console.error('Error saving notes:', e);
+  } finally {
+    hideLoading(loadingOverlay);
+  }
 }
 
 async function saveNote(date, modal, dayElement) {
