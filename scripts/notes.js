@@ -1,6 +1,15 @@
 // Notes functionality
 window.notes = {};
-
+// Simple HTML sanitizer
+function sanitizeHTML(str) {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 // Color options for notes
 const noteColors = [
     {class: 'note-color-gray', color: '#cccccc'},
@@ -74,7 +83,7 @@ function openNoteModal(date, dayElement) {
                         noteTypes.find(t => t.type === note.type)?.icon || '📝'
                     }</div>
                     <div class="note-content">
-                        ${note.text}
+                        ${sanitizeHTML(note.text)}
                         <div class="note-language">${note.language.toUpperCase()}</div>
                     </div>
                     <button class="delete-note" data-index="${index}" title="${
@@ -93,9 +102,9 @@ function openNoteModal(date, dayElement) {
             ${(window.notes[dateKey] || []).map((note, index) => `
                 ${(note.attachments || []).map(attach => `
                     ${attach.type === 'image' ? 
-                        `<img src="${attach.url}" class="attachment-preview">` : 
-                        `<div class="text-attachment">📄 ${attach.content.substring(0, 20)}...</div>`
-                    }
+    `<img src="${sanitizeHTML(attach.url)}" class="attachment-preview" onerror="this.style.display='none'">` : 
+    `<div class="text-attachment">📄 ${sanitizeHTML(attach.content.substring(0, 20))}...</div>`
+}
                 `).join('')}
             `).join('')}
         </div>
