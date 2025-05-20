@@ -136,7 +136,7 @@
 	],
 	"protocol_handlers": [
 		{
-			"protocol": "web+cal-multi-lang",
+			"protocol": "web+calmultilang",
 			"url": "/handle-protocol?url=%s",
 			"title": "Open in Calendar App"
 		}

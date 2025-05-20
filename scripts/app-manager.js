@@ -148,7 +148,7 @@ class AppManager {
 		});
 		document.getElementById('install-btn')?.addEventListener('click', async () => {
 			if (deferredPrompt) {
-				deferredPrompt.prompt();
+				await deferredPrompt.prompt();
 				const { outcome } = await deferredPrompt.userChoice;
 				if (outcome === 'accepted') {
 					console.log('User accepted install');
@@ -375,7 +375,7 @@ class AppManager {
 		try {
 			const parsed = new URL(url);
 			// Allow both http/https and your custom protocol
-			if (!['https:', 'http:', 'web+cal-multi-lang:'].includes(parsed.protocol)) {
+			if (!['https:', 'http:', 'web+calmultilang:'].includes(parsed.protocol)) {
 				return null;
 			}
 			if (!parsed.hostname.endsWith('netlify.app') && parsed.protocol.startsWith('http')) {
@@ -525,17 +525,17 @@ class FileManager {
 		}
 	}
 }
-	document.addEventListener('DOMContentLoaded', () => {
-		window.appManager = new AppManager();
-		window.appManager.init().catch(error => {
-			console.error('Initialization error:', error);
-		});
+document.addEventListener('DOMContentLoaded', () => {
+	window.appManager = new AppManager();
+	window.appManager.init().catch(error => {
+		console.error('Initialization error:', error);
 	});
-	
-	if ('launchQueue' in window) {
-		window.launchQueue.setConsumer((launchParams) => {
-			if (launchParams.files.length > 0) {
-				FileManager.processFile(launchParams.files[0]);
-			}
-		});
-	}	
+});
+
+if ('launchQueue' in window) {
+	window.launchQueue.setConsumer((launchParams) => {
+		if (launchParams.files.length > 0) {
+			FileManager.processFile(launchParams.files[0]);
+		}
+	});
+}	

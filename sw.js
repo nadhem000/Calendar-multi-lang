@@ -1,5 +1,5 @@
 // Service Worker for Offline Functionality
-importScripts('./config.js');
+importScripts('./scripts/config.js');
 let currentLanguage = 'en'; // Default fallback
 const isLocalEnvironment = (() => {
     try {
@@ -16,22 +16,22 @@ const PERIODIC_SYNC_TAG = 'periodic-update';
 const SYNC_QUEUE = 'sync-queue';
 // Update the openDB function to match version:
 const openDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('CalendarAttachments', 2); // Match version number
-    
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('attachments')) {
-        db.createObjectStore('attachments', { keyPath: 'id' }); // Match keyPath
-      }
-      if (!db.objectStoreNames.contains(SYNC_QUEUE)) {
-        db.createObjectStore(SYNC_QUEUE, { autoIncrement: true });
-      }
-    };
-    
-    request.onsuccess = (e) => resolve(e.target.result);
-    request.onerror = (e) => reject(e.target.error);
-  });
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open('CalendarAttachments', 2); // Match version number
+		
+		request.onupgradeneeded = (e) => {
+			const db = e.target.result;
+			if (!db.objectStoreNames.contains('attachments')) {
+				db.createObjectStore('attachments', { keyPath: 'id' }); // Match keyPath
+			}
+			if (!db.objectStoreNames.contains(SYNC_QUEUE)) {
+				db.createObjectStore(SYNC_QUEUE, { autoIncrement: true });
+			}
+		};
+		
+		request.onsuccess = (e) => resolve(e.target.result);
+		request.onerror = (e) => reject(e.target.error);
+	});
 };
 
 self.addEventListener('message', (event) => {
@@ -141,13 +141,13 @@ self.addEventListener('fetch', (event) => {
             (async () => {
                 // First try the cache
                 
-const cachedResponse = await caches.match(event.request);
-if (cachedResponse) {
-  const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
-  if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
-    return cachedResponse;
-  }
-}
+				const cachedResponse = await caches.match(event.request);
+				if (cachedResponse) {
+					const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+					if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+						return cachedResponse;
+					}
+				}
                 
                 // If not in cache, try network
                 try {
@@ -191,13 +191,13 @@ if (cachedResponse) {
         (async () => {
             // Try cache first
             
-const cachedResponse = await caches.match(event.request);
-if (cachedResponse) {
-  const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
-  if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
-    return cachedResponse;
-  }
-}
+			const cachedResponse = await caches.match(event.request);
+			if (cachedResponse) {
+				const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+				if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+					return cachedResponse;
+				}
+			}
             
             // Then try network
             try {
@@ -233,7 +233,7 @@ async function handleProtocolRequest(url) {
         'https://calendar-multi-lang.netlify.app',
         'https://his-geo-quiz-test.netlify.app',
         'https://noc-tunisia-chapter.netlify.app',
-		'web+cal-multi-lang://'
+		'web+calmultilang://'
 	];
 	
 	if (externalUrl && allowedOrigins.some(origin => externalUrl.startsWith(origin))) {
@@ -338,7 +338,11 @@ self.addEventListener('push', (event) => {
 		};
         
         event.waitUntil(
-            self.registration.showNotification(data.title, options)
+            self.registration.showNotification({
+  title: "Test",
+  body: "Push notification",
+  data: { url: "/" }
+});
 		);
 	}
 });
