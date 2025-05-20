@@ -8,6 +8,7 @@ const isLocalEnvironment = (() => {
         return false;
 	}
 })();
+let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
 const WIDGET_CACHE_NAME = 'widget-data-cache-v3';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
@@ -35,12 +36,11 @@ const openDB = () => {
 };
 
 self.addEventListener('message', (event) => {
-    if (event.data.type === 'INIT') {
-        if (event.data.currentLanguage) {
-            currentLanguage = event.data.currentLanguage;
-		}
+    if (event.data.type === 'INIT' && !initialized) {
+        initialized = true;
+        currentLanguage = event.data.currentLanguage || 'en';
         console.log('Service Worker initialized with language:', currentLanguage);
-	}
+    }
 });
 self.addEventListener('install', (event) => {
     if (isLocalEnvironment) {
@@ -364,18 +364,25 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(windowClients => {
-      const url = event.notification.data?.url || '/';
-      for (const client of windowClients) {
-        if (client.url === url && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      return clients.openWindow(url);
-    })
-  );
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({type: 'window'}).then((clientList) => {
+            const url = event.notification.data?.url || '/';
+            
+            // Check if there's already a window open
+            for (const client of clientList) {
+                if (client.url === url && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            
+            // Only open new window if there are visible clients
+            if (clients.openWindow && clientList.length > 0) {
+                return clients.openWindow(url);
+            }
+            return Promise.resolve();
+        })
+    );
 });
 
 self.addEventListener('notificationclick', (event) => {

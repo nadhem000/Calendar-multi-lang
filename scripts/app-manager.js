@@ -148,15 +148,23 @@ class AppManager {
 				installBtn.style.display = 'block';
 				installBtn.textContent = translations[currentLanguage].Install || 'Install App';
 				
-				installBtn.addEventListener('click', async () => {
+				// Remove any existing listeners to avoid duplicates
+				installBtn.replaceWith(installBtn.cloneNode(true));
+				document.getElementById('install-btn').addEventListener('click', async () => {
 					if (deferredPrompt) {
-						deferredPrompt.prompt();
-						const { outcome } = await deferredPrompt.userChoice;
-						console.log('User response:', outcome);
+						try {
+							deferredPrompt.prompt();
+							const { outcome } = await deferredPrompt.userChoice;
+							console.log('User response:', outcome);
+							if (outcome === 'accepted') {
+								this.hideInstallButton();
+							}
+							} catch (err) {
+							console.error('Install prompt error:', err);
+						}
 						deferredPrompt = null;
-						installBtn.style.display = 'none';
 					}
-				}, { once: true }); // Only handle one click
+				});
 			}
 		});
 		
@@ -494,4 +502,10 @@ if ('launchQueue' in window) {
 			FileManager.processFile(launchParams.files[0]);
 		}
 	});
-}	
+}
+self.addEventListener('error', (event) => {
+    console.error('SW Error:', event.error);
+});
+self.addEventListener('unhandledrejection', (event) => {
+    console.error('SW Unhandled Rejection:', event.reason);
+});
