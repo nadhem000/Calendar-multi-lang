@@ -105,6 +105,20 @@ function updateTodayButton() {
 		todayBtn.style.opacity = '1';
 	}
 }
+// Toast notification
+function showToast(message, duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), duration);
+}
+
+// Event details - placeholder
+function showEventDetails(eventId) {
+  console.log('Event details for:', eventId);
+  // Implement actual event display logic
+}
 document.getElementById('calendar-system').addEventListener('change', function() {
 	currentCalendarSystem = this.value;
 	renderCalendar(translations[currentLanguage]);

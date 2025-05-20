@@ -225,21 +225,35 @@ async function handleShare(request) {
     return Response.redirect('/note-with-attachment?shared=1', 303);
 }
 async function handleProtocolRequest(url) {
-	const urlParams = new URLSearchParams(url.search);
-	const externalUrl = urlParams.get('url');
-	
-	const allowedOrigins = [
-		
-        'https://calendar-multi-lang.netlify.app',
-        'https://his-geo-quiz-test.netlify.app',
-        'https://noc-tunisia-chapter.netlify.app',
-		'web+calmultilang://'
-	];
-	
-	if (externalUrl && allowedOrigins.some(origin => externalUrl.startsWith(origin))) {
-		return Response.redirect(externalUrl, 302);
-	}
-	return new Response('Invalid URL', { status: 403 });
+  const urlParams = new URLSearchParams(url.search);
+  let externalUrl = urlParams.get('url');
+  
+  // Decode URI if needed
+  try {
+    externalUrl = decodeURIComponent(externalUrl);
+  } catch (e) {
+    console.warn('Failed to decode URL:', externalUrl);
+  }
+
+  const allowedOrigins = [
+    'https://calendar-multi-lang.netlify.app/',
+    'https://his-geo-quiz-test.netlify.app/', 
+    'https://noc-tunisian-chapter.netlify.app/',
+    'web+calmultilang://'
+  ];
+
+  if (externalUrl && allowedOrigins.some(origin => {
+    try {
+      const urlObj = new URL(externalUrl);
+      return urlObj.origin === origin || 
+             externalUrl.startsWith(origin);
+    } catch {
+      return externalUrl.startsWith(origin);
+    }
+  })) {
+    return Response.redirect(externalUrl, 302);
+  }
+  return new Response('Invalid URL', { status: 403 });
 }
 
 
@@ -338,11 +352,13 @@ self.addEventListener('push', (event) => {
 		};
         
         event.waitUntil(
-            self.registration.showNotification({
-  title: "Test",
-  body: "Push notification",
-  data: { url: "/" }
-});
+			self.registration.showNotification(
+				"Test",
+				{
+					body: "Push notification",
+					data: { url: "/" }
+				}
+			);
 		);
 	}
 });

@@ -143,18 +143,23 @@
 	],
 	"handle_links": {
 		"matches": [
-			"https://calendar-multi-lang.netlify.app/*",
-			"https://his-geo-quiz-test.netlify.app/calendar*",
-			"https://noc-tunisia-chapter.netlify.app/calendar*"
+			"https://calendar-multi-lang.netlify.app/",
+			"https://his-geo-quiz-test.netlify.app/calendar/",
+			"https://noc-tunisian-chapter.netlify.app/calendar"
 		],
 		"exclude_matches": [
-			"https://calendar-multi-lang.netlify.app/admin*",
-			"https://his-geo-quiz-test.netlify.app/admin*",
-			"https://noc-tunisia-chapter.netlify.app/admin*"
+			"https://calendar-multi-lang.netlify.app/admin",
+			"https://his-geo-quiz-test.netlify.app/admin",
+			"https://noc-tunisian-chapter.netlify.app/admin"
 		]
 	},
 	"scope_extensions": [
-		{"origin": "https://his-geo-quiz-test.netlify.app"},
-		{"origin": "https://noc-tunisia-chapter.netlify.app"}
-	]
+		{"origin": "https://his-geo-quiz-test.netlify.app/"},
+		{"origin": "https://noc-tunisian-chapter.netlify.app/"}
+	],
+	"serviceworker": {
+		"src": "./sw.js",
+		"scope": "/",
+		"type": "classic"
+	}
 }	

@@ -395,6 +395,15 @@ class AppManager {
 			}
 		}
 	}
+	static async processFile(file) {
+		try {
+			const result = await this.storeImage(file);
+			return result;
+			} catch (error) {
+			console.error('File processing error:', error);
+			throw error;
+		}
+	}
 }
 class FileManager {
 	static async storeImage(file) {
@@ -442,7 +451,7 @@ class FileManager {
 			reader.onload = (e) => {
 				localStorage.setItem(fileId, e.target.result);
 				// Also store metadata about the fallback
-				const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || []);
+				const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || '[]');
 				fallbacks.push(fileId);
 				localStorage.setItem('fallbackAttachments', JSON.stringify(fallbacks));
 				resolve(e.target.result);
@@ -506,7 +515,7 @@ class FileManager {
 			await this._storeInIndexedDB(fileId, blob);
 			// Clean up from localStorage
 			localStorage.removeItem(fileId);
-			const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || []);
+			const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || '[]');
 			localStorage.setItem('fallbackAttachments', 
 			JSON.stringify(fallbacks.filter(id => id !== fileId)));
 			console.log(`Successfully synced ${fileId} to IndexedDB`);
@@ -516,7 +525,7 @@ class FileManager {
 	}
 	static async syncAllFallbacks() {
 		if (!navigator.onLine) return;
-		const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || '[]'); // Fixed syntax here
+		const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || '[]');
 		for (const fileId of fallbacks) {
 			const dataUrl = localStorage.getItem(fileId);
 			if (dataUrl) {
