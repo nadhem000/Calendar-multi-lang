@@ -340,27 +340,42 @@ async function backgroundUpdate() {
 }
 
 self.addEventListener('push', (event) => {
-    if (event.data) {
-        const data = event.data.json();
-        const options = {
-            body: data.body,
-            icon: './assets/icons/android/icon-192.png',
-            badge: './assets/icons/android/icon-192.png',
-            data: {
-                url: data.url || '/'
-			}
-		};
-        
-        event.waitUntil(
-			self.registration.showNotification(
-				"Test",
-				{
-					body: "Push notification",
-					data: { url: "/" }
-				}
-			);
-		);
-	}
+  let data = {};
+  try {
+    data = event.data?.json() || {};
+  } catch (e) {
+    data = {
+      title: "Calendar Update",
+      body: "New notification",
+      url: "/"
+    };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(
+      data.title || "Calendar",
+      {
+        body: data.body || "You have a new notification",
+        icon: './assets/icons/android/icon-192.png',
+        data: { url: data.url || '/' }
+      }
+    )
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      const url = event.notification.data?.url || '/';
+      for (const client of windowClients) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });
 
 self.addEventListener('notificationclick', (event) => {

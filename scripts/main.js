@@ -113,7 +113,62 @@ function showToast(message, duration = 3000) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), duration);
 }
+// Add to main.js
+function handleAppRouting() {
+  const path = window.location.pathname;
+  
+  // Handle share target
+  if (path === '/share-target') {
+    const params = new URLSearchParams(window.location.search);
+    const sharedData = params.get('text') || params.get('url');
+    if (sharedData) {
+      // Redirect to note creation with shared content
+      window.location.href = `/?shared=${encodeURIComponent(sharedData)}`;
+    }
+    return;
+  }
 
+  // Handle file protocol
+  if (path === '/handle-file') {
+    // Implement file handling logic
+    console.log('File handler triggered');
+    return;
+  }
+
+  // Handle note with attachment
+  if (path === '/note-with-attachment') {
+    // Show note with attachment view
+    document.body.innerHTML = '<h1>Note with Attachment</h1>'; // Replace with actual UI
+    return;
+  }
+
+  // Health tips shortcut
+  if (path === '/health-tips') {
+    showTipsModal('health');
+    return;
+  }
+
+  // Today's note shortcut
+  if (path === '/today-note') {
+    const today = new Date();
+    openNoteModal(today);
+    return;
+  }
+
+  // Protocol handler
+  if (path === '/handle-protocol') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const externalUrl = urlParams.get('url');
+    if (externalUrl) {
+      // Validate and handle the URL
+      if (externalUrl.startsWith('web+calmultilang://')) {
+        // Parse and handle your protocol-specific URL
+        console.log('Handling protocol URL:', externalUrl);
+      }
+    }
+    return;
+  }
+}
 // Event details - placeholder
 function showEventDetails(eventId) {
   console.log('Event details for:', eventId);
