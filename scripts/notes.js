@@ -311,7 +311,7 @@ async function saveNote(date, modal, dayElement) {
     
     if (!navigator.onLine) {
         try {
-            const db = await openDB();
+            const db = await window.appManager.openDB(); // Use appManager's method
             await db.transaction('SYNC_QUEUE', 'readwrite')
                 .objectStore('SYNC_QUEUE')
                 .add({

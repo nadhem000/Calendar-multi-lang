@@ -7,7 +7,7 @@
 	"background_color": "#ffffff",
 	"theme_color": "#4CAF50",
 	"orientation": "portrait",
-	"start_url": "/",
+	"start_url": "/?source=pwa",
 	"scope": "/",
 	"edge_side_panel": {
 		"preferred_width": 400
@@ -76,10 +76,6 @@
 			]
 		}
 	},
-	"handle_links": {
-		"matches": ["https://calendar-multi-lang.netlify.app/*"],
-		"exclude_matches": ["https://calendar-multi-lang.netlify.app/admin/*"]
-	},
 	"gcm_sender_id": "103953800507",
 	"permissions": ["notifications"],
 	"widgets": [
@@ -140,8 +136,9 @@
 	],
 	"protocol_handlers": [
 		{
-			"protocol": "cal-multi-lang",
-			"url": "/handle-protocol?url=%s"
+			"protocol": "web+cal-multi-lang",
+			"url": "/handle-protocol?url=%s",
+			"title": "Open in Calendar App"
 		}
 	],
 	"handle_links": {

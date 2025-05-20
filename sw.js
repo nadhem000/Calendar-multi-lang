@@ -1,69 +1,58 @@
 // Service Worker for Offline Functionality
-const CACHE_NAME = 'calendar-cache-v2';
-const WIDGET_CACHE_NAME = 'widget-data-cache-v1';
+importScripts('./config.js');
+let currentLanguage = 'en'; // Default fallback
 const isLocalEnvironment = (() => {
     try {
         return self.location.protocol === 'file:';
-    } catch (e) {
+		} catch (e) {
         return false;
-    }
+	}
 })();
+const CACHE_NAME = CACHE_CONFIG.name;
+const WIDGET_CACHE_NAME = 'widget-data-cache-v3';
+const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';
 const SYNC_QUEUE = 'sync-queue';
-const ASSETS_TO_CACHE = [
-    './',
-    './manifest.json',
-    './index.html',
-    './styles/main.css',
-    './scripts/languages.js',
-    './scripts/converter.js',
-    './scripts/calendar.js',
-    './scripts/notes.js',
-    './scripts/addons.js',
-    './scripts/main.js',
-    './scripts/app-manager.js',
-    './api/widget-data',
-    './assets/icons/ios/icon-192.png',
-    './assets/icons/android/icon-192.png',
-    './assets/icons/android/icon-512.png',
-    './assets/icons/health.png',
-    './assets/icons/note.png',
-    './assets/backgrounds/background.jpg',
-    './assets/screenshots/screenshot_01.png',
-    './assets/screenshots/screenshot_02.png'
-];
-
+// Update the openDB function to match version:
 const openDB = () => {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('CalendarAttachments', 1);
-        
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('attachments')) {
-                db.createObjectStore('attachments', { autoIncrement: true });
-            }
-            if (!db.objectStoreNames.contains(SYNC_QUEUE)) {
-                db.createObjectStore(SYNC_QUEUE, { autoIncrement: true });
-            }
-        };
-        
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
-    });
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('CalendarAttachments', 2); // Match version number
+    
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('attachments')) {
+        db.createObjectStore('attachments', { keyPath: 'id' }); // Match keyPath
+      }
+      if (!db.objectStoreNames.contains(SYNC_QUEUE)) {
+        db.createObjectStore(SYNC_QUEUE, { autoIncrement: true });
+      }
+    };
+    
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
 };
 
+self.addEventListener('message', (event) => {
+    if (event.data.type === 'INIT') {
+        if (event.data.currentLanguage) {
+            currentLanguage = event.data.currentLanguage;
+		}
+        console.log('Service Worker initialized with language:', currentLanguage);
+	}
+});
 self.addEventListener('install', (event) => {
     if (isLocalEnvironment) {
         console.log('Local environment detected, skipping cache');
         return;
-    }
+	}
     
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS_TO_CACHE))
-            .then(() => self.skipWaiting())
-    );
+		.then(cache => cache.addAll(ASSETS_TO_CACHE))
+		.then(() => self.skipWaiting())
+	);
 });
 
 self.addEventListener('activate', (event) => {
@@ -71,20 +60,22 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME && cacheName !== WIDGET_CACHE_NAME) {
+                    if (cacheName !== CACHE_NAME && 
+                        cacheName !== WIDGET_CACHE_NAME &&
+                        !cacheName.startsWith('widget-data-cache-')) {
                         return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
-    );
+					}
+				})
+			);
+		}).then(() => self.clients.claim())
+	);
 });
 
 self.addEventListener('fetch', (event) => {
     if (isLocalEnvironment) return;
     
     const url = new URL(event.request.url);
-
+	
     // Handle widget data with network-first strategy
     if (url.pathname === '/api/widget-data') {
         event.respondWith(
@@ -95,66 +86,132 @@ self.addEventListener('fetch', (event) => {
                     const cache = await caches.open(WIDGET_CACHE_NAME);
                     await cache.put(event.request, networkResponse.clone());
                     return networkResponse;
-                } catch (error) {
+					} catch (error) {
                     // Fallback to cache
-                    const cachedResponse = await caches.match(event.request);
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
+                    
+					const cachedResponse = await caches.match(event.request);
+					if (cachedResponse) {
+						const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+						if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+							return cachedResponse;
+						}
+					}
                     // Generate fallback data if no cache
                     return handleWidgetData();
-                }
-            })()
-        );
+				}
+			})()
+		);
         return;
-    }
-
+	}
+	
     // Handle share target
     if (url.pathname === '/share-target') {
         event.respondWith(handleShare(event.request));
         return;
-    }
-
-    // Handle app navigation
+	}
+	
+    // Handle app navigation (network-first)
     if (event.request.mode === 'navigate') {
         event.respondWith(
             (async () => {
                 try {
                     const networkResponse = await fetch(event.request);
+                    // Update cache with fresh response
+                    const cache = await caches.open(CACHE_NAME);
+                    await cache.put(event.request, networkResponse.clone());
                     return networkResponse;
-                } catch {
+					} catch {
                     const cachedResponse = await caches.match('/index.html');
                     return cachedResponse || new Response('Offline', { status: 200 });
-                }
-            })()
-        );
+				}
+			})()
+		);
         return;
-    }
-
+	}
+	
     // Handle protocol requests
     if (url.pathname === '/handle-protocol') {
         event.respondWith(handleProtocolRequest(url));
         return;
-    }
-
-    // Default cache-first strategy for other assets
+	}
+	
+    // Cache-first strategy for static assets
+    if (CACHE_CONFIG.strategies.cacheFirst.some(path => url.pathname.startsWith(path))) {
+        event.respondWith(
+            (async () => {
+                // First try the cache
+                
+const cachedResponse = await caches.match(event.request);
+if (cachedResponse) {
+  const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+  if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+    return cachedResponse;
+  }
+}
+                
+                // If not in cache, try network
+                try {
+                    const networkResponse = await fetch(event.request);
+                    if (networkResponse.ok) {
+                        const cache = await caches.open(CACHE_NAME);
+                        await cache.put(event.request, networkResponse.clone());
+					}
+                    return networkResponse;
+					} catch {
+                    return new Response('Offline', { status: 200 });
+				}
+			})()
+		);
+        return;
+	}
+	
+    // Default network-first strategy for other API requests
+    if (CACHE_CONFIG.strategies.networkFirst.some(path => url.pathname.startsWith(path))) {
+        event.respondWith(
+            (async () => {
+                try {
+                    // Try network first
+                    const networkResponse = await fetch(event.request);
+                    // Update cache
+                    const cache = await caches.open(CACHE_NAME);
+                    await cache.put(event.request, networkResponse.clone());
+                    return networkResponse;
+					} catch (error) {
+                    // Fallback to cache
+                    const cachedResponse = await caches.match(event.request);
+                    return cachedResponse || new Response('Offline', { status: 200 });
+				}
+			})()
+		);
+        return;
+	}
+	
+    // Fallback strategy for all other requests
     event.respondWith(
         (async () => {
-            const cachedResponse = await caches.match(event.request);
-            if (cachedResponse) return cachedResponse;
+            // Try cache first
             
+const cachedResponse = await caches.match(event.request);
+if (cachedResponse) {
+  const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+  if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+    return cachedResponse;
+  }
+}
+            
+            // Then try network
             try {
                 const networkResponse = await fetch(event.request);
                 if (networkResponse.ok) {
                     const cache = await caches.open(CACHE_NAME);
-                    cache.put(event.request, networkResponse.clone());
-                }
+                    await cache.put(event.request, networkResponse.clone());
+				}
                 return networkResponse;
-            } catch {
+				} catch {
                 return new Response('Offline', { status: 200 });
-            }
-        })()
-    );
+			}
+		})()
+	);
 });
 
 async function handleShare(request) {
@@ -167,45 +224,49 @@ async function handleShare(request) {
     
     return Response.redirect('/note-with-attachment?shared=1', 303);
 }
-
 async function handleProtocolRequest(url) {
-    const urlParams = new URLSearchParams(url.search);
-    const externalUrl = urlParams.get('url');
-    
-    const allowedOrigins = [
+	const urlParams = new URLSearchParams(url.search);
+	const externalUrl = urlParams.get('url');
+	
+	const allowedOrigins = [
+		
         'https://calendar-multi-lang.netlify.app',
         'https://his-geo-quiz-test.netlify.app',
-        'https://noc-tunisia-chapter.netlify.app'
-    ];
-    
-    if (externalUrl && allowedOrigins.some(origin => externalUrl.startsWith(origin))) {
-        return Response.redirect(externalUrl, 302);
-    } else {
-        return new Response('Invalid URL', { status: 403 });
-    }
+        'https://noc-tunisia-chapter.netlify.app',
+		'web+cal-multi-lang://'
+	];
+	
+	if (externalUrl && allowedOrigins.some(origin => externalUrl.startsWith(origin))) {
+		return Response.redirect(externalUrl, 302);
+	}
+	return new Response('Invalid URL', { status: 403 });
 }
+
 
 async function handleWidgetData() {
     const today = new Date().toISOString().split('T')[0];
     const notes = (await getNotesFromCache())?.[today] || [];
-    const categories = Object.keys(window.iconTips?.[currentLanguage] || {});
+    
+    // Get icon tips from cache
+    const iconTipsResponse = await caches.match('/data/iconTips');
+    const iconTips = iconTipsResponse ? await iconTipsResponse.json() : {};
+    
+    const categories = Object.keys(iconTips[currentLanguage] || {});
     const randomCategory = categories[Math.floor(Math.random() * categories.length)] || '';
-    const tips = window.iconTips?.[currentLanguage]?.[randomCategory] || [];
+    const tips = iconTips[currentLanguage]?.[randomCategory] || [];
     const randomTip = tips[Math.floor(Math.random() * tips.length)] || {};
-
+	
     const responseData = {
         tip: randomTip,
         notes: notes
-    };
-
+	};
+	
     const response = new Response(JSON.stringify(responseData), {
         headers: { 'Content-Type': 'application/json' }
-    });
-
-    // Cache the generated response
+	});
+	
     const cache = await caches.open(WIDGET_CACHE_NAME);
     await cache.put('/api/widget-data', response.clone());
-    
     return response;
 }
 
@@ -214,21 +275,21 @@ async function getNotesFromCache() {
         const cache = await caches.open(CACHE_NAME);
         const response = await cache.match('/data/notes');
         return response ? await response.json() : null;
-    } catch {
+		} catch {
         return null;
-    }
+	}
 }
 
 self.addEventListener('sync', (event) => {
     if (event.tag === BACKGROUND_SYNC_TAG) {
         event.waitUntil(processSyncQueue());
-    }
+	}
 });
 
 self.addEventListener('periodicsync', (event) => {
     if (event.tag === PERIODIC_SYNC_TAG) {
         event.waitUntil(backgroundUpdate());
-    }
+	}
 });
 
 async function processSyncQueue() {
@@ -244,13 +305,13 @@ async function processSyncQueue() {
                 method: 'POST',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
-            });
+			});
             await cursor.delete();
-        } catch (error) {
+			} catch (error) {
             console.error('Sync failed:', error);
-        }
+		}
         cursor = await cursor.continue();
-    }
+	}
 }
 
 async function backgroundUpdate() {
@@ -259,9 +320,9 @@ async function backgroundUpdate() {
         const data = await updates.json();
         const cache = await caches.open(CACHE_NAME);
         await cache.put('/data/notes', new Response(JSON.stringify(data)));
-    } catch (error) {
+		} catch (error) {
         console.error('Background update failed:', error);
-    }
+	}
 }
 
 self.addEventListener('push', (event) => {
@@ -273,13 +334,13 @@ self.addEventListener('push', (event) => {
             badge: './assets/icons/android/icon-192.png',
             data: {
                 url: data.url || '/'
-            }
-        };
+			}
+		};
         
         event.waitUntil(
             self.registration.showNotification(data.title, options)
-        );
-    }
+		);
+	}
 });
 
 self.addEventListener('notificationclick', (event) => {
@@ -290,11 +351,26 @@ self.addEventListener('notificationclick', (event) => {
             for (let client of windowClients) {
                 if (client.url === url && 'focus' in client) {
                     return client.focus();
-                }
-            }
+				}
+			}
             if (clients.openWindow) {
                 return clients.openWindow(url);
-            }
-        })
-    );
+			}
+		})
+	);
 });
+// add cache expiration
+async function cacheWithExpiration(request, response, cacheName, maxAgeSeconds) {
+	const cache = await caches.open(cacheName);
+	const clonedResponse = response.clone();
+	const headers = new Headers(clonedResponse.headers);
+	headers.set('sw-cache-expires', (Date.now() + maxAgeSeconds * 1000).toString());
+	await cache.put(request, new Response(clonedResponse.body, {
+		status: clonedResponse.status,
+		statusText: clonedResponse.statusText,
+		headers: headers
+	}));
+}
+
+
+

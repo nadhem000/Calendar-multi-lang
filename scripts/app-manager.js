@@ -1,31 +1,12 @@
 class AppManager {
 	constructor() {
-		this.CACHE_NAME = 'calendar-cache-v2';
-		this.ASSETS_TO_CACHE = [
-			'./',
-			'./index.html',
-			'./manifest.json',
-			'./styles/main.css',
-			'./scripts/languages.js',
-			'./scripts/converter.js',
-			'./scripts/calendar.js',
-			'./scripts/notes.js',
-			'./scripts/addons.js',
-			'./scripts/main.js',
-			'./scripts/app-manager.js',
-			'./assets/icons/ios/icon-192.png',
-			'./assets/icons/android/icon-192.png',
-			'./assets/icons/android/icon-512.png',
-	'./assets/icons/health.png',
-	'./assets/icons/note.png',
-			'./assets/backgrounds/background.jpg',
-			'./assets/screenshots/screenshot_01.png',
-			'./assets/screenshots/screenshot_02.png'
-		];
+		this.CACHE_NAME = CACHE_CONFIG.name;
+		this.ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 		this.BACKGROUND_SYNC_TAG = 'background-sync';
 		this.PERIODIC_SYNC_TAG = 'periodic-sync';
+		this.dbName = 'CalendarAttachments';
+		this.dbVersion = 2; // Consistent version
 	}
-	
 	async init() {
 		await this.registerServiceWorker();
 		this.setupInstallPrompt();
@@ -34,9 +15,29 @@ class AppManager {
 		this.registerPeriodicSync();
 		this.setupPushNotifications();
 	}
-	
+	monitorConnection() {
+		const updateOnlineStatus = () => {
+			const statusElement = document.getElementById('online-status');
+			if (statusElement) {
+				if (navigator.onLine) {
+					statusElement.className = 'online';
+					statusElement.title = 'Online';
+					// When coming online, sync any localStorage fallbacks
+					FileManager.syncAllFallbacks().catch(console.error);
+					} else {
+					statusElement.className = 'offline';
+					statusElement.title = 'Offline - Working locally';
+				}
+			}
+		};
+		window.addEventListener('online', updateOnlineStatus);
+		window.addEventListener('offline', updateOnlineStatus);
+		updateOnlineStatus();
+	}
 	async registerServiceWorker() {
-		const isLocalEnvironment = window.location.protocol === 'file:';
+		const isLocalEnvironment = window.location.protocol === 'file:' || 
+		window.location.hostname === 'localhost' || 
+		window.location.hostname === '127.0.0.1';
 		
 		if (isLocalEnvironment) {
 			console.log('Local environment detected - skipping Service Worker');
@@ -46,7 +47,6 @@ class AppManager {
 		if ('serviceWorker' in navigator) {
 			try {
 				const registration = await navigator.serviceWorker.register('./sw.js');
-				
 				registration.addEventListener('updatefound', () => {
 					const newWorker = registration.installing;
 					newWorker.addEventListener('statechange', () => {
@@ -55,18 +55,16 @@ class AppManager {
 						}
 					});
 				});
-				
 				if (registration.waiting) {
 					this.showUpdateNotification();
 				}
-				
 				if (registration.active) {
 					registration.active.postMessage({ 
 						type: 'INIT', 
-						cacheName: this.CACHE_NAME 
+						cacheName: this.CACHE_NAME,
+						currentLanguage: window.currentLanguage
 					});
 				}
-				
 				navigator.serviceWorker.addEventListener('controllerchange', () => {
 					window.location.reload();
 				});
@@ -75,7 +73,6 @@ class AppManager {
 			}
 		}
 	}
-	
 	async cacheAssets() {
 		if ('caches' in window) {
 			try {
@@ -87,7 +84,6 @@ class AppManager {
 			}
 		}
 	}
-	
 	async clearOldCaches() {
 		const cacheNames = await caches.keys();
 		await Promise.all(
@@ -98,21 +94,58 @@ class AppManager {
 			})
 		);
 	}
-	
+	async cleanupOldData() {
+		// Clear old caches
+		const cacheNames = await caches.keys();
+		await Promise.all(
+			cacheNames.map(cacheName => {
+				if (cacheName !== this.CACHE_NAME) {
+					return caches.delete(cacheName);
+				}
+			})
+		);
+		// Clear old IndexedDB data
+		try {
+			const db = await this.openDB();
+			const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
+			await Promise.all([
+				tx.objectStore('attachments').clear(),
+				tx.objectStore('SYNC_QUEUE').clear()
+			]);
+			} catch (error) {
+			console.error('Error clearing IndexedDB:', error);
+		}
+	}
+	openDB() {
+		return new Promise((resolve, reject) => {
+			const request = indexedDB.open(this.dbName, this.dbVersion);
+			
+			request.onerror = () => reject('IndexedDB open failed');
+			
+			request.onupgradeneeded = (e) => {
+				const db = e.target.result;
+				if (!db.objectStoreNames.contains('attachments')) {
+					db.createObjectStore('attachments', { keyPath: 'id' });
+				}
+				if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
+					db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
+				}
+			};
+			
+			request.onsuccess = (e) => resolve(e.target.result);
+		});
+	}
 	setupInstallPrompt() {
 		let deferredPrompt;
-		
 		window.addEventListener('beforeinstallprompt', (e) => {
 			e.preventDefault();
 			deferredPrompt = e;
 			this.showInstallButton();
 		});
-		
 		window.addEventListener('appinstalled', () => {
 			console.log('App installed successfully');
 			this.hideInstallButton();
 		});
-		
 		document.getElementById('install-btn')?.addEventListener('click', async () => {
 			if (deferredPrompt) {
 				deferredPrompt.prompt();
@@ -124,7 +157,6 @@ class AppManager {
 			}
 		});
 	}
-	
 	showInstallButton() {
 		const installBtn = document.getElementById('install-btn');
 		if (installBtn) {
@@ -132,12 +164,10 @@ class AppManager {
 			installBtn.textContent = translations[currentLanguage].Install || 'Install App';
 		}
 	}
-	
 	hideInstallButton() {
 		const installBtn = document.getElementById('install-btn');
 		if (installBtn) installBtn.style.display = 'none';
 	}
-	
 	setupStorageManagement() {
 		if ('storage' in navigator && 'estimate' in navigator.storage) {
 			navigator.storage.estimate().then(estimate => {
@@ -145,7 +175,6 @@ class AppManager {
 				this.updateStorageUI(estimate.usage / estimate.quota);
 			});
 		}
-		
 		if ('storage' in navigator && 'persist' in navigator.storage) {
 			navigator.storage.persist().then(persisted => {
 				if (persisted) {
@@ -154,14 +183,12 @@ class AppManager {
 			});
 		}
 	}
-	
 	updateStorageUI(usageRatio) {
 		const storageIndicator = document.getElementById('storage-indicator');
 		if (storageIndicator) {
 			const percentage = Math.round(usageRatio * 100);
 			storageIndicator.style.width = `${percentage}%`;
 			storageIndicator.title = `Using ${percentage}% of available storage`;
-			
 			if (percentage > 80) {
 				storageIndicator.style.backgroundColor = '#f44336';
 				this.showStorageWarning();
@@ -172,7 +199,6 @@ class AppManager {
 			}
 		}
 	}
-	
 	showStorageWarning() {
 		const warning = document.createElement('div');
 		warning.className = 'storage-warning';
@@ -181,27 +207,22 @@ class AppManager {
 		<button id="clear-storage">${translations[currentLanguage].clearStorage || 'Clear old data'}</button>
 		`;
 		document.body.appendChild(warning);
-		
 		document.getElementById('clear-storage').addEventListener('click', () => {
 			this.clearOldData();
 			warning.remove();
 		});
 	}
-	
 	async clearOldData() {
 		try {
 			await this.clearOldCaches();
-			
 			const sixMonthsAgo = new Date();
 			sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-			
 			for (const dateKey in window.notes) {
 				const noteDate = new Date(dateKey);
 				if (noteDate < sixMonthsAgo) {
 					delete window.notes[dateKey];
 				}
 			}
-			
 			localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
 			alert(translations[currentLanguage].storageCleared || 'Old data cleared successfully');
 			} catch (error) {
@@ -209,45 +230,26 @@ class AppManager {
 			alert(translations[currentLanguage].storageError || 'Error clearing old data');
 		}
 	}
-	
-	monitorConnection() {
-		const updateOnlineStatus = () => {
-			const statusElement = document.getElementById('online-status');
-			if (statusElement) {
-				if (navigator.onLine) {
-					statusElement.className = 'online';
-					statusElement.title = 'Online';
-					} else {
-					statusElement.className = 'offline';
-					statusElement.title = 'Offline - Working locally';
-				}
-			}
-		};
-		
-		window.addEventListener('online', updateOnlineStatus);
-		window.addEventListener('offline', updateOnlineStatus);
-		updateOnlineStatus();
-	}
-	
+	// limit sync frequency
 	async setupBackgroundSync() {
 		if ('SyncManager' in window) {
 			try {
-				const status = await navigator.permissions.query({name: 'background-sync'});
-				if (status.state === 'granted') {
-					const registration = await navigator.serviceWorker.ready;
+				const registration = await navigator.serviceWorker.ready;
+				// Check last sync time
+				const lastSync = localStorage.getItem('lastSync');
+				if (!lastSync || Date.now() - parseInt(lastSync) > 6 * 60 * 60 * 1000) {
 					await registration.sync.register(this.BACKGROUND_SYNC_TAG);
+					localStorage.setItem('lastSync', Date.now().toString());
 				}
 				} catch (error) {
 				console.log('Background Sync not supported:', error);
 			}
 		}
 	}
-	
 	async registerPeriodicSync() {
 		if ('PeriodicSyncManager' in window) {
 			try {
 				const status = await navigator.permissions.query({name: 'periodic-background-sync'});
-				
 				if (status.state === 'granted') {
 					const registration = await navigator.serviceWorker.ready;
 					await registration.periodicSync.register(this.PERIODIC_SYNC_TAG, {
@@ -264,13 +266,11 @@ class AppManager {
 			try {
 				const today = new Date().toISOString().split('T')[0];
 				const notes = window.notes[today] || [];
-				
 				// Get random tip
 				const categories = Object.keys(window.iconTips[currentLanguage]);
 				const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 				const tips = window.iconTips[currentLanguage][randomCategory];
 				const randomTip = tips[Math.floor(Math.random() * tips.length)];
-				
 				await navigator.updateWidgets({
 					template: '/widget.html',
 					data: {
@@ -297,7 +297,6 @@ class AppManager {
 			}
 		}
 	}
-	
 	scheduleDailyNotifications() {
 		if ('Notification' in window) {
 			const now = new Date();
@@ -307,26 +306,21 @@ class AppManager {
 				now.getDate(),
 				9, 0, 0
 			);
-			
 			if (now > firstNotification) {
 				firstNotification.setDate(firstNotification.getDate() + 1);
 			}
-			
 			const timeout = firstNotification.getTime() - now.getTime();
-			
 			setTimeout(() => {
 				this.showDailyTipNotification();
 				setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
 			}, timeout);
 		}
 	}
-	
 	showDailyTipNotification() {
 		if ('Notification' in window && window.iconTips && window.iconTips[currentLanguage]) {
 			const categories = Object.keys(window.iconTips[currentLanguage]);
 			const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 			const tips = window.iconTips[currentLanguage][randomCategory];
-			
 			if (tips && tips.length > 0) {
 				const randomTip = tips[Math.floor(Math.random() * tips.length)];
 				const notification = new Notification(window.translations[currentLanguage].icons[randomCategory], {
@@ -334,7 +328,6 @@ class AppManager {
 					icon: './assets/icons/android/icon-192.png',
 					tag: 'daily-tip'
 				});
-				
 				notification.onclick = () => {
 					if (window.showTipsModal) {
 						window.showTipsModal(randomCategory);
@@ -343,7 +336,6 @@ class AppManager {
 			}
 		}
 	}
-	
 	setupNoteReminders() {
 		setInterval(() => {
 			const today = new Date().toISOString().split('T')[0];
@@ -356,7 +348,6 @@ class AppManager {
 			}
 		}, 24 * 60 * 60 * 1000);
 	}
-	
 	showUpdateNotification() {
 		if ('Notification' in window && Notification.permission === 'granted') {
 			const notification = new Notification(window.translations[currentLanguage].updateAvailable, {
@@ -364,7 +355,6 @@ class AppManager {
 				icon: './assets/icons/android/icon-192.png',
 				tag: 'update-notification'
 			});
-			
 			notification.onclick = () => {
 				window.location.reload();
 			};
@@ -376,7 +366,6 @@ class AppManager {
 			<button id="reload-app">${window.translations[currentLanguage].reload || 'Reload'}</button>
 			`;
 			document.body.appendChild(notification);
-			
 			document.getElementById('reload-app').addEventListener('click', () => {
 				window.location.reload();
 			});
@@ -385,63 +374,168 @@ class AppManager {
 	sanitizeURL(url) {
 		try {
 			const parsed = new URL(url);
-			if (!['https:', 'http:'].includes(parsed.protocol)) return null;
-			if (!parsed.hostname.endsWith('netlify.app')) return null;
+			// Allow both http/https and your custom protocol
+			if (!['https:', 'http:', 'web+cal-multi-lang:'].includes(parsed.protocol)) {
+				return null;
+			}
+			if (!parsed.hostname.endsWith('netlify.app') && parsed.protocol.startsWith('http')) {
+				return null;
+			}
 			return parsed.toString();
 			} catch {
 			return null;
 		}
 	}
-}
-
-class FileManager {
-	static async processFile(file) {
-		const noteDate = new Date().toISOString().split('T')[0];
-		
-		if (file.type.startsWith('image/')) {
-			const imageUrl = await this.storeImage(file);
-			this.linkToNote(noteDate, {type: 'image', url: imageUrl});
-			} else if (file.type === 'text/plain') {
-			const text = await file.text();
-			this.linkToNote(noteDate, {type: 'text', content: text});
+	async checkStorageUsage() {
+		if ('storage' in navigator && 'estimate' in navigator.storage) {
+			const estimate = await navigator.storage.estimate();
+			const usageRatio = estimate.usage / estimate.quota;
+			if (usageRatio > 0.8) {
+				await this.cleanupOldData();
+			}
 		}
 	}
-	
+}
+class FileManager {
 	static async storeImage(file) {
+		// Validate file size (1MB limit)
+		if (file.size > 1024 * 1024) {
+			throw new Error('Image too large (max 1MB)');
+		}
+		const fileId = `img-${Date.now()}`;
+		const noteDate = new Date().toISOString().split('T')[0];
+		// First try IndexedDB (primary storage)
+		try {
+			await this._storeInIndexedDB(fileId, file);
+			console.log('Stored in IndexedDB');
+			return { id: fileId, source: 'indexeddb' };
+			} catch (error) {
+			console.warn('IndexedDB storage failed, falling back to localStorage');
+			// Fallback to localStorage
+			const dataUrl = await this._storeInLocalStorage(fileId, file);
+			return { id: fileId, source: 'localstorage', dataUrl };
+		}
+	}
+	static async _storeInIndexedDB(fileId, file) {
+		return new Promise((resolve, reject) => {
+			const dbRequest = indexedDB.open('CalendarAttachments', 1);
+			dbRequest.onerror = () => reject('IndexedDB open failed');
+			dbRequest.onsuccess = (e) => {
+				const db = e.target.result;
+				const tx = db.transaction('attachments', 'readwrite');
+				tx.onerror = () => reject('Transaction failed');
+				const store = tx.objectStore('attachments');
+				const request = store.add({
+					id: fileId,
+					file,
+					date: new Date().toISOString().split('T')[0],
+					lastSync: navigator.onLine ? new Date().toISOString() : null
+				});
+				request.onsuccess = () => resolve();
+				request.onerror = () => reject('Store operation failed');
+			};
+		});
+	}
+	static async _storeInLocalStorage(fileId, file) {
 		return new Promise((resolve) => {
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				localStorage.setItem(`img-${Date.now()}`, e.target.result);
+				localStorage.setItem(fileId, e.target.result);
+				// Also store metadata about the fallback
+				const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || []);
+				fallbacks.push(fileId);
+				localStorage.setItem('fallbackAttachments', JSON.stringify(fallbacks));
 				resolve(e.target.result);
 			};
 			reader.readAsDataURL(file);
 		});
 	}
-	
-	static linkToNote(date, attachment) {
-		if (!window.notes[date]) window.notes[date] = [{}];
-		
-		const lastNoteIndex = window.notes[date].length - 1;
-		if (!window.notes[date][lastNoteIndex].attachments) {
-			window.notes[date][lastNoteIndex].attachments = [];
+	static async getImage(fileId, sourceHint) {
+		// Try the hinted source first
+		if (sourceHint === 'indexeddb') {
+			try {
+				const file = await this._getFromIndexedDB(fileId);
+				return file;
+				} catch {
+				// Fall through to localStorage
+			}
 		}
-		
-		window.notes[date][lastNoteIndex].attachments.push(attachment);
-		saveNotes();
+		// Try localStorage
+		const dataUrl = localStorage.getItem(fileId);
+		if (dataUrl) {
+			// If we found it in localStorage but it should be in IndexedDB,
+			// schedule a sync
+			if (sourceHint === 'indexeddb' && navigator.onLine) {
+				this._syncToIndexedDB(fileId, dataUrl);
+			}
+			return dataUrl;
+		}
+		// Final fallback - try IndexedDB even if hint was localStorage
+		try {
+			const file = await this._getFromIndexedDB(fileId);
+			return file;
+			} catch {
+			throw new Error('Image not found in any storage');
+		}
+	}
+	static async _getFromIndexedDB(fileId) {
+		return new Promise((resolve, reject) => {
+			const dbRequest = indexedDB.open('CalendarAttachments', 1);
+			dbRequest.onerror = () => reject('IndexedDB open failed');
+			dbRequest.onsuccess = (e) => {
+				const db = e.target.result;
+				const tx = db.transaction('attachments', 'readonly');
+				tx.onerror = () => reject('Transaction failed');
+				const store = tx.objectStore('attachments');
+				const request = store.get(fileId);
+				request.onsuccess = () => {
+					if (request.result) {
+						resolve(request.result.file);
+						} else {
+						reject('Image not found');
+					}
+				};
+				request.onerror = () => reject('Get operation failed');
+			};
+		});
+	}
+	static async _syncToIndexedDB(fileId, dataUrl) {
+		try {
+			// Convert data URL back to Blob
+			const blob = await (await fetch(dataUrl)).blob();
+			await this._storeInIndexedDB(fileId, blob);
+			// Clean up from localStorage
+			localStorage.removeItem(fileId);
+			const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || []);
+			localStorage.setItem('fallbackAttachments', 
+			JSON.stringify(fallbacks.filter(id => id !== fileId)));
+			console.log(`Successfully synced ${fileId} to IndexedDB`);
+			} catch (error) {
+			console.error('Failed to sync to IndexedDB:', error);
+		}
+	}
+	static async syncAllFallbacks() {
+		if (!navigator.onLine) return;
+		const fallbacks = JSON.parse(localStorage.getItem('fallbackAttachments') || '[]'); // Fixed syntax here
+		for (const fileId of fallbacks) {
+			const dataUrl = localStorage.getItem(fileId);
+			if (dataUrl) {
+				await this._syncToIndexedDB(fileId, dataUrl);
+			}
+		}
 	}
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-	window.appManager = new AppManager();
-	window.appManager.init().catch(error => {
-		console.error('Initialization error:', error);
+	document.addEventListener('DOMContentLoaded', () => {
+		window.appManager = new AppManager();
+		window.appManager.init().catch(error => {
+			console.error('Initialization error:', error);
+		});
 	});
-});
-
-if ('launchQueue' in window) {
-	window.launchQueue.setConsumer((launchParams) => {
-		if (launchParams.files.length > 0) {
-			FileManager.processFile(launchParams.files[0]);
-		}
-	});
-}
+	
+	if ('launchQueue' in window) {
+		window.launchQueue.setConsumer((launchParams) => {
+			if (launchParams.files.length > 0) {
+				FileManager.processFile(launchParams.files[0]);
+			}
+		});
+	}	

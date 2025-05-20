@@ -2,6 +2,7 @@
 // Initialize App Manager
 /* import './app-manager.js'; */
 // Utility functions for loading indicator
+window.currentLanguage = 'en';
 function showLoading() {
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
@@ -60,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			renderCalendar(changeLanguage(currentLanguage));
 		});
 	}
-    
+    if (!window.currentLanguage) {
+    window.currentLanguage = 'en'; // Fallback
+}
     document.getElementById('next-month')?.addEventListener('click', nextMonth);
     document.getElementById('prev-month')?.addEventListener('click', prevMonth);
     
