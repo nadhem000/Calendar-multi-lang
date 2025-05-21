@@ -6,6 +6,7 @@ class AppManager {
 		this.PERIODIC_SYNC_TAG = 'periodic-sync';
 		this.dbName = 'CalendarAttachments';
 		this.dbVersion = 2; // Consistent version
+		
 	}
 	async init() {
 		await this.registerServiceWorker();
@@ -15,6 +16,41 @@ class AppManager {
 		this.registerPeriodicSync();
 		this.setupPushNotifications();
 	}
+	async performSafeCleanup() {
+    try {
+      // 1. Cache cleanup
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(name => {
+          if (name !== CACHE_NAME && 
+              !name.includes('notes') &&
+              !name.includes('prefs') &&
+              name !== 'large-assets-v1') {
+            return caches.delete(name);
+          }
+        })
+      );
+
+      // 2. IndexedDB cleanup (attachments >30 days old)
+      const db = await this.openDB();
+      const tx = db.transaction('attachments', 'readwrite');
+      const store = tx.objectStore('attachments');
+      const index = store.index('timestamp');
+      
+      let cursor = await index.openCursor(IDBKeyRange.upperBound(
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ));
+      
+      while (cursor) {
+        await cursor.delete();
+        cursor = await cursor.continue();
+      }
+      
+      console.log('Cleanup completed safely');
+    } catch (error) {
+      console.log('Cleanup failed (non-critical):', error);
+    }
+  }
 	monitorConnection() {
 		const updateOnlineStatus = () => {
 			const statusElement = document.getElementById('online-status');
@@ -508,4 +544,12 @@ self.addEventListener('error', (event) => {
 });
 self.addEventListener('unhandledrejection', (event) => {
     console.error('SW Unhandled Rejection:', event.reason);
+});
+document.addEventListener('DOMContentLoaded', () => {
+  // Run cleanup every 15 days when online
+  const lastCleanup = localStorage.getItem('lastCleanup') || 0;
+  if (Date.now() - lastCleanup > 15 * 24 * 60 * 60 * 1000 && navigator.onLine) {
+    new AppManager().performSafeCleanup();
+    localStorage.setItem('lastCleanup', Date.now());
+  }
 });

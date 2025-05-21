@@ -10,11 +10,16 @@ const isLocalEnvironment = (() => {
 })();
 let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
-const WIDGET_CACHE_NAME = 'widget-data-cache-v3';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v4';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';
 const SYNC_QUEUE = 'sync-queue';
+const LARGE_ASSETS = [
+  '/assets/backgrounds/background.jpg',
+  '/assets/screenshots/screenshot_01.png',
+  '/assets/screenshots/screenshot_02.png'
+];
 // Update the openDB function to match version:
 const openDB = () => {
 	return new Promise((resolve, reject) => {
@@ -43,35 +48,86 @@ self.addEventListener('message', (event) => {
     }
 });
 self.addEventListener('install', (event) => {
-    if (isLocalEnvironment) {
+   if (isLocalEnvironment) {
         console.log('Local environment detected, skipping cache');
         return;
 	}
-    
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-		.then(cache => cache.addAll(ASSETS_TO_CACHE))
-		.then(() => self.skipWaiting())
-	);
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.keys().then(existingKeys => {
+        // Preserve these data types during update
+        const dataToKeep = existingKeys.filter(key => 
+          key.url.includes('/api/notes') || 
+          key.url.includes('/prefs') ||
+          key.url.includes('/attachments')
+        );
+        
+        // Add new assets + preserved data
+        return Promise.all([
+          cache.addAll(ASSETS_TO_CACHE),
+          ...dataToKeep.map(item => cache.put(item.url, item))
+        ]);
+      });
+    }).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME && 
-                        cacheName !== WIDGET_CACHE_NAME &&
-                        !cacheName.startsWith('widget-data-cache-')) {
-                        return caches.delete(cacheName);
-					}
-				})
-			);
-		}).then(() => self.clients.claim())
-	);
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all([
+        // Delete old caches but keep data caches
+        ...cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME && 
+              !cacheName.includes('notes-') &&
+              !cacheName.includes('prefs-') &&
+              !cacheName.includes('attachments-')) {
+            return caches.delete(cacheName);
+          }
+        }),
+        
+        // Claim clients immediately
+        self.clients.claim()
+      ]);
+    })
+  );
 });
+async function handleLargeAsset(request) {
+  const cache = await caches.open('large-assets-v1');
+  const cached = await cache.match(request);
+  
+  // 1. Return cached version if fresh (<30 days old)
+  if (cached) {
+    const cachedAt = parseInt(cached.headers.get('sw-cached-at') || '0');
+    if (Date.now() - cachedAt < 30 * 24 * 60 * 60 * 1000) {
+      return cached;
+    }
+  }
 
+  // 2. Try network update
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const headers = new Headers(networkResponse.headers);
+      headers.set('sw-cached-at', Date.now().toString());
+      
+      await cache.put(
+        request,
+        new Response(await networkResponse.blob(), { headers })
+      );
+    }
+    return networkResponse;
+  } catch {
+    return cached || Response.error();
+  }
+}
 self.addEventListener('fetch', (event) => {
+  // Add this check FIRST in the fetch handler
+  if (LARGE_ASSETS.some(asset => event.request.url.includes(asset))) {
+    event.respondWith(handleLargeAsset(event.request));
+    return;
+  }
     if (isLocalEnvironment) return;
     
     const url = new URL(event.request.url);
@@ -385,22 +441,7 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
-            const url = event.notification.data.url || '/';
-            for (let client of windowClients) {
-                if (client.url === url && 'focus' in client) {
-                    return client.focus();
-				}
-			}
-            if (clients.openWindow) {
-                return clients.openWindow(url);
-			}
-		})
-	);
-});
+
 // add cache expiration
 async function cacheWithExpiration(request, response, cacheName, maxAgeSeconds) {
 	const cache = await caches.open(cacheName);

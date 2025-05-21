@@ -1,6 +1,6 @@
 
 const CACHE_CONFIG = {
-  name: 'calendar-cache-v3',
+  name: 'calendar-cache-v4',
   assets: [
     './',
     './manifest.json',

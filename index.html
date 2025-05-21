@@ -3,12 +3,16 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="./manifest.json">
+		<link rel="manifest" href="./manifest.json">
 		<meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self' https://calendar-multi-lang.netlify.app/ https://his-geo-quiz-test.netlify.app/ https://noc-tunisian-chapter.netlify.app/;
-               script-src 'self' 'unsafe-inline';
-               style-src 'self' 'unsafe-inline';
-               img-src 'self' data: https:;">
+		content="default-src 'self' https://*.netlify.app;
+		script-src 'self' 'unsafe-inline';
+		style-src 'self' 'unsafe-inline';
+		img-src 'self' data: https:;
+		connect-src 'self' https://*.netlify.app;
+		form-action 'self';
+		base-uri 'self';
+		frame-src 'none';">
 		<title>Calendar</title>
 		<link rel="stylesheet" href="styles/main.css">
 		<!-- Font Awesome CDN removed -->
@@ -77,7 +81,7 @@
 			<div id="online-status" title="Online"></div>
 		</div>
 		<script src="scripts/config.js"></script>
-<script src="scripts/app-manager.js"></script>
+		<script src="scripts/app-manager.js"></script>
 		<script src="scripts/converter.js"></script>
 		<script src="scripts/languages.js"></script>
 		<script src="scripts/calendar.js"></script>

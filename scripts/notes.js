@@ -2,8 +2,8 @@
 window.notes = {};
 // Simple HTML sanitizer
 function sanitizeHTML(str) {
-  if (!str) return '';
-  return str.toString()
+	if (!str) return '';
+	return str.toString()
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -38,173 +38,221 @@ function openNoteModal(date, dayElement) {
     
     modal.innerHTML = `
     <div class="note-modal-content">
-        <div class="note-header">
-            <h3>${formatNoteDate(date)}</h3>
-            <span class="close-modal" title="${translations[currentLanguage].close}">&times;</span>
-        </div>
-        
-        <fieldset class="note-controls">
-            <legend>${translations[currentLanguage].noteSettings || 'Note Settings'}</legend>
-            
-            <div class="color-picker">
-                ${noteColors.map((color, index) => `
-                <label class="color-option" 
-                    style="background-color: ${color.color}" 
-                    title="${color.class.replace('note-color-', '')}">
-                    <input type="radio" 
-                        name="note-color" 
-                        value="${color.class}" 
-                        ${index === 0 ? 'checked' : ''}>
-                </label>
-                `).join('')}
-            </div>
-            
-            <div class="note-type-selector">
-                ${noteTypes.map((type, index) => `
-                <input type="radio" name="note-type" id="type-${dateKey}-${index}" 
-                    class="note-type" value="${type.type}" ${index === 0 ? 'checked' : ''}>
-                <label for="type-${dateKey}-${index}" title="${type.label}">${type.icon}</label>
-                `).join('')}
-            </div>
-        </fieldset>
-        
-        <label for="note-input" class="sr-only">${translations[currentLanguage].noteLabel || 'Note Content'}</label>
-        <textarea id="note-input" name="note" class="note-text" 
-            placeholder="${translations[currentLanguage].notePlaceholder}"></textarea>
-        
-        <div class="existing-notes">
-            <h4>${translations[currentLanguage].existingNotes || 'Existing Notes'}:</h4>
-            <div class="notes-list">
-                ${(window.notes[dateKey] || []).map((note, index) => `
-                <div class="note-item" style="background-color: ${
-                    noteColors.find(c => c.class === note.color)?.color || '#cccccc'
-                }">
-                    <div class="note-icon">${
-                        noteTypes.find(t => t.type === note.type)?.icon || '📝'
-                    }</div>
-                    <div class="note-content">
-                        ${sanitizeHTML(note.text)}
-                        <div class="note-language">${note.language.toUpperCase()}</div>
-                    </div>
-                    <button class="delete-note" data-index="${index}" title="${
-                        translations[currentLanguage].delete
-                    }">✕</button>
-                </div>
-                `).join('')}
-            </div>
-        </div>
+	<div class="note-header">
+	<h3>${formatNoteDate(date)}</h3>
+	<span class="close-modal" title="${translations[currentLanguage].close}">&times;</span>
+	</div>
+	
+	<fieldset class="note-controls">
+	<legend>${translations[currentLanguage].noteSettings || 'Note Settings'}</legend>
+	
+	<div class="color-picker">
+	${noteColors.map((color, index) => `
+	<label class="color-option" 
+	style="background-color: ${color.color}" 
+	title="${color.class.replace('note-color-', '')}">
+	<input type="radio" 
+	name="note-color" 
+	value="${color.class}" 
+	${index === 0 ? 'checked' : ''}>
+	</label>
+	`).join('')}
+	</div>
+	
+	<div class="note-type-selector">
+	${noteTypes.map((type, index) => `
+	<input type="radio" name="note-type" id="type-${dateKey}-${index}" 
+	class="note-type" value="${type.type}" ${index === 0 ? 'checked' : ''}>
+	<label for="type-${dateKey}-${index}" title="${type.label}">${type.icon}</label>
+	`).join('')}
+	</div>
+	</fieldset>
+	
+	<label for="note-input" class="sr-only">${translations[currentLanguage].noteLabel || 'Note Content'}</label>
+	<textarea id="note-input" name="note" class="note-text" 
+	placeholder="${translations[currentLanguage].notePlaceholder}"></textarea>
+	
+	<div class="existing-notes">
+	<h4>${translations[currentLanguage].existingNotes || 'Existing Notes'}:</h4>
+	<div class="notes-list">
+	${(window.notes[dateKey] || []).map((note, index) => `
+	<div class="note-item" style="background-color: ${
+	noteColors.find(c => c.class === note.color)?.color || '#cccccc'
+}">
+<div class="note-icon">${
+	noteTypes.find(t => t.type === note.type)?.icon || '📝'
+}</div>
+<div class="note-content">
+${sanitizeHTML(note.text)}
+<div class="note-language">${note.language.toUpperCase()}</div>
+</div>
+<button class="edit-note" data-index="${index}" title="${translations[currentLanguage].edit || 'Edit'}">✎</button>
+<button class="delete-note" data-index="${index}" title="${translations[currentLanguage].delete}">✕</button>
+</div>
+`).join('')}
+</div>
+</div>
 
-        <div class="note-buttons">
-            <button type="submit" class="save-note">${translations[currentLanguage].save}</button>
-            <button type="button" class="close-note">${translations[currentLanguage].close}</button>
-        </div>
-        <div class="attachments">
-            ${(window.notes[dateKey] || []).map((note, index) => `
-                ${(note.attachments || []).map(attach => `
-                    ${attach.type === 'image' ? 
+<div class="note-buttons">
+<button type="submit" class="save-note">${translations[currentLanguage].save}</button>
+<button type="button" class="close-note">${translations[currentLanguage].close}</button>
+</div>
+<div class="attachments">
+${(window.notes[dateKey] || []).map((note, index) => `
+${(note.attachments || []).map(attach => `
+	${attach.type === 'image' ? 
     `<img src="${sanitizeHTML(attach.url)}" class="attachment-preview" onerror="this.style.display='none'">` : 
     `<div class="text-attachment">📄 ${sanitizeHTML(attach.content.substring(0, 20))}...</div>`
-}
-                `).join('')}
-            `).join('')}
-        </div>
-    </div>
-    `;
+	}
+`).join('')}
+`).join('')}
+</div>
+</div>
+`;
 
-    document.body.appendChild(modal);
+document.body.appendChild(modal);
 
-    // Initialize selections
-    const firstColor = modal.querySelector('.color-option');
-    if (firstColor) firstColor.classList.add('selected');
+// Initialize selections
+const firstColor = modal.querySelector('.color-option');
+if (firstColor) firstColor.classList.add('selected');
 
-    const firstType = modal.querySelector('.note-type');
-    if (firstType) firstType.classList.add('selected');
+const firstType = modal.querySelector('.note-type');
+if (firstType) firstType.classList.add('selected');
 
-    // Color picker interaction
-    modal.querySelectorAll('.color-option').forEach(option => {
-        option.addEventListener('click', function() {
-            modal.querySelectorAll('.color-option').forEach(opt => 
-                opt.classList.remove('selected'));
-            this.classList.add('selected');
-        });
-    });
+// Color picker interaction
+modal.querySelectorAll('.color-option').forEach(option => {
+	option.addEventListener('click', function() {
+		modal.querySelectorAll('.color-option').forEach(opt => 
+		opt.classList.remove('selected'));
+		this.classList.add('selected');
+	});
+});
 
-    // Type selector interaction
-    modal.querySelectorAll('.note-type').forEach(type => {
-        type.addEventListener('click', function() {
-            modal.querySelectorAll('.note-type').forEach(t => 
-                t.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            // Auto-insert type text if empty
-            const textarea = modal.querySelector('.note-text');
-            if (!textarea.value.trim()) {
-                const typeData = noteTypes.find(t => t.type === this.value);
-                textarea.value = `${typeData.icon} ${typeData.label}`;
+// Type selector interaction
+modal.querySelectorAll('.note-type').forEach(type => {
+	type.addEventListener('click', function() {
+		modal.querySelectorAll('.note-type').forEach(t => 
+		t.classList.remove('selected'));
+		this.classList.add('selected');
+		
+		// Auto-insert type text if empty
+		const textarea = modal.querySelector('.note-text');
+		if (!textarea.value.trim()) {
+			const typeData = noteTypes.find(t => t.type === this.value);
+			textarea.value = `${typeData.icon} ${typeData.label}`;
+		}
+	});
+});
+
+// Delete note handler
+modal.querySelectorAll('.delete-note').forEach(btn => {
+	btn.addEventListener('click', (e) => {
+		e.stopPropagation();
+		const index = parseInt(btn.dataset.index);
+		if (confirm(translations[currentLanguage].confirmDelete)) {
+			if (window.notes[dateKey] && window.notes[dateKey].length > index) {
+				// Remove the note from all languages
+				window.notes[dateKey].splice(index, 1);
+				
+				if (window.notes[dateKey].length === 0) {
+					delete window.notes[dateKey];
+				}
+				
+				saveNotes();
+				
+				// Refresh both calendar and modal
+				renderCalendar(translations[currentLanguage]);
+				openNoteModal(date, dayElement);
+			}
+		}
+	});
+});
+// Edit note handler
+modal.querySelectorAll('.edit-note').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(btn.dataset.index);
+        const note = window.notes[dateKey][index];
+        
+        // Update form values
+        // Color selection
+        modal.querySelectorAll('.color-option').forEach(option => {
+            const radio = option.querySelector('input');
+            if (radio.value === note.color) {
+                radio.checked = true;
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
             }
         });
-    });
-
-    // Delete note handler
-    modal.querySelectorAll('.delete-note').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const index = parseInt(btn.dataset.index);
-            if (confirm(translations[currentLanguage].confirmDelete)) {
-                if (window.notes[dateKey] && window.notes[dateKey].length > index) {
-                    // Remove the note from all languages
-                    window.notes[dateKey].splice(index, 1);
-                    
-                    if (window.notes[dateKey].length === 0) {
-                        delete window.notes[dateKey];
-                    }
-                    
-                    saveNotes();
-                    
-                    // Refresh both calendar and modal
-                    renderCalendar(translations[currentLanguage]);
-                    openNoteModal(date, dayElement);
-                }
+        
+        // Type selection
+        modal.querySelectorAll('.note-type').forEach(radio => {
+            if (radio.value === note.type) {
+                radio.checked = true;
+                radio.classList.add('selected');
+            } else {
+                radio.classList.remove('selected');
             }
         });
+        
+        // Text content
+        modal.querySelector('#note-input').value = note.text;
+        
+        // Store edit index
+        modal.dataset.editIndex = index;
     });
-
-    // Save handler
-    modal.querySelector('.save-note').addEventListener('click', () => {
-        const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
-        const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
-        const noteText = modal.querySelector('#note-input').value.trim();
-        
-        if (!noteText) {
-            alert(translations[currentLanguage].validationError);
-            return;
-        }
-        
-        const dateKey = date.toISOString().split('T')[0];
-        if (!window.notes[dateKey]) window.notes[dateKey] = [];
-        
-        window.notes[dateKey].push({
+});
+// Save handler
+modal.querySelector('.save-note').addEventListener('click', () => {
+    const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
+    const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
+    const noteText = modal.querySelector('#note-input').value.trim();
+    const dateKey = date.toISOString().split('T')[0];
+    
+    if (!noteText) {
+        alert(translations[currentLanguage].validationError);
+        return;
+    }
+    
+    const editingIndex = modal.dataset.editIndex; // Get edit state
+    
+    if (!window.notes[dateKey]) window.notes[dateKey] = [];
+    
+    // Update or create note
+    if (editingIndex !== undefined) {
+        const index = parseInt(editingIndex);
+        window.notes[dateKey][index] = { // Replace existing note
+            date: dateKey,
+            color: selectedColor,
+            type: selectedType,
+            text: noteText,
+            language: currentLanguage
+        };
+    } else {
+        window.notes[dateKey].push({ // Add new note
             date: dateKey,
             color: selectedColor,
             type: selectedType,
             text: noteText,
             language: currentLanguage
         });
-        
-        saveNotes();
-        renderCalendar(translations[currentLanguage]);
-        modal.remove();
-    });
+    }
+    
+    saveNotes();
+    renderCalendar(translations[currentLanguage]);
+    modal.remove();
+});
 
-    // Close handlers
-    const closeModal = () => modal.remove();
-    modal.querySelector('.close-modal').addEventListener('click', closeModal);
-    modal.querySelector('.close-note').addEventListener('click', closeModal);
+// Close handlers
+const closeModal = () => modal.remove();
+modal.querySelector('.close-modal').addEventListener('click', closeModal);
+modal.querySelector('.close-note').addEventListener('click', closeModal);
 
-    // Close when clicking outside
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-    });
+// Close when clicking outside
+modal.addEventListener('click', (e) => {
+	if (e.target === modal) closeModal();
+});
 }
 
 function formatNoteDate(date) {
@@ -213,7 +261,7 @@ function formatNoteDate(date) {
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
-    };
+	};
     return new Intl.DateTimeFormat(currentLanguage, options).format(date);
 }
 
@@ -229,22 +277,22 @@ function renderNoteIndicator(dayElement, colorClass) {
     const colorObj = noteColors.find(c => c.class === colorClass);
     if (colorObj) {
         indicator.style.backgroundColor = colorObj.color;
-    } else {
+		} else {
         // Default to gray if color not found
         indicator.style.backgroundColor = '#cccccc';
-    }
+	}
     
     // Add note count
     const dateKey = new Date(
         currentYear, 
         currentMonth, 
         parseInt(dayElement.textContent)
-    ).toISOString().split('T')[0];
+	).toISOString().split('T')[0];
     
     const noteCount = window.notes[dateKey]?.length || 0;
     if (noteCount > 0) {
         indicator.textContent = noteCount > 9 ? '9+' : noteCount;
-    }
+	}
     
     dayElement.appendChild(indicator);
 }
@@ -258,37 +306,37 @@ function loadNotes() {
             // Ensure notes is always an object
             if (!window.notes || typeof window.notes !== 'object') {
                 window.notes = {};
-            }
-        } else {
+			}
+			} else {
             window.notes = {};
-        }
-    } catch (e) {
+		}
+		} catch (e) {
         console.error('Error loading notes:', e);
         window.notes = {};
-    } finally {
+		} finally {
         hideLoading(loadingOverlay);
-    }
+	}
 }
 
 function saveNotes() {
-  const loadingOverlay = showLoading();
-  try {
-    localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
-    if (window.appManager && window.appManager.updateWidget) {
-      window.appManager.updateWidget();
-    }
-  } catch (e) {
-    console.error('Error saving notes:', e);
-  } finally {
-    hideLoading(loadingOverlay);
-  }
+	const loadingOverlay = showLoading();
+	try {
+		localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
+		if (window.appManager && window.appManager.updateWidget) {
+			window.appManager.updateWidget();
+		}
+		} catch (e) {
+		console.error('Error saving notes:', e);
+		} finally {
+		hideLoading(loadingOverlay);
+	}
 }
 
 async function saveNote(date, modal, dayElement) {
     const dateKey = date.toISOString().split('T')[0];
     const existingNotes = window.notes[dateKey]?.filter(note => 
         note.language === currentLanguage
-    ) || [];
+	) || [];
     const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
     const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
     const noteText = modal.querySelector('.note-text').value.trim();
@@ -296,7 +344,7 @@ async function saveNote(date, modal, dayElement) {
     if (!noteText) {
         alert(translations[currentLanguage].validationError || "Please enter note text");
         return;
-    }
+	}
     
     window.notes[dateKey] = [
         ...existingNotes,
@@ -306,23 +354,23 @@ async function saveNote(date, modal, dayElement) {
             type: selectedType,
             text: noteText,
             language: currentLanguage
-        }
-    ];
+		}
+	];
     
     if (!navigator.onLine) {
         try {
             const db = await window.appManager.openDB(); // Use appManager's method
             await db.transaction('SYNC_QUEUE', 'readwrite')
-                .objectStore('SYNC_QUEUE')
-                .add({
-                    url: '/api/save-note',
-                    data: { date, note: window.notes[dateKey] }
-                });
+			.objectStore('SYNC_QUEUE')
+			.add({
+				url: '/api/save-note',
+				data: { date, note: window.notes[dateKey] }
+			});
             showToast(translations[currentLanguage].offlineSave || 'Note saved offline');
-        } catch (error) {
+			} catch (error) {
             console.error('Offline sync error:', error);
-        }
-    }
+		}
+	}
     
     saveNotes();
     renderCalendar(translations[currentLanguage]);
@@ -337,6 +385,6 @@ window.initNotes = function() {
             const day = parseInt(dayElement.textContent);
             const date = new Date(currentYear, currentMonth, day);
             openNoteModal(date, dayElement);
-        }
-    });
-};
+		}
+	});
+	};		

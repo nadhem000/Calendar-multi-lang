@@ -926,7 +926,16 @@ legend {
     -webkit-app-region: drag;
     app-region: drag;
 }
-
+.edit-note {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    margin-left: 5px;
+}
+.edit-note:hover {
+    color: #333;
+}
 
 
 

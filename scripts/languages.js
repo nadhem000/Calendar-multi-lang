@@ -50,7 +50,10 @@ const translations = {
 		notesReminder: "You have {count} notes for today",
 		dailyTip: "Daily Tip",
 		noTipToday: "No tip for today",
-		noNotesToday: "No notes for today"
+		noNotesToday: "No notes for today",
+		sanitizeWarning: "Remarque : Les caractères spéciaux ont été nettoyés automatiquement",
+		validationErrorText: "Veuillez saisir le texte de la note",
+		edit: "Edit"
 	},
     ar: {
         title: "التقويم",
@@ -102,7 +105,10 @@ const translations = {
 		notesReminder: "لديك {count} ملاحظات لليوم",
 		dailyTip: "لا نصائح اليوم",
 		noTipToday: "لا ملاحظات اليوم",
-		noNotesToday: "No notes for today"
+		noNotesToday: "لا ملاحظات اليوم",
+		sanitizeWarning: "ملاحظة: تم تنظيف الأحرف الخاصة تلقائيًا",
+		validationErrorText: "الرجاء إدخال نص الملاحظة",
+		edit: "عدل"
 	},
     fr: {
         title: "Calendrier",
@@ -154,7 +160,10 @@ const translations = {
 		notesReminder: "T'as {count} notes pour aujourd'hui",
 		dailyTip: "Conseil Quotidien",
 		noTipToday: "Pas des tips aujourd'hui",
-		noNotesToday: "Pas des notes aujourd'hui"
+		noNotesToday: "Pas des notes aujourd'hui",
+		sanitizeWarning: "Remarque : Les caractères spéciaux ont été nettoyés automatiquement",
+		validationErrorText: "Veuillez saisir le texte de la note",
+		edit: "modifier"
 	}
 };
 // Function to change language
