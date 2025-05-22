@@ -39,40 +39,47 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = showLoading();
     
+    // Load saved language or use default
+    const savedLanguage = localStorage.getItem('userLanguage') || 'en';
+    currentLanguage = savedLanguage;
+    
+    // Update language select to match saved language
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.value = savedLanguage;
+        
+        languageSelect.addEventListener('change', function() {
+            if (this.value !== currentLanguage) { // Only change if different
+                currentLanguage = this.value;
+                // Force full calendar re-render
+                renderCalendar(changeLanguage(currentLanguage));
+            }
+        });
+    }
+    
     setTimeout(() => {
         try {
             // Load notes first
             if (typeof initNotes === 'function') initNotes();
-            // Then render calendar
-            renderCalendar(translations[currentLanguage]);
-			} catch (error) {
+            // Then render calendar with correct language
+            renderCalendar(changeLanguage(currentLanguage));
+        } catch (error) {
             console.error('Initialization error:', error);
-			} finally {
+        } finally {
             hideLoading(loadingOverlay);
-		}
-	}, 50);
+        }
+    }, 50);
     
-    // Set up event listeners
-    const languageSelect = document.getElementById('language-select');
-    if (languageSelect) {
-        languageSelect.addEventListener('change', function() {
-			currentLanguage = this.value;
-			// Force full calendar re-render
-			renderCalendar(changeLanguage(currentLanguage));
-		});
-	}
-    if (!window.currentLanguage) {
-    window.currentLanguage = 'en'; // Fallback
-}
+    // Rest of your existing event listeners...
     document.getElementById('next-month')?.addEventListener('click', nextMonth);
     document.getElementById('prev-month')?.addEventListener('click', prevMonth);
     
     ['health-icon', 'plate-icon', 'mechanics-icon'].forEach(id => {
-		document.getElementById(id)?.addEventListener('click', function() {
-			const category = this.id.replace('-icon', '');
-			showTipsModal(category);
-		});
-	});
+        document.getElementById(id)?.addEventListener('click', function() {
+            const category = this.id.replace('-icon', '');
+            showTipsModal(category);
+        });
+    });
 });
 
 // Today button handler
