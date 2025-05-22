@@ -51,9 +51,51 @@ const translations = {
 		dailyTip: "Daily Tip",
 		noTipToday: "No tip for today",
 		noNotesToday: "No notes for today",
-		sanitizeWarning: "Remarque : Les caractères spéciaux ont été nettoyés automatiquement",
-		validationErrorText: "Veuillez saisir le texte de la note",
-		edit: "Edit"
+		sanitizeWarning: "Note : Special caracters will be cleaned automatically",
+		validationErrorText: "Enter the note's text",
+		edit: "Edit",
+		noteSettings: "Note Settings",
+		noteLabel: "Note Content",
+		modalClose: "Close modal",
+		onlineStatus: "Online",
+		offlineStatus: "Offline",
+		storageUsage: "Using {percentage}% of available storage",
+		databaseError: "Database error. Some features may not work properly.",
+		fileTooLarge: "File is too large to save offline",
+		fileReadError: "Failed to read file",
+		cleanupError: "Error during cleanup",
+		noteSettings: "Note Settings",
+		noteLabel: "Note Content",
+		modalClose: "Close modal",
+		onlineStatus: "Online",
+		offlineStatus: "Offline",
+		storageUsage: "Using {percentage}% of available storage",
+		databaseError: "Database error. Some features may not work properly.",
+		fileTooLarge: "File is too large to save offline",
+		fileReadError: "Failed to read file",
+		cleanupError: "Error during cleanup",
+		loading: "Loading...",
+		noEventsToday: "No events today",
+		addAttachment: "Add attachment",
+		attachmentSaved: "Attachment saved",
+		attachmentError: "Failed to save attachment",
+		noteSaved: "Note saved",
+		noteUpdated: "Note updated",
+		syncProgress: "Sync in progress...",
+		syncCompleted: "Sync completed",
+		syncFailed: "Sync failed",
+		offlineMessage: "Offline - data unavailable",
+		offlineBadge: "Offline",
+		themeToggle: "Toggle Dark Mode",
+		searchPlaceholder: "Search notes...",
+		exportButton: "Export PDF",
+		navigation: {
+			scrollUp: "Scroll up",
+			scrollDown: "Scroll down",
+			tipCount: "Tip {current} of {total}"
+		},
+		descriptionLabel: "Description", // For the "📝" label
+		frequencyLabel: "Frequency"     // For the "⏰" label
 	},
     ar: {
         title: "التقويم",
@@ -108,7 +150,49 @@ const translations = {
 		noNotesToday: "لا ملاحظات اليوم",
 		sanitizeWarning: "ملاحظة: تم تنظيف الأحرف الخاصة تلقائيًا",
 		validationErrorText: "الرجاء إدخال نص الملاحظة",
-		edit: "عدل"
+		edit: "عدل",
+		noteSettings: "إعدادات الملاحظة",
+		noteLabel: "محتويات الملاحظة",
+		modalClose: "إغلاق النافذة",
+		onlineStatus: "متصل بالإنترنت",
+		offlineStatus: "غير متصل",
+		storageUsage: "يتم استخدام {percentage}٪ من مساحة التخزين المتاحة",
+		databaseError: "خطأ في قاعدة البيانات. بعض الميزات قد لا تعمل بشكل صحيح.",
+		fileTooLarge: "الملف كبير جدًا ولا يمكن حفظه دون اتصال",
+		fileReadError: "فشل قراءة الملف",
+		cleanupError: "خطأ أثناء التنظيف",
+		noteSettings: "إعدادات الملاحظة",
+		noteLabel: "محتويات الملاحظة",
+		modalClose: "إغلاق النافذة",
+		onlineStatus: "متصل بالإنترنت",
+		offlineStatus: "غير متصل",
+		storageUsage: "يتم استخدام {percentage}٪ من مساحة التخزين المتاحة",
+		databaseError: "خطأ في قاعدة البيانات. بعض الميزات قد لا تعمل بشكل صحيح.",
+		fileTooLarge: "الملف كبير جدًا ولا يمكن حفظه دون اتصال",
+		fileReadError: "فشل قراءة الملف",
+		cleanupError: "خطأ أثناء التنظيف",
+		loading: "جاري التحميل...",
+		noEventsToday: "لا توجد أحداث اليوم",
+		addAttachment: "إضافة مرفق",
+		attachmentSaved: "تم حفظ المرفق",
+		attachmentError: "فشل حفظ المرفق",
+		noteSaved: "تم حفظ الملاحظة",
+		noteUpdated: "تم تحديث الملاحظة",
+		syncProgress: "جاري المزامنة...",
+		syncCompleted: "تمت المزامنة",
+		syncFailed: "فشلت المزامنة",
+		offlineMessage: "غير متصل - البيانات غير متوفرة",
+		offlineBadge: "غير متصل",
+		themeToggle: "تبديل الوضع المظلم", 
+		searchPlaceholder: "ابحث في الملاحظات...",
+		exportButton: "تصدير PDF",
+		navigation: {
+			scrollUp: "التمرير لأعلى",
+			scrollDown: "التمرير لأسفل",
+			tipCount: "النصيحة {current} من {total}"
+		},
+		descriptionLabel: "الوصف", // For the "📝" label
+		frequencyLabel: "التكرار"     // For the "⏰" label
 	},
     fr: {
         title: "Calendrier",
@@ -163,22 +247,65 @@ const translations = {
 		noNotesToday: "Pas des notes aujourd'hui",
 		sanitizeWarning: "Remarque : Les caractères spéciaux ont été nettoyés automatiquement",
 		validationErrorText: "Veuillez saisir le texte de la note",
-		edit: "modifier"
+		edit: "modifier",
+		noteSettings: "Paramètres de note",
+		noteLabel: "Contenu de la note",
+		modalClose: "Fermer la fenêtre",
+		onlineStatus: "En ligne",
+		offlineStatus: "Hors ligne",
+		storageUsage: "Utilisation de {percentage}% du stockage disponible",
+		databaseError: "Erreur de base de données. Certaines fonctionnalités peuvent ne pas fonctionner correctement.",
+		fileTooLarge: "Le fichier est trop volumineux pour être enregistré hors ligne",
+		fileReadError: "Échec de lecture du fichier",
+		cleanupError: "Erreur lors du nettoyage",
+		noteSettings: "Paramètres de note",
+		noteLabel: "Contenu de la note",
+		modalClose: "Fermer la fenêtre",
+		onlineStatus: "En ligne",
+		offlineStatus: "Hors ligne",
+		storageUsage: "Utilisation de {percentage}% du stockage disponible",
+		databaseError: "Erreur de base de données. Certaines fonctionnalités peuvent ne pas fonctionner correctement.",
+		fileTooLarge: "Le fichier est trop volumineux pour être enregistré hors ligne",
+		fileReadError: "Échec de lecture du fichier",
+		cleanupError: "Erreur lors du nettoyage",
+		loading: "Chargement...",
+		noEventsToday: "Aucun événement aujourd'hui",
+		addAttachment: "Ajouter une pièce jointe",
+		attachmentSaved: "Pièce jointe enregistrée",
+		attachmentError: "Échec de l'enregistrement de la pièce jointe",
+		noteSaved: "Note enregistrée",
+		noteUpdated: "Note mise à jour",
+		syncProgress: "Synchronisation en cours...",
+		syncCompleted: "Synchronisation terminée",
+		syncFailed: "Échec de la synchronisation",
+		offlineMessage: "Hors ligne - données non disponibles",
+		offlineBadge: "Hors ligne",
+		themeToggle: "Basculer en mode sombre",
+		searchPlaceholder: "Rechercher des notes...",
+		exportButton: "Exporter PDF",
+		navigation: {
+			scrollUp: "Défiler vers le haut",
+			scrollDown: "Défiler vers le bas",
+			tipCount: "Astuce {current} sur {total}"
+		},
+		descriptionLabel: "Descrption", // For the "📝" label
+		frequencyLabel: "Fréquence"     // For the "⏰" label
 	}
 };
+
 // Function to change language
 function changeLanguage(lang) {
-    const prevSystem = currentCalendarSystem;
-    currentLanguage = lang;
-    const langData = translations[lang];
-    // Update calendar system options
-    const systemSelect = document.getElementById('calendar-system');
-    if (systemSelect) {
-        systemSelect.innerHTML = Object.entries(langData.calendarSystems)
+	const prevSystem = currentCalendarSystem;
+	currentLanguage = lang;
+	const langData = translations[lang];
+	// Update calendar system options
+	const systemSelect = document.getElementById('calendar-system');
+	if (systemSelect) {
+		systemSelect.innerHTML = Object.entries(langData.calendarSystems)
 		.map(([value, name]) => 
 			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
 		).join('');
-        currentCalendarSystem = prevSystem; // Restore previous system
+		currentCalendarSystem = prevSystem; // Restore previous system
 	}
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;

@@ -340,7 +340,5 @@ This setup gives you:
 - Easy upgrade path for real notifications
 - Netlify-hosted PWA with zero server maintenance
 
-Would you like me to elaborate on any specific part of this implementation?
 
-
-
+button-> language of app, search, perso info, clear memory, notification, 

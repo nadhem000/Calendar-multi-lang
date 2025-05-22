@@ -4,7 +4,7 @@ let currentYear = currentDate.getFullYear();
 let currentMonth = currentDate.getMonth();
 const today = new Date();
 function renderCalendar(langData) {
-  const months = currentCalendarSystem === 'hijri' 
+	const months = currentCalendarSystem === 'hijri' 
     ? langData.monthsHijri 
     : langData.months;
     const monthYearElement = document.getElementById('month-year-display');
@@ -37,6 +37,9 @@ function renderCalendar(langData) {
 	}
     // Current month's days
     for (let i = 1; i <= daysInMonth; i++) {
+		// Update date key handling:
+		const dateObj = new Date(currentYear, currentMonth, i);
+		const dateKey = normalizeDateKey(dateObj);
         const dayElement = document.createElement('div');
         dayElement.textContent = i;
         dayElement.style.position = 'relative';
@@ -45,7 +48,7 @@ function renderCalendar(langData) {
             dayElement.classList.add('today');
 		}
         // Add note indicators if they exist
-        const dateKey = new Date(currentYear, currentMonth, i).toISOString().split('T')[0];
+        /* const dateKey = getLocalISODate(new Date(currentYear, currentMonth, i)); */
 		
 		if (window.notes && window.notes[dateKey] && window.notes[dateKey].length > 0) {
 			const dateNotes = window.notes[dateKey]; // Show ALL notes regardless of language

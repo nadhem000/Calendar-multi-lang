@@ -5,7 +5,7 @@ class AppManager {
 		this.BACKGROUND_SYNC_TAG = 'background-sync';
 		this.PERIODIC_SYNC_TAG = 'periodic-sync';
 		this.dbName = 'CalendarAttachments';
-		this.dbVersion = 2; // Consistent version
+		this.dbVersion = 3;  // Consistent version
 		
 	}
 	async init() {
@@ -17,40 +17,68 @@ class AppManager {
 		this.setupPushNotifications();
 	}
 	async performSafeCleanup() {
-    try {
-      // 1. Cache cleanup
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames.map(name => {
-          if (name !== CACHE_NAME && 
-              !name.includes('notes') &&
-              !name.includes('prefs') &&
-              name !== 'large-assets-v1') {
-            return caches.delete(name);
-          }
-        })
-      );
-
-      // 2. IndexedDB cleanup (attachments >30 days old)
-      const db = await this.openDB();
-      const tx = db.transaction('attachments', 'readwrite');
-      const store = tx.objectStore('attachments');
-      const index = store.index('timestamp');
-      
-      let cursor = await index.openCursor(IDBKeyRange.upperBound(
-        Date.now() - 30 * 24 * 60 * 60 * 1000
-      ));
-      
-      while (cursor) {
-        await cursor.delete();
-        cursor = await cursor.continue();
-      }
-      
-      console.log('Cleanup completed safely');
-    } catch (error) {
-      console.log('Cleanup failed (non-critical):', error);
-    }
-  }
+		try {
+			// 1. Cache cleanup
+			const cacheNames = await caches.keys();
+			await Promise.all(
+				cacheNames.map(name => {
+					if (name !== CACHE_NAME && 
+						!name.includes('notes') && 
+						!name.includes('prefs') && 
+						name !== 'large-assets-v1') {
+						return caches.delete(name);
+					}
+					return Promise.resolve();
+				})
+			);
+			
+			// 2. IndexedDB cleanup with transaction error handling
+			try {
+				const db = await this.openDB();
+				const tx = db.transaction('attachments', 'readwrite');
+				const store = tx.objectStore('attachments');
+				const index = store.index('timestamp');
+				
+				tx.onerror = (event) => {
+					console.error('Cleanup transaction error:', event.target.error);
+				};
+				
+				let cursor = await index.openCursor(IDBKeyRange.upperBound(
+					Date.now() - 30 * 24 * 60 * 60 * 1000
+				));
+				
+				while (cursor) {
+					try {
+						await cursor.delete();
+						cursor = await cursor.continue();
+						} catch (error) {
+						console.error('Error deleting record:', error);
+						cursor = await cursor.continue(); // Try to continue anyway
+					}
+				}
+				} catch (error) {
+				console.error('IndexedDB cleanup error:', error);
+			}
+			
+			} catch (error) {
+			console.error('Cleanup failed:', error);
+			showToast(translations[currentLanguage].cleanupError);
+		}
+	}
+    async withRetry(operation, maxRetries = 3, delay = 100) {
+        let lastError;
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await operation();
+				} catch (error) {
+                lastError = error;
+                if (i < maxRetries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+				}
+			}
+		}
+        throw lastError;
+	}
 	monitorConnection() {
 		const updateOnlineStatus = () => {
 			const statusElement = document.getElementById('online-status');
@@ -98,7 +126,7 @@ class AppManager {
 					registration.active.postMessage({ 
 						type: 'INIT', 
 						cacheName: this.CACHE_NAME,
-						currentLanguage: window.currentLanguage
+						currentLanguage: window.currentLanguage || 'en' //  fallback
 					});
 				}
 				navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -130,44 +158,97 @@ class AppManager {
 			})
 		);
 	}
+	// In app-manager.js, update the cleanup methods:
 	async cleanupOldData() {
-		// Clear old caches
-		const cacheNames = await caches.keys();
-		await Promise.all(
-			cacheNames.map(cacheName => {
-				if (cacheName !== this.CACHE_NAME) {
-					return caches.delete(cacheName);
-				}
-			})
-		);
-		// Clear old IndexedDB data
 		try {
 			const db = await this.openDB();
 			const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
+			
+			tx.onerror = (event) => {
+				console.error('Transaction error:', event.target.error);
+			};
+			
 			await Promise.all([
-				tx.objectStore('attachments').clear(),
-				tx.objectStore('SYNC_QUEUE').clear()
+				new Promise((resolve, reject) => {
+					const req = tx.objectStore('attachments').clear();
+					req.onsuccess = resolve;
+					req.onerror = reject;
+				}),
+				new Promise((resolve, reject) => {
+					const req = tx.objectStore('SYNC_QUEUE').clear();
+					req.onsuccess = resolve;
+					req.onerror = reject;
+				})
 			]);
 			} catch (error) {
 			console.error('Error clearing IndexedDB:', error);
+			throw error;
 		}
 	}
 	openDB() {
 		return new Promise((resolve, reject) => {
 			const request = indexedDB.open(this.dbName, this.dbVersion);
 			
-			request.onerror = () => reject('IndexedDB open failed');
+			request.onupgradeneeded = (e) => {
+				const db = e.target.result;
+				const oldVersion = e.oldVersion || 0; // Handle first creation (oldVersion=0)
+				// Migration handling
+				if (oldVersion < 1) {
+					// Initial version
+					db.createObjectStore('attachments', { keyPath: 'id' });
+				}
+				
+				if (oldVersion < 2) {
+					// Version 2 adds timestamp index
+					const tx = e.target.transaction;
+					const store = tx.objectStore('attachments');
+					store.createIndex('timestamp', 'timestamp', { unique: false });
+				}
+				
+				if (oldVersion < 3) {
+					// Version 3 adds SYNC_QUEUE
+					if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
+						db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
+					}
+				}
+			};
+			request.onerror = (event) => {
+				console.error('Database error:', event.target.error);
+				reject(new Error(`Database error: ${event.target.error.message}`));
+			};
+			
+			request.onblocked = () => {
+				console.warn('Database access blocked');
+				reject(new Error('Database access blocked by another connection'));
+			};
 			
 			request.onupgradeneeded = (e) => {
 				const db = e.target.result;
-				if (!db.objectStoreNames.contains('attachments')) {
-					db.createObjectStore('attachments', { keyPath: 'id' });
-				}
-				if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
-					db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
+				try {
+					if (!db.objectStoreNames.contains('attachments')) {
+						const store = db.createObjectStore('attachments', { keyPath: 'id' });
+						store.createIndex('timestamp', 'timestamp', { unique: false });
+					}
+					if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
+						db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
+					}
+					} catch (error) {
+					console.error('Database upgrade error:', error);
+					reject(error);
 				}
 			};
 			
+			request.onsuccess = (e) => {
+				const db = e.target.result;
+				
+				// error handling for database operations
+				db.onerror = (event) => {
+					console.error('Database operation error:', event.target.error);
+				};
+				
+				resolve(db);
+			};
+			request.onerror = () => reject('IndexedDB open failed');
 			request.onsuccess = (e) => resolve(e.target.result);
 		});
 	}
@@ -343,23 +424,25 @@ class AppManager {
 		}
 	}
 	scheduleDailyNotifications() {
-		if ('Notification' in window) {
-			const now = new Date();
-			const firstNotification = new Date(
-				now.getFullYear(),
-				now.getMonth(),
-				now.getDate(),
-				9, 0, 0
-			);
-			if (now > firstNotification) {
-				firstNotification.setDate(firstNotification.getDate() + 1);
-			}
-			const timeout = firstNotification.getTime() - now.getTime();
-			setTimeout(() => {
-				this.showDailyTipNotification();
-				setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
-			}, timeout);
+		const now = new Date();
+		const firstNotification = new Date(
+			now.getFullYear(),
+			now.getMonth(),
+			now.getDate(),
+			9, 0, 0
+		);
+		
+		// Add UTC conversion for consistency
+		if (now > firstNotification) {
+			firstNotification.setUTCDate(firstNotification.getDate() + 1);
 		}
+		
+		const timeout = firstNotification.getTime() - now.getTime();
+		
+		setTimeout(() => {
+			this.showDailyTipNotification();
+			setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
+		}, timeout);
 	}
 	showDailyTipNotification() {
 		if ('Notification' in window && window.iconTips && window.iconTips[currentLanguage]) {
@@ -452,38 +535,102 @@ class AppManager {
 }
 class FileManager {
 	static async storeFile(file) {
+		// Validate input
+		if (!(file instanceof File || file instanceof Blob)) {
+			throw new Error(translations[currentLanguage].invalidFileType || 'Invalid file type');
+		}
+		
 		try {
-			// First try IndexedDB
-			const id = `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-			const db = await this.#getDB();
-			await db.transaction('attachments', 'readwrite')
-			.objectStore('attachments')
-			.add({ id, file, timestamp: Date.now() });
-			
-			return { id, source: 'indexeddb' };
+			// First try IndexedDB with retry logic
+			let lastError;
+			for (let retries = 3; retries > 0; retries--) {
+				try {
+					const id = `file-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+					const db = await this.#getDB();
+					
+					// Create a new transaction for each attempt
+					const transaction = db.transaction('attachments', 'readwrite');
+					const store = transaction.objectStore('attachments');
+					
+					// Wrap in Promise to handle transaction completion
+					await new Promise((resolve, reject) => {
+						const request = store.add({ 
+							id, 
+							file, 
+							timestamp: Date.now(),
+							name: file.name,
+							type: file.type,
+							size: file.size
+						});
+						
+						request.onsuccess = () => resolve();
+						request.onerror = (event) => reject(event.target.error);
+						transaction.onerror = (event) => reject(event.target.error);
+					});
+					
+					return { id, source: 'indexeddb' };
+					} catch (error) {
+					lastError = error;
+					if (retries > 1) {
+						await new Promise(resolve => setTimeout(resolve, 100 * (4 - retries))); // Exponential backoff
+					}
+				}
+			}
+			throw lastError; // If all retries failed
 			} catch (error) {
-			console.warn('IndexedDB failed, falling back to localStorage');
+			console.warn('IndexedDB failed, falling back to localStorage:', error);
 			
-			// Fallback to localStorage with size check
-			if (file.size > 5 * 1024 * 1024) { // 5MB limit for localStorage
-				throw new Error('File too large for fallback storage');
+			// Enhanced localStorage fallback with size check
+			if (file.size > 5 * 1024 * 1024) {
+				const errorMsg = translations[currentLanguage].fileTooLarge || 'File too large for fallback storage';
+				console.error(errorMsg);
+				throw new Error(errorMsg);
 			}
 			
-			return new Promise((resolve) => {
-				const reader = new FileReader();
-				reader.onload = async (e) => {
-					const id = `local-${Date.now()}`;
-					localStorage.setItem(id, e.target.result);
+			try {
+				return await new Promise((resolve, reject) => {
+					const reader = new FileReader();
 					
-					// Store metadata about fallback files
-					const fallbacks = JSON.parse(localStorage.getItem('fallbackFiles') || '[]');
-					fallbacks.push({ id, name: file.name, type: file.type, size: file.size });
-					localStorage.setItem('fallbackFiles', JSON.stringify(fallbacks));
+					reader.onabort = () => reject(new Error(translations[currentLanguage].fileReadAborted || 'File read aborted'));
+					reader.onerror = () => reject(new Error(translations[currentLanguage].fileReadError || 'Failed to read file'));
 					
-					resolve({ id, source: 'localstorage' });
-				};
-				reader.readAsDataURL(file);
-			});
+					reader.onload = (e) => {
+						try {
+							const id = `local-${Date.now()}`;
+							const fileData = {
+								data: e.target.result,
+								metadata: {
+									name: file.name,
+									type: file.type,
+									size: file.size,
+									lastModified: file.lastModified
+								}
+							};
+							
+							localStorage.setItem(id, JSON.stringify(fileData));
+							
+							const fallbacks = JSON.parse(localStorage.getItem('fallbackFiles') || '[]');
+							fallbacks.push({ 
+								id,
+								name: file.name,
+								type: file.type,
+								size: file.size,
+								timestamp: Date.now()
+							});
+							localStorage.setItem('fallbackFiles', JSON.stringify(fallbacks));
+							
+							resolve({ id, source: 'localstorage' });
+							} catch (storageError) {
+							reject(storageError);
+						}
+					};
+					
+					reader.readAsDataURL(file);
+				});
+				} catch (fallbackError) {
+				console.error('LocalStorage fallback failed:', fallbackError);
+				throw new Error(translations[currentLanguage].storageFailed || 'Failed to store file in both IndexedDB and localStorage');
+			}
 		}
 	}
 	
@@ -546,10 +693,10 @@ self.addEventListener('unhandledrejection', (event) => {
     console.error('SW Unhandled Rejection:', event.reason);
 });
 document.addEventListener('DOMContentLoaded', () => {
-  // Run cleanup every 15 days when online
-  const lastCleanup = localStorage.getItem('lastCleanup') || 0;
-  if (Date.now() - lastCleanup > 15 * 24 * 60 * 60 * 1000 && navigator.onLine) {
-    new AppManager().performSafeCleanup();
-    localStorage.setItem('lastCleanup', Date.now());
-  }
+	// Run cleanup every 15 days when online
+	const lastCleanup = localStorage.getItem('lastCleanup') || 0;
+	if (Date.now() - lastCleanup > 15 * 24 * 60 * 60 * 1000 && navigator.onLine) {
+		new AppManager().performSafeCleanup();
+		localStorage.setItem('lastCleanup', Date.now());
+	}
 });

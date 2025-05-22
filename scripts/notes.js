@@ -33,7 +33,7 @@ function openNoteModal(date, dayElement) {
     document.querySelectorAll('.note-modal').forEach(modal => modal.remove());
     const modal = document.createElement('div');
     modal.className = 'note-modal';
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = normalizeDateKey(date); // Instead of toISOString()
     const existingNotes = window.notes[dateKey] || [];
     
     modal.innerHTML = `
@@ -181,27 +181,27 @@ modal.querySelectorAll('.edit-note').forEach(btn => {
             if (radio.value === note.color) {
                 radio.checked = true;
                 option.classList.add('selected');
-            } else {
+				} else {
                 option.classList.remove('selected');
-            }
-        });
+			}
+		});
         
         // Type selection
         modal.querySelectorAll('.note-type').forEach(radio => {
             if (radio.value === note.type) {
                 radio.checked = true;
                 radio.classList.add('selected');
-            } else {
+				} else {
                 radio.classList.remove('selected');
-            }
-        });
+			}
+		});
         
         // Text content
         modal.querySelector('#note-input').value = note.text;
         
         // Store edit index
         modal.dataset.editIndex = index;
-    });
+	});
 });
 // Save handler
 modal.querySelector('.save-note').addEventListener('click', () => {
@@ -213,7 +213,7 @@ modal.querySelector('.save-note').addEventListener('click', () => {
     if (!noteText) {
         alert(translations[currentLanguage].validationError);
         return;
-    }
+	}
     
     const editingIndex = modal.dataset.editIndex; // Get edit state
     
@@ -228,16 +228,16 @@ modal.querySelector('.save-note').addEventListener('click', () => {
             type: selectedType,
             text: noteText,
             language: currentLanguage
-        };
-    } else {
+		};
+		} else {
         window.notes[dateKey].push({ // Add new note
             date: dateKey,
             color: selectedColor,
             type: selectedType,
             text: noteText,
             language: currentLanguage
-        });
-    }
+		});
+	}
     
     saveNotes();
     renderCalendar(translations[currentLanguage]);
@@ -319,6 +319,25 @@ function loadNotes() {
 }
 
 function saveNotes() {
+	// Add date validation before saving
+	// Migrate old note keys if needed
+	const migratedNotes = {};
+	let needsMigration = false;
+	
+	Object.keys(window.notes).forEach(key => {
+		const newKey = normalizeDateKey(key);
+		if (newKey !== key) {
+			needsMigration = true;
+		}
+		migratedNotes[newKey] = window.notes[key];
+	});
+	
+	if (needsMigration) {
+		window.notes = migratedNotes;
+		console.log('Note date keys migrated to new format');
+	}
+	
+	localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
 	const loadingOverlay = showLoading();
 	try {
 		localStorage.setItem('calendarNotes', JSON.stringify(window.notes));
@@ -376,6 +395,37 @@ async function saveNote(date, modal, dayElement) {
     renderCalendar(translations[currentLanguage]);
 }
 
+function normalizeDateKey(dateInput) {
+	// Handle both Date objects and existing string keys
+	if (dateInput instanceof Date) {
+		return getStableDateKey(dateInput);
+	}
+	
+	// Handle existing note keys (could be ISO string or local date string)
+	if (typeof dateInput === 'string') {
+		// Check if already in YYYY-MM-DD format
+		if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+			return dateInput;
+		}
+		
+		// Try to parse as ISO string
+		const isoMatch = dateInput.match(/^(\d{4}-\d{2}-\d{2})T/);
+		if (isoMatch) {
+			return isoMatch[1];
+		}
+		
+		// Final fallback - try to parse as is
+		try {
+			return getStableDateKey(new Date(dateInput));
+			} catch (e) {
+			console.warn('Could not normalize date key:', dateInput);
+			return getStableDateKey(new Date()); // Fallback to today
+		}
+	}
+	
+	// Ultimate fallback
+	return getStableDateKey(new Date());
+}
 // Initialize note functionality
 window.initNotes = function() {
     loadNotes();
@@ -387,4 +437,4 @@ window.initNotes = function() {
             openNoteModal(date, dayElement);
 		}
 	});
-	};		
+	};			

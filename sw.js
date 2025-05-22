@@ -314,7 +314,7 @@ async function handleProtocolRequest(url) {
 
 
 async function handleWidgetData() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = normalizeDateKey(new Date());
     const notes = (await getNotesFromCache())?.[today] || [];
     
     // Get icon tips from cache

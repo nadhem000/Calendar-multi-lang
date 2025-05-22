@@ -825,6 +825,14 @@ legend {
         order: 3;
         width: 100%;
     }
+    .tips-list-container {
+        height: 300px !important;
+    }
+    
+    .tip-item {
+        padding: 8px !important;
+        margin: 8px 0 !important;
+    }
 }
 
 /* Tips Modal Styles */
@@ -850,15 +858,28 @@ legend {
   transition: transform 0.3s ease;
 }
 .tips-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: white;
+}
+.tips-modal-header h3 {
+    color: var(--modal-primary-color);
+    margin: 0;
 }
 .close-tips-modal {
-  cursor: pointer;
-  transition: transform 0.2s ease;
+    background: var(--modal-primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 .close-tips-modal:hover {
   transform: scale(1.1);
@@ -881,12 +902,23 @@ legend {
   margin: 16px 0;
 }
 .tip-item {
-  border: 1px solid #ddd;
-  padding: 16px;
-  margin: 8px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+    border-left: 4px solid var(--modal-primary-color);
+    background: white;
+    position: relative;
+    margin: 10px 0;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+.tip-counter {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.8em;
+    color: #666;
+}
+.tip-item h4 {
+    color: var(--modal-primary-color);
+    margin: 5px 0;
 }
 .tip-emoji {
   font-size: 1.5rem;
@@ -937,9 +969,204 @@ legend {
     color: #333;
 }
 
+.tips-navigation {
+    display: flex;
+    gap: 15px;
+    flex-direction: row;
+    height: 100%;
+    display: flex;
+    height: 100%;
+}
+.category-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    align-self: flex-start;
+}
+.tips-controls-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+}
 
+.category-icon-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0;
+}
 
+.category-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: default;
+    opacity: 0.7;
+    transition: all 0.2s;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+}
+.category-icon:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
 
+.scroll-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+[dir="rtl"] .tips-navigation {
+    flex-direction: row-reverse;
+}
+.category-icon[data-category="health"] { 
+    color: var(--health-color);
+    border: 1px solid var(--health-color);
+}
+.category-icon[data-category="plate"] { 
+    color: var(--plate-color);
+    border: 1px solid var(--plate-color);
+}
+.category-icon[data-category="mechanics"] { 
+    color: var(--mechanics-color);
+    border: 1px solid var(--mechanics-color);
+}
+
+.tips-list-container {
+  height: 400px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 10px;
+  position: relative;
+  background: transparent !important; /* Remove background */
+  border-radius: 8px;
+    flex-grow: 1;
+}
+
+.tips-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tips-list-container::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.tips-list-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.scroll-up, .scroll-down {
+    background: var(--modal-primary-color);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px auto;
+    cursor: pointer;
+}
+
+.scroll-up:hover, .scroll-down:hover {
+    transform: scale(1.1);
+    opacity: 0.9;
+}
+
+.scroll-up:active, .scroll-down:active {
+    transform: scale(0.95);
+}
+
+:root {
+  --health-color: #dc2626;
+  --health-bg: #fee2e2;
+  --plate-color: #16a34a;
+  --plate-bg: #dcfce7;
+  --mechanics-color: #2563eb;
+  --mechanics-bg: #dbeafe;
+}
+.tip-category-health {
+  --modal-primary-color: var(--health-color);
+  background-color: var(--health-bg);
+  border-color: var(--health-color);
+}
+
+.tip-category-plate {
+  --modal-primary-color: var(--plate-color);
+  background-color: var(--plate-bg);
+  border-color: var(--plate-color);
+}
+
+.tip-category-mechanics {
+  --modal-primary-color: var(--mechanics-color);
+  background-color: var(--mechanics-bg);
+  border-color: var(--mechanics-color);
+}
+/* Tooltip styles */
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  z-index: 100;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* RTL adjustments */
+[dir="rtl"] [data-tooltip]:hover::after {
+  left: auto;
+  right: 50%;
+  transform: translateX(50%);
+}
+/* RTL icon positioning */
+[dir="rtl"] .icon {
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+[dir="rtl"] .tip-emoji {
+  right: auto;
+  left: 16px;
+  transform: translateY(-50%);
+}
+
+[dir="rtl"] .tip-counter {
+  right: auto;
+  left: 5px;
+}
+
+[dir="rtl"] .tip-item {
+  border-left: none;
+  border-right: 4px solid var(--modal-primary-color);
+}
 
 
 

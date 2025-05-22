@@ -75,7 +75,8 @@ function renderWidget(data) {
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric' 
+      day: 'numeric',
+      timeZone: 'UTC' // Add explicit timezone
     });
 
   // Update daily tip
