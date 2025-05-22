@@ -342,3 +342,8 @@ This setup gives you:
 
 
 button-> language of app, search, perso info, clear memory, notification, 
+app-manager.js:415 [Violation] Only request notification permission in response to a user gesture.
+app-manager.js:300 Using 1094418 out of 106607274393 bytes
+app-manager.js:307 Storage will not be cleared without user permission
+app-manager.js:417 Notification permission granted
+﻿

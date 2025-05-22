@@ -181,6 +181,11 @@ function showEventDetails(eventId) {
   console.log('Event details for:', eventId);
   // Implement actual event display logic
 }
+document.getElementById('enable-notifications')?.addEventListener('click', () => {
+  if (window.appManager) {
+    appManager.setupPushNotifications();
+  }
+});
 document.getElementById('calendar-system').addEventListener('change', function() {
 	currentCalendarSystem = this.value;
 	renderCalendar(translations[currentLanguage]);

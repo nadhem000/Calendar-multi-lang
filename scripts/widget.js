@@ -1,4 +1,4 @@
-const WIDGET_CACHE_NAME = 'widget-data-cache-v4';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v5';
 
 // Initialize widget with offline support
 function initWidget() {
