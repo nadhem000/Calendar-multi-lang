@@ -95,7 +95,16 @@ const translations = {
 			tipCount: "Tip {current} of {total}"
 		},
 		descriptionLabel: "Description", // For the "📝" label
-		frequencyLabel: "Frequency"     // For the "⏰" label
+		frequencyLabel: "Frequency",     // For the "⏰" label
+    settingsSaved: "Settings saved successfully",
+    settingsTitle: "Settings",
+    languageLabel: "Language",
+    notificationsLabel: "Notifications",
+    pushLabel: "Push Notifications",
+    updatesLabel: "Updates",
+    calendarSystemLabel: "Calendar System",
+    syncLabel: "Sync Mode",
+    personalInfoLabel: "Personal Information"
 	},
     ar: {
         title: "التقويم",
@@ -191,8 +200,17 @@ const translations = {
 			scrollDown: "التمرير لأسفل",
 			tipCount: "النصيحة {current} من {total}"
 		},
-		descriptionLabel: "الوصف", // For the "📝" label
-		frequencyLabel: "التكرار"     // For the "⏰" label
+		descriptionLabel: "الوصف",
+		frequencyLabel: "التكرار",
+    settingsSaved: "تم حفظ الإعدادات بنجاح",
+    settingsTitle: "الإعدادات",
+    languageLabel: "اللغة",
+    notificationsLabel: "الإشعارات",
+    pushLabel: "إشعارات الدفع",
+    updatesLabel: "التحديثات",
+    calendarSystemLabel: "نظام التقويم",
+    syncLabel: "وضع المزامنة",
+    personalInfoLabel: "المعلومات الشخصية"
 	},
     fr: {
         title: "Calendrier",
@@ -288,8 +306,17 @@ const translations = {
 			scrollDown: "Défiler vers le bas",
 			tipCount: "Astuce {current} sur {total}"
 		},
-		descriptionLabel: "Descrption", // For the "📝" label
-		frequencyLabel: "Fréquence"     // For the "⏰" label
+		descriptionLabel: "Descrption",
+		frequencyLabel: "Fréquence",
+    settingsSaved: "Paramètres enregistrés avec succès",
+    settingsTitle: "Paramètres",
+    languageLabel: "Langue",
+    notificationsLabel: "Notifications",
+    pushLabel: "Notifications push",
+    updatesLabel: "Mises à jour",
+    calendarSystemLabel: "Système de calendrier",
+    syncLabel: "Mode de synchronisation",
+    personalInfoLabel: "Informations personnelles"
 	}
 };
 

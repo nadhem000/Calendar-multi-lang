@@ -10,7 +10,7 @@ const isLocalEnvironment = (() => {
 })();
 let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
-const WIDGET_CACHE_NAME = 'widget-data-cache-v4';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v5';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';

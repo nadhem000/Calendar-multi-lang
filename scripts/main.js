@@ -57,6 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+  // Settings modal handling
+  const settingsIcon = document.getElementById('settings-icon');
+  const settingsModal = document.getElementById('settings-modal');
+  
+  settingsIcon.addEventListener('click', function() {
+    // Sync settings with current state
+    document.getElementById('language-select').value = currentLanguage;
+    document.getElementById('calendar-system').value = currentCalendarSystem;
+    settingsModal.style.display = 'block';
+  });
+
+  // Close modal
+  document.getElementById('settings-close').addEventListener('click', function() {
+    settingsModal.style.display = 'none';
+  });
     setTimeout(() => {
         try {
             // Load notes first

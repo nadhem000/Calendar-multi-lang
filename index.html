@@ -21,17 +21,18 @@
 		<div class="container">
 			<header>
 				<h1 class="title">Calendar</h1>
-				<div class="language-selector">
+				<!-- <div class="language-selector">
 					<select id="language-select">
-    <option value="en">English</option>
-    <option value="ar">العربية (Arabic)</option>
-    <option value="fr">Français (French)</option>
-</select>
-				</div><!-- Calendar System Selector -->
-				<select id="calendar-system">
+						<option value="en">English</option>
+						<option value="ar">العربية (Arabic)</option>
+						<option value="fr">Français (French)</option>
+					</select>
+				</div> -->
+				<!-- Calendar System Selector -->
+				<!-- <select id="calendar-system">
 					<option value="gregorian">Gregorian</option>
 					<option value="hijri">Hijri</option>
-				</select>
+				</select> -->
 			</header>
 			
 			<div class="main-content">
@@ -45,6 +46,10 @@
 					<div class="icon" id="mechanics-icon" title="Mechanics">
 						⚙️
 					</div>
+					<div class="icon" id="settings-icon" title="Settings">
+						⚙️
+						<div class="settings-badge" id="settings-badge" style="display:none">!</div>
+					</div>
 				</aside>
 				
 				<main class="calendar-container">
@@ -55,9 +60,9 @@
 						<button id="today-btn" class="today-button" title="Return to today">
 							📅 Today
 						</button>
-<button id="enable-notifications" class="today-button" >
-  Enable Notifications
-</button>
+						<button id="enable-notifications" class="today-button" >
+							Enable Notifications
+						</button>
 					</div>
 					<div id="today-date-label" class="today-date"></div>
 					<div class="weekdays">
@@ -81,10 +86,60 @@
 			<div id="storage-indicator-container">
 				<div id="storage-indicator"></div>
 			</div>
-			<div id="online-status" title="Online"></div>
-		</div>
-		<script src="scripts/languages.js"></script>
-		<script src="scripts/config.js"></script>
+			<div id="settings-modal" class="settings-modal">
+				<h3><span id="settings-title">Settings</span></h3>
+				
+				<!-- Language Selector (existing element moved here) -->
+				<div class="settings-option">
+					<label for="language-select">
+						<span id="language-label">Language</span>
+					</label>
+					<select id="language-select" class="existing-select">
+						<option value="en">English</option>
+						<option value="ar">العربية</option>
+						<option value="fr">Français</option>
+					</select>
+				</div>
+				
+				<!-- Calendar System (existing element moved here) -->
+				<div class="settings-option">
+					<label for="calendar-system">
+						<span id="calendar-system-label">Calendar System</span>
+					</label>
+					<select id="calendar-system" class="existing-select">
+						<option value="gregorian">Gregorian</option>
+						<option value="hijri">Hijri</option>
+					</select>
+				</div>
+				
+				<!-- New Settings -->
+				<div class="settings-option">
+					<label>
+						<span id="notifications-label">Notifications</span>
+						<input type="checkbox" id="notifications-toggle">
+					</label>
+				</div>
+				
+				<div class="settings-option">
+					<label>
+						<span id="sync-label">Sync Preferences</span>
+						<select id="sync-preference">
+							<option value="auto">Automatic</option>
+							<option value="wifi">Wi-Fi Only</option>
+							<option value="manual">Manual</option>
+						</select>
+					</label>
+				</div>
+				
+				<div class="settings-actions">
+					<button id="settings-close" class="settings-btn">
+						<span id="close-label">Close</span>
+					</button>
+				</div>
+			</div>
+			<script src="scripts/languages.js"></script>
+			<script src="scripts/config.js"></script>
+		<!-- <script src="scripts/settings.js"></script> -->
 		<script src="scripts/app-manager.js"></script>
 		<script src="scripts/converter.js"></script>
 		<script src="scripts/calendar.js"></script>
