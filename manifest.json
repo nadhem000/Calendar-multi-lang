@@ -9,10 +9,8 @@
 	"orientation": "portrait",
 	"start_url": "/?source=pwa",
 	"scope": "/",
-{
   "version": "1.0.3",
-  "version_name": "2024-06-20"
-},
+  "version_name": "2024-06-20",
 	"edge_side_panel": {
 		"preferred_width": 400
 	},
