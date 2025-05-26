@@ -53,25 +53,29 @@ self.addEventListener('message', (event) => {
     console.log('Service Worker language updated to:', currentLanguage);
 });
 self.addEventListener('install', (event) => {
-    console.log('SW installing for:', self.location.href);
-   if (isLocalEnvironment) {
-        console.log('Local environment detected, skipping cache');
-        return;
-	}
-  
+  if (isLocalEnvironment) {
+    console.log('Local environment detected, skipping cache');
+    return;
+  }
+
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
+      // MODIFICATION: Filter out manifest.json from cached assets
+      const assetsToCache = ASSETS_TO_CACHE.filter(asset => 
+        !asset.endsWith('manifest.json') &&
+        !asset.endsWith('sw.js')
+      );
+      
       return cache.keys().then(existingKeys => {
-        // Preserve these data types during update
         const dataToKeep = existingKeys.filter(key => 
           key.url.includes('/api/notes') || 
           key.url.includes('/prefs') ||
           key.url.includes('/attachments')
         );
         
-        // Add new assets + preserved data
+        // Use filtered assets
         return Promise.all([
-          cache.addAll(ASSETS_TO_CACHE),
+          cache.addAll(assetsToCache),
           ...dataToKeep.map(item => cache.put(item.url, item))
         ]);
       });
@@ -501,3 +505,9 @@ async function cacheWithExpiration(request, response, cacheName, maxAgeSeconds) 
 
 
 
+
+self.addEventListener('fetch', event => {
+  if (event.request.url.includes('manifest.json')) {
+    console.log('Manifest fetch initiated by:', new Error().stack);
+  }
+});

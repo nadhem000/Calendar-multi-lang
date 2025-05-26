@@ -196,7 +196,6 @@ console.log('DOM elements ready:', {
 	}, 50);
 });
 
-// Move these outside the DOMContentLoaded since they're utility functions
 function showLoading() {
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
@@ -229,3 +228,16 @@ function safeRenderCalendar() {
         showToast('Calendar error - please refresh');
 	}
 }
+// Performance metrics
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const timing = performance.timing;
+    const loadTime = timing.loadEventEnd - timing.navigationStart;
+    console.log('Page load time:', loadTime + 'ms');
+    
+    // Log resource timing
+    performance.getEntriesByType('resource').forEach(resource => {
+      console.log(`${resource.name} loaded in ${resource.duration}ms`);
+    });
+  }, 0);
+});
