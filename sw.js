@@ -10,7 +10,7 @@ const isLocalEnvironment = (() => {
 })();
 let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
-const WIDGET_CACHE_NAME = 'widget-data-cache-v5';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v4';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';
@@ -41,11 +41,16 @@ const openDB = () => {
 };
 
 self.addEventListener('message', (event) => {
-    if (event.data.type === 'INIT' && !initialized) {
-        initialized = true;
-        currentLanguage = event.data.currentLanguage || 'en';
-        console.log('Service Worker initialized with language:', currentLanguage);
+    switch (event.data.type) {
+        case 'INIT':
+            initialized = true;
+            currentLanguage = event.data.language || 'en';
+            break;
+        case 'SET_LANGUAGE':
+            currentLanguage = event.data.language || currentLanguage;
+            break;
     }
+    console.log('Service Worker language updated to:', currentLanguage);
 });
 self.addEventListener('install', (event) => {
    if (isLocalEnvironment) {
@@ -123,7 +128,17 @@ async function handleLargeAsset(request) {
   }
 }
 self.addEventListener('fetch', (event) => {
-  // Add this check FIRST in the fetch handler
+  const url = new URL(event.request.url);
+    
+    // Add language to cache key for API requests
+    if (url.pathname.startsWith('/api/')) {
+        const langAwareRequest = new Request(
+            `${url.pathname}?lang=${currentLanguage}`,
+            event.request
+        );
+        event.respondWith(handleApiFetch(langAwareRequest));
+        return;
+    }
   if (LARGE_ASSETS.some(asset => event.request.url.includes(asset))) {
     event.respondWith(handleLargeAsset(event.request));
     return;
@@ -270,6 +285,17 @@ self.addEventListener('fetch', (event) => {
 	);
 });
 
+async function handleApiFetch(request) {
+    const cache = await caches.open(`${CACHE_NAME}-${currentLanguage}`);
+    try {
+        const networkResponse = await fetch(request);
+        await cache.put(request, networkResponse.clone());
+        return networkResponse;
+    } catch {
+        const cached = await cache.match(request);
+        return cached || Response.error();
+    }
+}
 async function handleShare(request) {
     const formData = await request.formData();
     const files = formData.getAll('files');

@@ -1,6 +1,6 @@
 
 const CACHE_CONFIG = {
-  name: 'calendar-cache-v5',
+  name: 'calendar-cache-v4',
   assets: [
     './',
     './manifest.json',
@@ -13,6 +13,7 @@ const CACHE_CONFIG = {
     './scripts/addons.js',
     './scripts/main.js',
     './scripts/app-manager.js',
+    './scripts/settings.js',
     './api/widget-data',
     './assets/icons/ios/icon-192.png',
     './assets/icons/android/icon-192.png',

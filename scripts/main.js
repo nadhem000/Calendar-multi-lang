@@ -1,8 +1,8 @@
 // Initialize the page
-// Initialize App Manager
-/* import './app-manager.js'; */
-// Utility functions for loading indicator
-window.currentLanguage = 'en';
+window.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
+window.currentCalendarSystem = localStorage.getItem('calendarSystem') || 'gregorian';
+
+// Utility functions
 function showLoading() {
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
@@ -14,70 +14,116 @@ function showLoading() {
 function hideLoading(overlay) {
     if (overlay && overlay.parentNode) {
         overlay.parentNode.removeChild(overlay);
-	}
+    }
 }
+
+function updateTodayButton() {
+    const today = new Date();
+    const todayBtn = document.getElementById('today-btn');
+    if (!todayBtn) return;
+    
+    if (currentYear === today.getFullYear() && currentMonth === today.getMonth()) {
+        todayBtn.disabled = true;
+        todayBtn.style.opacity = '0.6';
+    } else {
+        todayBtn.disabled = false;
+        todayBtn.style.opacity = '1';
+    }
+}
+
+function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+}
+
+// Routing functionality
 function handleAppRouting() {
-  const path = window.location.pathname;
-  
-  // Exemple : /event/123 → Affiche l'événement
-  if (path.startsWith('/event/')) {
-    const eventId = path.split('/')[2];
-    showEventDetails(eventId);
-  }
-  
-  // Ajoutez d'autres routes
+    const path = window.location.pathname;
+    
+    if (path === '/share-target') {
+        const params = new URLSearchParams(window.location.search);
+        const sharedData = params.get('text') || params.get('url');
+        if (sharedData) {
+            window.location.href = `/?shared=${encodeURIComponent(sharedData)}`;
+        }
+        return;
+    }
+
+    if (path === '/health-tips') {
+        showTipsModal('health');
+        return;
+    }
+
+    if (path === '/today-note') {
+        const today = new Date();
+        openNoteModal(today);
+        return;
+    }
+
+    if (path.startsWith('/event/')) {
+        const eventId = path.split('/')[2];
+        showEventDetails(eventId);
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  handleAppRouting();
-  window.addEventListener('hashchange', handleAppRouting);
-});
+function showEventDetails(eventId) {
+    console.log('Event details for:', eventId);
+    // Implement actual event display logic
+}
 
-
-
-// Initialize the page
+// Main initialization
 document.addEventListener('DOMContentLoaded', function() {
-    const loadingOverlay = showLoading();
-    
-    // Load saved language or use default
-    const savedLanguage = localStorage.getItem('userLanguage') || 'en';
-    currentLanguage = savedLanguage;
-    
-    // Update language select to match saved language
+    // Initialize language select
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
-        languageSelect.value = savedLanguage;
-        
+        languageSelect.value = window.currentLanguage;
         languageSelect.addEventListener('change', function() {
-            if (this.value !== currentLanguage) { // Only change if different
-                currentLanguage = this.value;
-                // Force full calendar re-render
-                renderCalendar(changeLanguage(currentLanguage));
+            window.currentLanguage = this.value;
+            localStorage.setItem('selectedLanguage', window.currentLanguage);
+            
+            // Notify service worker
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'SET_LANGUAGE',
+                    language: window.currentLanguage
+                });
             }
+            
+            renderCalendar(translations[window.currentLanguage]);
         });
     }
-    
-  // Settings modal handling
-  const settingsIcon = document.getElementById('settings-icon');
-  const settingsModal = document.getElementById('settings-modal');
-  
-  settingsIcon.addEventListener('click', function() {
-    // Sync settings with current state
-    document.getElementById('language-select').value = currentLanguage;
-    document.getElementById('calendar-system').value = currentCalendarSystem;
-    settingsModal.style.display = 'block';
-  });
 
-  // Close modal
-  document.getElementById('settings-close').addEventListener('click', function() {
-    settingsModal.style.display = 'none';
-  });
+    // Initialize calendar system select
+    const calendarSystemSelect = document.getElementById('calendar-system');
+    if (calendarSystemSelect) {
+        calendarSystemSelect.value = window.currentCalendarSystem;
+        calendarSystemSelect.addEventListener('change', function() {
+            window.currentCalendarSystem = this.value;
+            localStorage.setItem('calendarSystem', window.currentCalendarSystem);
+            renderCalendar(translations[window.currentLanguage]);
+        });
+    }
+
+    // Initialize settings manager with cleanup toggle
+    window.settingsManager = new SettingsManager();
+    window.settingsManager.setupAutoCleanupToggle();
+    window.settingsManager.setupPeriodicCleanup();
+    // Set up routing
+    handleAppRouting();
+    window.addEventListener('hashchange', handleAppRouting);
+
+    // Initialize with loading indicator
+    const loadingOverlay = showLoading();
+    
     setTimeout(() => {
         try {
             // Load notes first
             if (typeof initNotes === 'function') initNotes();
-            // Then render calendar with correct language
-            renderCalendar(changeLanguage(currentLanguage));
+            // Then render calendar
+            renderCalendar(translations[window.currentLanguage]);
         } catch (error) {
             console.error('Initialization error:', error);
         } finally {
@@ -85,123 +131,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 50);
     
-    // Rest of your existing event listeners...
+    // Set up navigation buttons
     document.getElementById('next-month')?.addEventListener('click', nextMonth);
     document.getElementById('prev-month')?.addEventListener('click', prevMonth);
     
+    // Set up icon click handlers
     ['health-icon', 'plate-icon', 'mechanics-icon'].forEach(id => {
         document.getElementById(id)?.addEventListener('click', function() {
             const category = this.id.replace('-icon', '');
             showTipsModal(category);
         });
     });
-});
 
-// Today button handler
-const todayBtn = document.getElementById('today-btn');
-if (todayBtn) {
-    todayBtn.addEventListener('click', function() {
-        const loadingOverlay = showLoading();
-        try {
-            const today = new Date();
-            currentYear = today.getFullYear();
-            currentMonth = today.getMonth();
-            renderCalendar(translations[currentLanguage]);
-            document.querySelector('.today')?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest'
-			});
-			} finally {
-            hideLoading(loadingOverlay);
-		}
-	});
-}
-function updateTodayButton() {
-	const today = new Date();
-	const todayBtn = document.getElementById('today-btn');
-	if (currentYear === today.getFullYear() && currentMonth === today.getMonth()) {
-		todayBtn.disabled = true;
-		todayBtn.style.opacity = '0.6';
-		} else {
-		todayBtn.disabled = false;
-		todayBtn.style.opacity = '1';
-	}
-}
-// Toast notification
-function showToast(message, duration = 3000) {
-  const toast = document.createElement('div');
-  toast.className = 'toast-notification';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), duration);
-}
-// Add to main.js
-function handleAppRouting() {
-  const path = window.location.pathname;
-  
-  // Handle share target
-  if (path === '/share-target') {
-    const params = new URLSearchParams(window.location.search);
-    const sharedData = params.get('text') || params.get('url');
-    if (sharedData) {
-      // Redirect to note creation with shared content
-      window.location.href = `/?shared=${encodeURIComponent(sharedData)}`;
+    // Today button handler
+    const todayBtn = document.getElementById('today-btn');
+    if (todayBtn) {
+        todayBtn.addEventListener('click', function() {
+            const loadingOverlay = showLoading();
+            try {
+                const today = new Date();
+                currentYear = today.getFullYear();
+                currentMonth = today.getMonth();
+                renderCalendar(translations[window.currentLanguage]);
+                document.querySelector('.today')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } finally {
+                hideLoading(loadingOverlay);
+            }
+        });
     }
-    return;
-  }
 
-  // Handle file protocol
-  if (path === '/handle-file') {
-    // Implement file handling logic
-    console.log('File handler triggered');
-    return;
-  }
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
 
-  // Handle note with attachment
-  if (path === '/note-with-attachment') {
-    // Show note with attachment view
-    document.body.innerHTML = '<h1>Note with Attachment</h1>'; // Replace with actual UI
-    return;
-  }
-
-  // Health tips shortcut
-  if (path === '/health-tips') {
-    showTipsModal('health');
-    return;
-  }
-
-  // Today's note shortcut
-  if (path === '/today-note') {
-    const today = new Date();
-    openNoteModal(today);
-    return;
-  }
-
-  // Protocol handler
-  if (path === '/handle-protocol') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const externalUrl = urlParams.get('url');
-    if (externalUrl) {
-      // Validate and handle the URL
-      if (externalUrl.startsWith('web+calmultilang://')) {
-        // Parse and handle your protocol-specific URL
-        console.log('Handling protocol URL:', externalUrl);
-      }
-    }
-    return;
-  }
+function updateOnlineStatus() {
+    showToast(navigator.onLine ? 'Online' : 'Offline');
 }
-// Event details - placeholder
-function showEventDetails(eventId) {
-  console.log('Event details for:', eventId);
-  // Implement actual event display logic
+    // Initialize service worker
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+        registration.active?.postMessage({
+            type: 'SET_LANGUAGE',
+            language: window.currentLanguage
+        });
+    }).catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+    });
 }
-document.getElementById('enable-notifications')?.addEventListener('click', () => {
-  if (window.appManager) {
-    appManager.setupPushNotifications();
-  }
-});
-document.getElementById('calendar-system').addEventListener('change', function() {
-	currentCalendarSystem = this.value;
-	renderCalendar(translations[currentLanguage]);
 });

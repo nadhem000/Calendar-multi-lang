@@ -17,54 +17,61 @@ class AppManager {
 		this.setupPushNotifications();
 	}
 	async performSafeCleanup() {
-		try {
-			// 1. Cache cleanup
-			const cacheNames = await caches.keys();
-			await Promise.all(
-				cacheNames.map(name => {
-					if (name !== CACHE_NAME && 
-						!name.includes('notes') && 
-						!name.includes('prefs') && 
-						name !== 'large-assets-v1') {
-						return caches.delete(name);
-					}
-					return Promise.resolve();
-				})
-			);
-			
-			// 2. IndexedDB cleanup with transaction error handling
-			try {
-				const db = await this.openDB();
-				const tx = db.transaction('attachments', 'readwrite');
-				const store = tx.objectStore('attachments');
-				const index = store.index('timestamp');
-				
-				tx.onerror = (event) => {
-					console.error('Cleanup transaction error:', event.target.error);
-				};
-				
-				let cursor = await index.openCursor(IDBKeyRange.upperBound(
-					Date.now() - 30 * 24 * 60 * 60 * 1000
-				));
-				
-				while (cursor) {
-					try {
-						await cursor.delete();
-						cursor = await cursor.continue();
-						} catch (error) {
-						console.error('Error deleting record:', error);
-						cursor = await cursor.continue(); // Try to continue anyway
-					}
-				}
-				} catch (error) {
-				console.error('IndexedDB cleanup error:', error);
-			}
-			
-			} catch (error) {
-			console.error('Cleanup failed:', error);
-			showToast(translations[currentLanguage].cleanupError);
-		}
-	}
+    try {
+        // 1. Cache cleanup
+        const cacheNames = await caches.keys();
+        await Promise.all(
+            cacheNames.map(name => {
+                if (name !== this.CACHE_NAME && 
+                    !name.includes('notes') && 
+                    !name.includes('prefs') && 
+                    name !== 'large-assets-v1') {
+                    return caches.delete(name);
+                }
+                return Promise.resolve();
+            })
+        );
+        
+        // 2. IndexedDB cleanup with transaction error handling
+        try {
+            const db = await this.openDB();
+            const tx = db.transaction('attachments', 'readwrite');
+            const store = tx.objectStore('attachments');
+            const index = store.index('timestamp');
+            
+            tx.onerror = (event) => {
+                console.error('Cleanup transaction error:', event.target.error);
+            };
+            
+            return new Promise((resolve, reject) => {
+                const request = index.openCursor(IDBKeyRange.upperBound(
+                    Date.now() - 30 * 24 * 60 * 60 * 1000
+                ));
+                
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        cursor.delete().onsuccess = () => {
+                            cursor.continue();
+                        };
+                    } else {
+                        resolve();
+                    }
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Cursor error:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        } catch (error) {
+            console.error('IndexedDB cleanup error:', error);
+        }
+    } catch (error) {
+        console.error('Cleanup failed:', error);
+        showToast(translations[currentLanguage].cleanupError);
+    }
+}
     async withRetry(operation, maxRetries = 3, delay = 100) {
         let lastError;
         for (let i = 0; i < maxRetries; i++) {
@@ -687,16 +694,20 @@ if ('launchQueue' in window) {
 	});
 }
 self.addEventListener('error', (event) => {
-    console.error('SW Error:', event.error);
+    console.error('SW Error:', event.error || event.message || 'Unknown error');
 });
+
 self.addEventListener('unhandledrejection', (event) => {
-    console.error('SW Unhandled Rejection:', event.reason);
+    console.error('SW Unhandled Rejection:', event.reason || 'Unknown rejection');
 });
-document.addEventListener('DOMContentLoaded', () => {
-	// Run cleanup every 15 days when online
-	const lastCleanup = localStorage.getItem('lastCleanup') || 0;
-	if (Date.now() - lastCleanup > 15 * 24 * 60 * 60 * 1000 && navigator.onLine) {
-		new AppManager().performSafeCleanup();
-		localStorage.setItem('lastCleanup', Date.now());
-	}
-});
+/* document.addEventListener('DOMContentLoaded', () => {
+    // Run cleanup every 15 days when online
+    const lastCleanup = localStorage.getItem('lastCleanup') || 0;
+    const cleanupInterval = 15 * 24 * 60 * 60 * 1000; // 15 days
+    
+    if (Date.now() - lastCleanup > cleanupInterval && navigator.onLine) {
+        new AppManager().performSafeCleanup().then(() => {
+            localStorage.setItem('lastCleanup', Date.now());
+        }).catch(console.error);
+    }
+}); */

@@ -96,15 +96,7 @@ const translations = {
 		},
 		descriptionLabel: "Description", // For the "📝" label
 		frequencyLabel: "Frequency",     // For the "⏰" label
-    settingsSaved: "Settings saved successfully",
-    settingsTitle: "Settings",
-    languageLabel: "Language",
-    notificationsLabel: "Notifications",
-    pushLabel: "Push Notifications",
-    updatesLabel: "Updates",
-    calendarSystemLabel: "Calendar System",
-    syncLabel: "Sync Mode",
-    personalInfoLabel: "Personal Information"
+		time: "Time"
 	},
     ar: {
         title: "التقويم",
@@ -202,15 +194,7 @@ const translations = {
 		},
 		descriptionLabel: "الوصف",
 		frequencyLabel: "التكرار",
-    settingsSaved: "تم حفظ الإعدادات بنجاح",
-    settingsTitle: "الإعدادات",
-    languageLabel: "اللغة",
-    notificationsLabel: "الإشعارات",
-    pushLabel: "إشعارات الدفع",
-    updatesLabel: "التحديثات",
-    calendarSystemLabel: "نظام التقويم",
-    syncLabel: "وضع المزامنة",
-    personalInfoLabel: "المعلومات الشخصية"
+		time: "وقت"
 	},
     fr: {
         title: "Calendrier",
@@ -308,37 +292,24 @@ const translations = {
 		},
 		descriptionLabel: "Descrption",
 		frequencyLabel: "Fréquence",
-    settingsSaved: "Paramètres enregistrés avec succès",
-    settingsTitle: "Paramètres",
-    languageLabel: "Langue",
-    notificationsLabel: "Notifications",
-    pushLabel: "Notifications push",
-    updatesLabel: "Mises à jour",
-    calendarSystemLabel: "Système de calendrier",
-    syncLabel: "Mode de synchronisation",
-    personalInfoLabel: "Informations personnelles"
+		time: "Heure"
 	}
 };
 
 // Function to change language
 function changeLanguage(lang) {
-    // Save to localStorage
-    localStorage.setItem('userLanguage', lang);
-    
-    const prevSystem = currentCalendarSystem;
-    currentLanguage = lang;
-    const langData = translations[lang];
-    
-    // Update calendar system options
-    const systemSelect = document.getElementById('calendar-system');
-    if (systemSelect) {
-        systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-        .map(([value, name]) => 
-            `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-        ).join('');
-        currentCalendarSystem = prevSystem;
-    }
-    
+	const prevSystem = currentCalendarSystem;
+	currentLanguage = lang;
+	const langData = translations[lang];
+	// Update calendar system options
+	const systemSelect = document.getElementById('calendar-system');
+	if (systemSelect) {
+		systemSelect.innerHTML = Object.entries(langData.calendarSystems)
+		.map(([value, name]) => 
+			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+		).join('');
+		currentCalendarSystem = prevSystem; // Restore previous system
+	}
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
     document.getElementById('plate-icon').setAttribute('title', langData.icons.plate);

@@ -27,7 +27,13 @@ const noteTypes = [
     {icon: '🏥', type: 'medical', label: 'Medical'},
     {icon: '📅', type: 'event', label: 'Event'}
 ];
-
+function getStableDateKey(date) {
+  // Local date components (ignores timezone)
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 function openNoteModal(date, dayElement) {
     // Remove any existing modals first
     document.querySelectorAll('.note-modal').forEach(modal => modal.remove());
@@ -37,76 +43,86 @@ function openNoteModal(date, dayElement) {
     const existingNotes = window.notes[dateKey] || [];
     
     modal.innerHTML = `
-    <div class="note-modal-content">
-	<div class="note-header">
-	<h3>${formatNoteDate(date)}</h3>
-	<span class="close-modal" title="${translations[currentLanguage].close}">&times;</span>
-	</div>
-	
-	<fieldset class="note-controls">
-	<legend>${translations[currentLanguage].noteSettings || 'Note Settings'}</legend>
-	
-	<div class="color-picker">
-	${noteColors.map((color, index) => `
-	<label class="color-option" 
-	style="background-color: ${color.color}" 
-	title="${color.class.replace('note-color-', '')}">
-	<input type="radio" 
-	name="note-color" 
-	value="${color.class}" 
-	${index === 0 ? 'checked' : ''}>
-	</label>
-	`).join('')}
-	</div>
-	
-	<div class="note-type-selector">
-	${noteTypes.map((type, index) => `
-	<input type="radio" name="note-type" id="type-${dateKey}-${index}" 
-	class="note-type" value="${type.type}" ${index === 0 ? 'checked' : ''}>
-	<label for="type-${dateKey}-${index}" title="${type.label}">${type.icon}</label>
-	`).join('')}
-	</div>
-	</fieldset>
-	
-	<label for="note-input" class="sr-only">${translations[currentLanguage].noteLabel || 'Note Content'}</label>
-	<textarea id="note-input" name="note" class="note-text" 
-	placeholder="${translations[currentLanguage].notePlaceholder}"></textarea>
-	
-	<div class="existing-notes">
-	<h4>${translations[currentLanguage].existingNotes || 'Existing Notes'}:</h4>
-	<div class="notes-list">
-	${(window.notes[dateKey] || []).map((note, index) => `
-	<div class="note-item" style="background-color: ${
-	noteColors.find(c => c.class === note.color)?.color || '#cccccc'
-}">
-<div class="note-icon">${
-	noteTypes.find(t => t.type === note.type)?.icon || '📝'
-}</div>
-<div class="note-content">
-${sanitizeHTML(note.text)}
-<div class="note-language">${note.language.toUpperCase()}</div>
-</div>
-<button class="edit-note" data-index="${index}" title="${translations[currentLanguage].edit || 'Edit'}">✎</button>
-<button class="delete-note" data-index="${index}" title="${translations[currentLanguage].delete}">✕</button>
-</div>
-`).join('')}
-</div>
-</div>
+<div class="note-modal-content">
+    <div class="note-header">
+        <h3>${formatNoteDate(date)}</h3>
+        <span class="close-modal" title="${translations[currentLanguage].close}">&times;</span>
+    </div>
+    
+    <fieldset class="note-controls">
+        <legend>${translations[currentLanguage].noteSettings || 'Note Settings'}</legend>
+        
+        <div class="color-picker">
+            ${noteColors.map((color, index) => `
+            <label class="color-option" 
+                style="background-color: ${color.color}" 
+                title="${color.class.replace('note-color-', '')}">
+                <input type="radio" 
+                    name="note-color" 
+                    value="${color.class}" 
+                    ${index === 0 ? 'checked' : ''}>
+            </label>
+            `).join('')}
+        </div>
+        
+        <div class="note-type-selector">
+            ${noteTypes.map((type, index) => `
+            <input type="radio" name="note-type" id="type-${dateKey}-${index}" 
+                class="note-type" value="${type.type}" ${index === 0 ? 'checked' : ''}>
+            <label for="type-${dateKey}-${index}" title="${type.label}">${type.icon}</label>
+            `).join('')}
+        </div>
 
-<div class="note-buttons">
-<button type="submit" class="save-note">${translations[currentLanguage].save}</button>
-<button type="button" class="close-note">${translations[currentLanguage].close}</button>
-</div>
-<div class="attachments">
-${(window.notes[dateKey] || []).map((note, index) => `
-${(note.attachments || []).map(attach => `
-	${attach.type === 'image' ? 
-    `<img src="${sanitizeHTML(attach.url)}" class="attachment-preview" onerror="this.style.display='none'">` : 
-    `<div class="text-attachment">📄 ${sanitizeHTML(attach.content.substring(0, 20))}...</div>`
-	}
-`).join('')}
-`).join('')}
-</div>
+        <!-- Add time input field -->
+        <div class="time-input">
+            <label for="note-time-${dateKey}">${translations[currentLanguage].time || 'Time'}:</label>
+            <input type="time" id="note-time-${dateKey}" name="note-time" 
+                value="${existingNotes[0]?.time || ''}">
+        </div>
+    </fieldset>
+
+    <label for="note-input" class="sr-only">${translations[currentLanguage].noteLabel || 'Note Content'}</label>
+    <textarea id="note-input" name="note" class="note-text" 
+        placeholder="${translations[currentLanguage].notePlaceholder}"></textarea>
+    
+    <div class="existing-notes">
+        <h4>${translations[currentLanguage].existingNotes || 'Existing Notes'}:</h4>
+        <div class="notes-list">
+    ${(window.notes[dateKey] || [])
+        .sort((a, b) => (a.time || '23:59') > (b.time || '23:59') ? 1 : -1)
+        .map((note, index) => `
+        <div class="note-item" style="background-color: ${
+            noteColors.find(c => c.class === note.color)?.color || '#cccccc'
+        }">
+                <div class="note-icon">${
+                    noteTypes.find(t => t.type === note.type)?.icon || '📝'
+                }</div>
+                <div class="note-content">
+                    ${note.time ? `<div class="note-time">${note.time}</div>` : ''}
+                    ${sanitizeHTML(note.text)}
+                    <div class="note-language">${note.language.toUpperCase()}</div>
+                </div>
+                <button class="edit-note" data-index="${index}" title="${translations[currentLanguage].edit || 'Edit'}">✎</button>
+                <button class="delete-note" data-index="${index}" title="${translations[currentLanguage].delete}">✕</button>
+            </div>
+            `).join('')}
+        </div>
+    </div>
+
+    <div class="note-buttons">
+        <button type="submit" class="save-note">${translations[currentLanguage].save}</button>
+        <button type="button" class="close-note">${translations[currentLanguage].close}</button>
+    </div>
+    <div class="attachments">
+        ${(window.notes[dateKey] || []).map((note, index) => `
+            ${(note.attachments || []).map(attach => `
+                ${attach.type === 'image' ? 
+                    `<img src="${sanitizeHTML(attach.url)}" class="attachment-preview" onerror="this.style.display='none'">` : 
+                    `<div class="text-attachment">📄 ${sanitizeHTML(attach.content.substring(0, 20))}...</div>`
+                }
+            `).join('')}
+        `).join('')}
+    </div>
 </div>
 `;
 
@@ -175,69 +191,68 @@ modal.querySelectorAll('.edit-note').forEach(btn => {
         const note = window.notes[dateKey][index];
         
         // Update form values
-        // Color selection
         modal.querySelectorAll('.color-option').forEach(option => {
             const radio = option.querySelector('input');
             if (radio.value === note.color) {
                 radio.checked = true;
                 option.classList.add('selected');
-				} else {
+            } else {
                 option.classList.remove('selected');
-			}
-		});
+            }
+        });
         
-        // Type selection
         modal.querySelectorAll('.note-type').forEach(radio => {
             if (radio.value === note.type) {
                 radio.checked = true;
                 radio.classList.add('selected');
-				} else {
+            } else {
                 radio.classList.remove('selected');
-			}
-		});
+            }
+        });
         
-        // Text content
         modal.querySelector('#note-input').value = note.text;
+        modal.querySelector('input[name="note-time"]').value = note.time || ''; // Set time value
         
-        // Store edit index
         modal.dataset.editIndex = index;
-	});
+    });
 });
 // Save handler
 modal.querySelector('.save-note').addEventListener('click', () => {
     const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
     const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
     const noteText = modal.querySelector('#note-input').value.trim();
-    const dateKey = date.toISOString().split('T')[0];
+    const noteTime = modal.querySelector('input[name="note-time"]').value; // Get time value
+    const dateKey = normalizeDateKey(date);
     
     if (!noteText) {
         alert(translations[currentLanguage].validationError);
         return;
-	}
+    }
     
-    const editingIndex = modal.dataset.editIndex; // Get edit state
+    const editingIndex = modal.dataset.editIndex;
     
     if (!window.notes[dateKey]) window.notes[dateKey] = [];
     
-    // Update or create note
     if (editingIndex !== undefined) {
         const index = parseInt(editingIndex);
-        window.notes[dateKey][index] = { // Replace existing note
+        window.notes[dateKey][index] = {
             date: dateKey,
             color: selectedColor,
             type: selectedType,
             text: noteText,
+            time: noteTime, // Save time
             language: currentLanguage
-		};
-		} else {
-        window.notes[dateKey].push({ // Add new note
+        };
+    } else {
+        window.notes[dateKey].push({
             date: dateKey,
             color: selectedColor,
             type: selectedType,
             text: noteText,
+            time: noteTime, // Save time
             language: currentLanguage
-		});
-	}
+        });
+    }
     
     saveNotes();
     renderCalendar(translations[currentLanguage]);
@@ -265,6 +280,16 @@ function formatNoteDate(date) {
     return new Intl.DateTimeFormat(currentLanguage, options).format(date);
 }
 
+function validateNote(note) {
+    return {
+        date: normalizeDateKey(note.date),
+        color: noteColors.some(c => c.class === note.color) ? note.color : 'note-color-gray',
+        type: noteTypes.some(t => t.type === note.type) ? note.type : 'note',
+        text: sanitizeHTML(note.text),
+        time: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(note.time) ? note.time : '',
+        language: ['en', 'fr', 'ar'].includes(note.language) ? note.language : 'en'
+    };
+}
 function renderNoteIndicator(dayElement, colorClass) {
     // Clear existing indicators
     dayElement.querySelectorAll('.note-indicator').forEach(el => el.remove());
@@ -319,7 +344,6 @@ function loadNotes() {
 }
 
 function saveNotes() {
-	// Add date validation before saving
 	// Migrate old note keys if needed
 	const migratedNotes = {};
 	let needsMigration = false;
@@ -352,7 +376,7 @@ function saveNotes() {
 }
 
 async function saveNote(date, modal, dayElement) {
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = normalizeDateKey(date); // Uses local date
     const existingNotes = window.notes[dateKey]?.filter(note => 
         note.language === currentLanguage
 	) || [];
@@ -395,36 +419,37 @@ async function saveNote(date, modal, dayElement) {
     renderCalendar(translations[currentLanguage]);
 }
 
+
 function normalizeDateKey(dateInput) {
-	// Handle both Date objects and existing string keys
-	if (dateInput instanceof Date) {
-		return getStableDateKey(dateInput);
-	}
-	
-	// Handle existing note keys (could be ISO string or local date string)
-	if (typeof dateInput === 'string') {
-		// Check if already in YYYY-MM-DD format
-		if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-			return dateInput;
-		}
-		
-		// Try to parse as ISO string
-		const isoMatch = dateInput.match(/^(\d{4}-\d{2}-\d{2})T/);
-		if (isoMatch) {
-			return isoMatch[1];
-		}
-		
-		// Final fallback - try to parse as is
-		try {
-			return getStableDateKey(new Date(dateInput));
-			} catch (e) {
-			console.warn('Could not normalize date key:', dateInput);
-			return getStableDateKey(new Date()); // Fallback to today
-		}
-	}
-	
-	// Ultimate fallback
-	return getStableDateKey(new Date());
+    // Handle Date objects
+    if (dateInput instanceof Date) {
+        return getStableDateKey(dateInput);
+    }
+    
+    // Handle existing note keys
+    if (typeof dateInput === 'string') {
+        // Already in YYYY-MM-DD format
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+            return dateInput;
+        }
+        
+        // ISO string (YYYY-MM-DDTHH:MM:SSZ)
+        const isoMatch = dateInput.match(/^(\d{4}-\d{2}-\d{2})T/);
+        if (isoMatch) return isoMatch[1];
+        
+        // Try to parse as local date string
+        try {
+            const parsedDate = new Date(dateInput);
+            if (!isNaN(parsedDate)) {
+                return getStableDateKey(parsedDate);
+            }
+        } catch (e) {
+            console.warn('Date parsing failed:', dateInput);
+        }
+    }
+    
+    // Fallback to today's date
+    return getStableDateKey(new Date());
 }
 // Initialize note functionality
 window.initNotes = function() {

@@ -3,6 +3,12 @@ let currentDate = new Date();
 let currentYear = currentDate.getFullYear();
 let currentMonth = currentDate.getMonth();
 const today = new Date();
+function getStableDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 function renderCalendar(langData) {
 	const months = currentCalendarSystem === 'hijri' 
     ? langData.monthsHijri 
@@ -82,6 +88,8 @@ function renderCalendar(langData) {
     const remainingCells = 7 - (totalCells % 7);
     if (remainingCells < 7) {
         for (let i = 1; i <= remainingCells; i++) {
+const dateObj = new Date(currentYear, currentMonth, i);
+const dateKey = normalizeDateKey(dateObj);
             const dayElement = document.createElement('div');
             dayElement.classList.add('empty', 'shadow-day');
             dayElement.textContent = i;
@@ -117,4 +125,5 @@ const calendarSystems = {
         getDaysInMonth: (year, month) => new Date(year, month + 1, 0).getDate()
 	}
 };
-let currentCalendarSystem = 'gregorian';
+
+/* let currentCalendarSystem = localStorage.getItem('calendarSystem') || 'gregorian'; */
