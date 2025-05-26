@@ -53,6 +53,7 @@ self.addEventListener('message', (event) => {
     console.log('Service Worker language updated to:', currentLanguage);
 });
 self.addEventListener('install', (event) => {
+    console.log('SW installing for:', self.location.href);
    if (isLocalEnvironment) {
         console.log('Local environment detected, skipping cache');
         return;
@@ -145,7 +146,6 @@ self.addEventListener('fetch', (event) => {
   }
     if (isLocalEnvironment) return;
     
-    const url = new URL(event.request.url);
 	
     // Handle widget data with network-first strategy
     if (url.pathname === '/api/widget-data') {
@@ -284,6 +284,24 @@ self.addEventListener('fetch', (event) => {
 		})()
 	);
 });
+async function safeFetch(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response;
+        })
+        .catch(error => {
+            console.error('Fetch failed:', error);
+            // Can't use showToast in SW - use postMessage instead
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => client.postMessage({
+                    type: 'NETWORK_ERROR',
+                    message: 'Working offline'
+                }));
+            });
+            throw error;
+        });
+}
 
 async function handleApiFetch(request) {
     const cache = await caches.open(`${CACHE_NAME}-${currentLanguage}`);

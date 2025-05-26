@@ -1,81 +1,104 @@
 // Initialize the page
 window.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
 window.currentCalendarSystem = localStorage.getItem('calendarSystem') || 'gregorian';
-
 // Utility functions
-function showLoading() {
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = '<div class="loading-spinner"></div>';
-    document.body.appendChild(overlay);
-    return overlay;
-}
-
-function hideLoading(overlay) {
-    if (overlay && overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
-    }
-}
-
 function updateTodayButton() {
     const today = new Date();
     const todayBtn = document.getElementById('today-btn');
     if (!todayBtn) return;
-    
     if (currentYear === today.getFullYear() && currentMonth === today.getMonth()) {
         todayBtn.disabled = true;
         todayBtn.style.opacity = '0.6';
-    } else {
+		} else {
         todayBtn.disabled = false;
         todayBtn.style.opacity = '1';
-    }
+	}
 }
-
-function showToast(message, duration = 3000) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), duration);
-}
-
 // Routing functionality
 function handleAppRouting() {
     const path = window.location.pathname;
-    
     if (path === '/share-target') {
         const params = new URLSearchParams(window.location.search);
         const sharedData = params.get('text') || params.get('url');
         if (sharedData) {
             window.location.href = `/?shared=${encodeURIComponent(sharedData)}`;
-        }
+		}
         return;
-    }
-
+	}
     if (path === '/health-tips') {
         showTipsModal('health');
         return;
-    }
-
+	}
     if (path === '/today-note') {
         const today = new Date();
         openNoteModal(today);
         return;
-    }
-
+	}
     if (path.startsWith('/event/')) {
         const eventId = path.split('/')[2];
         showEventDetails(eventId);
-    }
+	}
 }
-
 function showEventDetails(eventId) {
-    console.log('Event details for:', eventId);
-    // Implement actual event display logic
+    // Create or show modal
+    const modal = document.getElementById('event-details-modal') || 
+	createEventDetailsModal();
+    
+    // Fetch or find event data (placeholder implementation)
+    const event = findEventById(eventId) || {
+        title: 'Event ' + eventId,
+        date: new Date().toLocaleDateString(),
+        description: 'Event details not available'
+	};
+	
+    // Populate modal
+    modal.querySelector('.event-title').textContent = event.title;
+    modal.querySelector('.event-date').textContent = event.date;
+    modal.querySelector('.event-description').textContent = event.description;
+    
+    // Show modal
+    modal.style.display = 'block';
 }
 
-// Main initialization
+function createEventDetailsModal() {
+    const modal = document.createElement('div');
+    modal.id = 'event-details-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+	<div class="modal-content">
+	<span class="close-modal">&times;</span>
+	<h2 class="event-title"></h2>
+	<p class="event-date"></p>
+	<p class="event-description"></p>
+	</div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Add close handler
+    modal.querySelector('.close-modal').addEventListener('click', () => {
+        modal.style.display = 'none';
+	});
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+    
+    return modal;
+}
+// Main initialization - wrap everything in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
+console.log('Environment:', window.location.hostname);
+console.log('Scripts loaded:', {
+    languages: typeof translations,
+    calendar: typeof renderCalendar,
+    notes: typeof initNotes
+});
+console.log('DOM elements ready:', {
+    nextMonthBtn: !!document.getElementById('next-month'),
+    prevMonthBtn: !!document.getElementById('prev-month'),
+    todayBtn: !!document.getElementById('today-btn')
+});
     // Initialize language select
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
@@ -83,19 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
         languageSelect.addEventListener('change', function() {
             window.currentLanguage = this.value;
             localStorage.setItem('selectedLanguage', window.currentLanguage);
-            
-            // Notify service worker
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                    type: 'SET_LANGUAGE',
-                    language: window.currentLanguage
-                });
-            }
-            
             renderCalendar(translations[window.currentLanguage]);
-        });
-    }
-
+		});
+	}
+	
     // Initialize calendar system select
     const calendarSystemSelect = document.getElementById('calendar-system');
     if (calendarSystemSelect) {
@@ -104,45 +118,27 @@ document.addEventListener('DOMContentLoaded', function() {
             window.currentCalendarSystem = this.value;
             localStorage.setItem('calendarSystem', window.currentCalendarSystem);
             renderCalendar(translations[window.currentLanguage]);
-        });
-    }
-
-    // Initialize settings manager with cleanup toggle
-    window.settingsManager = new SettingsManager();
-    window.settingsManager.setupAutoCleanupToggle();
-    window.settingsManager.setupPeriodicCleanup();
-    // Set up routing
-    handleAppRouting();
-    window.addEventListener('hashchange', handleAppRouting);
-
-    // Initialize with loading indicator
-    const loadingOverlay = showLoading();
+		});
+	}
+	
+    // Set up navigation buttons - only if they exist
+    const nextMonthBtn = document.getElementById('next-month');
+    const prevMonthBtn = document.getElementById('prev-month');
     
-    setTimeout(() => {
-        try {
-            // Load notes first
-            if (typeof initNotes === 'function') initNotes();
-            // Then render calendar
-            renderCalendar(translations[window.currentLanguage]);
-        } catch (error) {
-            console.error('Initialization error:', error);
-        } finally {
-            hideLoading(loadingOverlay);
-        }
-    }, 50);
-    
-    // Set up navigation buttons
-    document.getElementById('next-month')?.addEventListener('click', nextMonth);
-    document.getElementById('prev-month')?.addEventListener('click', prevMonth);
-    
-    // Set up icon click handlers
+    if (nextMonthBtn) nextMonthBtn.addEventListener('click', nextMonth);
+    if (prevMonthBtn) prevMonthBtn.addEventListener('click', prevMonth);
+	
+    // Set up icon click handlers - only if they exist
     ['health-icon', 'plate-icon', 'mechanics-icon'].forEach(id => {
-        document.getElementById(id)?.addEventListener('click', function() {
-            const category = this.id.replace('-icon', '');
-            showTipsModal(category);
-        });
-    });
-
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('click', function() {
+                const category = this.id.replace('-icon', '');
+                showTipsModal(category);
+			});
+		}
+	});
+	
     // Today button handler
     const todayBtn = document.getElementById('today-btn');
     if (todayBtn) {
@@ -156,28 +152,80 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelector('.today')?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'nearest'
-                });
-            } finally {
+				});
+				} finally {
                 hideLoading(loadingOverlay);
-            }
-        });
-    }
-
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-function updateOnlineStatus() {
-    showToast(navigator.onLine ? 'Online' : 'Offline');
-}
+			}
+		});
+	}
+	
     // Initialize service worker
-if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-        registration.active?.postMessage({
-            type: 'SET_LANGUAGE',
-            language: window.currentLanguage
-        });
-    }).catch(err => {
-        console.log('ServiceWorker registration failed: ', err);
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+            registration.active?.postMessage({
+                type: 'SET_LANGUAGE',
+                language: window.currentLanguage
+			});
+			}).catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+		});
+	}
+	if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'NETWORK_ERROR') {
+            showToast(event.data.message);
+        }
     });
 }
+    // Initialize with loading indicator
+    const loadingOverlay = showLoading();
+    
+    // In the setTimeout callback:
+	setTimeout(() => {
+		try {
+			if (typeof initNotes === 'function') initNotes();
+			if (typeof renderCalendar === 'function') {
+				renderCalendar(translations[window.currentLanguage]);
+			}
+			} catch (error) {
+			console.error('Initialization error:', error);
+			showToast('Failed to initialize calendar');
+			} finally {
+			hideLoading(loadingOverlay);
+		}
+	}, 50);
 });
+
+// Move these outside the DOMContentLoaded since they're utility functions
+function showLoading() {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function hideLoading(overlay) {
+    if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+	}
+}
+
+function showToast(message, duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+}
+// Wrap critical functions
+function safeRenderCalendar() {
+    try {
+        if (typeof renderCalendar === 'function') {
+            renderCalendar(translations[window.currentLanguage]);
+		}
+		} catch (e) {
+        console.error('Calendar render failed:', e);
+        showToast('Calendar error - please refresh');
+	}
+}
