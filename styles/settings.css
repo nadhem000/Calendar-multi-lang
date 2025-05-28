@@ -1,0 +1,216 @@
+/* styles for settings modal and components */
+
+/* Settings Modal Structure */
+.settings-modal-container {
+    background: #ffffff;
+    margin: 2% auto;
+    padding: 25px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.settings-tabs-container {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.settings-tab-btn {
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.settings-tab-btn.active {
+    border-bottom-color: #4CAF50;
+    font-weight: 600;
+}
+
+.settings-tab-content {
+    display: none;
+    padding: 15px 0;
+}
+
+.settings-tab-content.active {
+    display: block;
+}
+
+/* Periodic Activities Section */
+.settings-periodic-option {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #4CAF50;
+}
+
+.settings-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.settings-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.settings-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.settings-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.settings-toggle-switch input:checked + .settings-toggle-slider {
+    background-color: #4CAF50;
+}
+
+.settings-toggle-switch input:checked + .settings-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.settings-toggle-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+    position: relative;
+}
+
+.settings-toggle-tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 100;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.settings-toggle-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.settings-toggle-container:hover .settings-toggle-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Memory Management Section */
+.settings-memory-section {
+    margin: 20px 0;
+}
+
+.settings-memory-btn {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-memory-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Detailed Views */
+.settings-detail-view {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .settings-modal-container {
+        padding: 15px;
+        margin: 5% auto;
+    }
+    
+    .settings-tabs-container {
+        flex-wrap: wrap;
+    }
+    
+    .settings-tab-btn {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-modal-container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    .settings-toggle-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .settings-toggle-tooltip {
+        left: 0;
+        transform: none;
+    }
+}
+#memory-monitor-view.hidden,
+#clear-partial-view.hidden {
+    display: none !important;
+}

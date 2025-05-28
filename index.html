@@ -15,6 +15,7 @@
 		frame-src 'none';">
 		<title>Calendar</title>
 		<link rel="stylesheet" href="styles/main.css">
+		<link rel="stylesheet" href="styles/settings.css">
 		<!-- Font Awesome CDN removed -->
 	</head>
 	<body>
@@ -87,10 +88,12 @@
 			<div class="modal-content">
 				<span class="close-modal">&times;</span>
 				<h2 id="settings-title">Settings</h2>
-				<div class="settings-tabs">
-					<button class="tab-btn active" data-tab="memory">Memory</button>
-				</div>
-				<div id="memory-tab" class="tab-content active">
+				
+<div class="settings-tabs">
+    <button class="settings-tab-btn active" data-tab="memory">Memory</button>
+    <button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
+</div>
+				<div id="memory-tab" class="settings-tab-content active">
 					<h3>Memory Management</h3>
 					<button id="memory-monitor-btn">Memory Monitor</button>
 					<button id="clear-partial-btn">Clear Partial Data</button>
@@ -104,6 +107,10 @@
 						<!-- Will be populated by JavaScript -->
 					</div>
 				</div>
+<div id="periodic-tab" class="settings-tab-content">
+    <h3>Periodic Activities</h3>
+    <!-- The auto-clean toggle will be moved here by JavaScript -->
+</div>
 			</div>
 		</div>
 		<script src="scripts/languages.js"></script>

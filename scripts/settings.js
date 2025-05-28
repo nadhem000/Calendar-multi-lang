@@ -1,11 +1,11 @@
 // settings.js
 class SettingsManager {
     constructor() {
-    this.modal = document.getElementById('settings-modal');
-    this.initSettingsButton();
-    this.initModal();
-    this.setupAutoCleanupToggle();
-    this.setupPeriodicCleanup();
+		this.modal = document.getElementById('settings-modal');
+		this.initSettingsButton();
+		this.initModal();
+		this.setupAutoCleanupToggle();
+		this.setupPeriodicCleanup();
 	}
 	
     
@@ -17,30 +17,42 @@ class SettingsManager {
 	}
 	
     initModal() {
-        // Close modal when clicking X
-        this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
-        
-        // Close when clicking outside modal
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) this.closeSettings();
+		// Close modal when clicking X
+		this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
+		
+		// Close when clicking outside modal
+		this.modal.addEventListener('click', (e) => {
+			if (e.target === this.modal) this.closeSettings();
 		});
 		
-        // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                btn.classList.add('active');
-                const tabId = btn.dataset.tab + '-tab';
-                document.getElementById(tabId).classList.add('active');
+		// Tab switching - fixed version
+		document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+			btn.addEventListener('click', () => {
+        // Hide all sub-views when switching tabs
+        document.querySelectorAll('[id$="-view"]').forEach(view => {
+            view.classList.add('hidden');
+        });
+				// Remove active class from all buttons
+				document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+				// Remove active class from all content
+				document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
+				
+				// Add active class to clicked button
+				btn.classList.add('active');
+				// Show corresponding content
+				const tabId = btn.dataset.tab + '-tab';
+				document.getElementById(tabId).classList.add('active');
+				
+				// Hide any open sub-views when switching tabs
+				document.getElementById('memory-monitor-view').classList.add('hidden');
+				document.getElementById('clear-partial-view').classList.add('hidden');
 			});
 		});
 		
-        // Memory management buttons
-        document.getElementById('memory-monitor-btn').addEventListener('click', () => this.showMemoryMonitor());
-        document.getElementById('clear-partial-btn').addEventListener('click', () => this.showPartialClear());
-        document.getElementById('clear-all-btn').addEventListener('click', () => this.promptClearAll());
+		// Memory management buttons
+		document.getElementById('memory-monitor-btn').addEventListener('click', () => this.showMemoryMonitor());
+		document.getElementById('clear-partial-btn').addEventListener('click', () => this.showPartialClear());
+		document.getElementById('clear-all-btn').addEventListener('click', () => this.promptClearAll());
 	}
 	
     openSettings() {
@@ -62,6 +74,11 @@ class SettingsManager {
         document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
         document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
         document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
+    document.querySelector('[data-tab="periodic"]').textContent = lang.periodicActivities || 'Periodic Activities';
+    this.modal.querySelector('.close-modal').textContent = lang.close || '×';
+    document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
+    document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
+    document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
 	}
 	
     async countObjectStore(db, storeName) {
@@ -170,97 +187,97 @@ class SettingsManager {
 		}
 	}
 	async showDetailedMemoryView() {
-    const view = document.getElementById('memory-monitor-view');
-    view.innerHTML = '<div class="loading-spinner"></div>';
-    
-    try {
-        // Get detailed storage information
-        const estimate = await navigator.storage.estimate();
-        const notesCount = Object.keys(window.notes || {}).reduce((acc, date) => 
-            acc + (window.notes[date]?.length || 0), 0);
-        
-        const db = await window.appManager.openDB();
-        const attachmentsCount = await this.countObjectStore(db, 'attachments');
-        const syncQueueCount = await this.countObjectStore(db, 'SYNC_QUEUE');
-        const dbSize = await this.estimateDBSize(db);
-
-        // Format sizes
-        const formatBytes = (bytes) => {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        };
-
-        view.innerHTML = `
+		const view = document.getElementById('memory-monitor-view');
+		view.innerHTML = '<div class="loading-spinner"></div>';
+		
+		try {
+			// Get detailed storage information
+			const estimate = await navigator.storage.estimate();
+			const notesCount = Object.keys(window.notes || {}).reduce((acc, date) => 
+			acc + (window.notes[date]?.length || 0), 0);
+			
+			const db = await window.appManager.openDB();
+			const attachmentsCount = await this.countObjectStore(db, 'attachments');
+			const syncQueueCount = await this.countObjectStore(db, 'SYNC_QUEUE');
+			const dbSize = await this.estimateDBSize(db);
+			
+			// Format sizes
+			const formatBytes = (bytes) => {
+				if (bytes === 0) return '0 Bytes';
+				const k = 1024;
+				const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+				const i = Math.floor(Math.log(bytes) / Math.log(k));
+				return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+			};
+			
+			view.innerHTML = `
             <div class="detailed-memory-view">
-                <div class="detail-card">
-                    <div class="detail-icon">📝</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${notesCount}</div>
-                        <div class="detail-label">Notes</div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <div class="detail-icon">📎</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${attachmentsCount}</div>
-                        <div class="detail-label">Attachments</div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <div class="detail-icon">🔄</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${syncQueueCount}</div>
-                        <div class="detail-label">Pending Syncs</div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <div class="detail-icon">💾</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${formatBytes(dbSize)}</div>
-                        <div class="detail-label">IndexedDB Size</div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <div class="detail-icon">📊</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${formatBytes(estimate.usage)}</div>
-                        <div class="detail-label">Storage Used</div>
-                    </div>
-                </div>
-                
-                <div class="detail-card">
-                    <div class="detail-icon">🏷️</div>
-                    <div class="detail-content">
-                        <div class="detail-value">${formatBytes(estimate.quota)}</div>
-                        <div class="detail-label">Total Storage</div>
-                    </div>
-                </div>
-                
-                <button class="btn-back" data-tooltip="Return to summary view">
-                    ← Back
-                </button>
+			<div class="detail-card">
+			<div class="detail-icon">📝</div>
+			<div class="detail-content">
+			<div class="detail-value">${notesCount}</div>
+			<div class="detail-label">Notes</div>
+			</div>
+			</div>
+			
+			<div class="detail-card">
+			<div class="detail-icon">📎</div>
+			<div class="detail-content">
+			<div class="detail-value">${attachmentsCount}</div>
+			<div class="detail-label">Attachments</div>
+			</div>
+			</div>
+			
+			<div class="detail-card">
+			<div class="detail-icon">🔄</div>
+			<div class="detail-content">
+			<div class="detail-value">${syncQueueCount}</div>
+			<div class="detail-label">Pending Syncs</div>
+			</div>
+			</div>
+			
+			<div class="detail-card">
+			<div class="detail-icon">💾</div>
+			<div class="detail-content">
+			<div class="detail-value">${formatBytes(dbSize)}</div>
+			<div class="detail-label">IndexedDB Size</div>
+			</div>
+			</div>
+			
+			<div class="detail-card">
+			<div class="detail-icon">📊</div>
+			<div class="detail-content">
+			<div class="detail-value">${formatBytes(estimate.usage)}</div>
+			<div class="detail-label">Storage Used</div>
+			</div>
+			</div>
+			
+			<div class="detail-card">
+			<div class="detail-icon">🏷️</div>
+			<div class="detail-content">
+			<div class="detail-value">${formatBytes(estimate.quota)}</div>
+			<div class="detail-label">Total Storage</div>
+			</div>
+			</div>
+			
+			<button class="btn-back" data-tooltip="Return to summary view">
+			← Back
+			</button>
             </div>
-        `;
-
-        view.querySelector('.btn-back').addEventListener('click', () => {
-            this.showMemoryMonitor();
-        });
-    } catch (error) {
-        view.innerHTML = `
+			`;
+			
+			view.querySelector('.btn-back').addEventListener('click', () => {
+				this.showMemoryMonitor();
+			});
+			} catch (error) {
+			view.innerHTML = `
             <div class="error-message">
-                <div class="error-icon">❌</div>
-                <div class="error-text">Failed to load detailed memory data</div>
+			<div class="error-icon">❌</div>
+			<div class="error-text">Failed to load detailed memory data</div>
             </div>
-        `;
-    }
-}
+			`;
+		}
+	}
 	
     async showPartialClear() {
         const view = document.getElementById('clear-partial-view');
@@ -329,142 +346,142 @@ class SettingsManager {
 	}
 	
     renderPartialClearView(view, notesByMonth, attachments) {
-    view.innerHTML = `
+		view.innerHTML = `
         <div class="clear-options">
-            <h3><i class="icon">🗑️</i> ${translations[currentLanguage].clearOptions || 'Clear Options'}</h3>
-            
-            <div class="clear-section">
-                <h4><i class="icon">📅</i> ${translations[currentLanguage].notesByMonth || 'Notes by Month'}</h4>
-                <div class="months-list">
-                    ${Object.entries(notesByMonth)
-                        .sort((a, b) => b[0].localeCompare(a[0]))
-                        .map(([monthYear, data]) => {
-                            const [year, month] = monthYear.split('-');
-                            const monthName = translations[currentLanguage].months[parseInt(month)];
-                            const maxPreview = 3;
-                            const hasMore = data.notes.length > maxPreview;
-                            
-                            return `
-                                <div class="month-card">
-                                    <div class="month-header">
-                                        <div class="month-title">
-                                            <i class="icon">📅</i>
-                                            <span>${monthName} ${year}</span>
-                                            <span class="note-count">${data.count} notes</span>
-                                        </div>
-                                        <button class="btn-clear-month" 
-                                                data-month="${monthYear}"
-                                                data-tooltip="Clear all notes for ${monthName} ${year}">
-                                            <i class="icon">🗑️</i> ${translations[currentLanguage].clear || 'Clear'}
-                                        </button>
-                                    </div>
-                                    <div class="month-details">
-                                        <div class="date-range">
-                                            <i class="icon">📆</i>
-                                            ${data.oldest} → ${data.newest}
-                                        </div>
-                                        <div class="notes-preview">
-                                            ${data.notes.slice(0, maxPreview).map(note => `
-                                                <div class="note-preview" 
-                                                     style="border-left: 3px solid ${noteColors.find(c => c.class === note.color)?.color || '#ccc'}">
-                                                    <span class="note-type-icon">${noteTypes.find(t => t.type === note.type)?.icon || '📝'}</span>
-                                                    <span class="note-text">${sanitizeHTML(note.text.substring(0, 30))}${note.text.length > 30 ? '...' : ''}</span>
-                                                    <button class="delete-single-note" 
-                                                            data-date="${note.date}"
-                                                            data-index="${data.notes.indexOf(note)}"
-                                                            data-tooltip="Delete this specific note">
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            `).join('')}
-                                            ${hasMore ? `
-                                                <button class="show-all-notes" 
-                                                        data-month="${monthYear}"
-                                                        data-tooltip="Show all ${data.count} notes">
-                                                    +${data.count - maxPreview} more...
-                                                </button>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')
-                    }
-                </div>
-            </div>
-            
-            <!-- Attachments section remains the same -->
-            ${attachments.length > 0 ? `
-                <div class="clear-section">
-                    <h4><i class="icon">📎</i> ${translations[currentLanguage].attachments || 'Attachments'}</h4>
-                    <div class="attachments-list">
-                        ${attachments.slice(0, 5).map(attach => `
-                            <div class="attachment-item">
-                                <span class="attach-icon">${attach.name.match(/\.(jpg|jpeg|png|gif)$/i) ? '🖼️' : '📄'}</span>
-                                <span class="attach-name">${attach.name}</span>
-                                <span class="attach-size">${Math.round(attach.size / 1024)} KB</span>
-                                <span class="attach-date">${attach.date}</span>
-                                <button class="delete-attachment" 
-                                        data-id="${attach.id}"
-                                        data-tooltip="Delete this attachment">
-                                    ✕
-                                </button>
-                            </div>
-                        `).join('')}
-                        ${attachments.length > 5 ? `
-                            <div class="more-attachments">
-                                +${attachments.length - 5} more attachments
-                            </div>
-                        ` : ''}
-                        <button class="btn-clear-attachments">
-                            <i class="icon">🗑️</i> ${translations[currentLanguage].clearAllAttachments || 'Clear All Attachments'}
-                        </button>
-                    </div>
-                </div>
-            ` : ''}
+		<h3><i class="icon">🗑️</i> ${translations[currentLanguage].clearOptions || 'Clear Options'}</h3>
+		
+		<div class="clear-section">
+		<h4><i class="icon">📅</i> ${translations[currentLanguage].notesByMonth || 'Notes by Month'}</h4>
+		<div class="months-list">
+		${Object.entries(notesByMonth)
+		.sort((a, b) => b[0].localeCompare(a[0]))
+		.map(([monthYear, data]) => {
+		const [year, month] = monthYear.split('-');
+		const monthName = translations[currentLanguage].months[parseInt(month)];
+		const maxPreview = 3;
+		const hasMore = data.notes.length > maxPreview;
+		
+		return `
+		<div class="month-card">
+		<div class="month-header">
+		<div class="month-title">
+		<i class="icon">📅</i>
+		<span>${monthName} ${year}</span>
+		<span class="note-count">${data.count} notes</span>
+		</div>
+		<button class="btn-clear-month" 
+		data-month="${monthYear}"
+		data-tooltip="Clear all notes for ${monthName} ${year}">
+		<i class="icon">🗑️</i> ${translations[currentLanguage].clear || 'Clear'}
+		</button>
+		</div>
+		<div class="month-details">
+		<div class="date-range">
+		<i class="icon">📆</i>
+		${data.oldest} → ${data.newest}
+		</div>
+		<div class="notes-preview">
+		${data.notes.slice(0, maxPreview).map(note => `
+			<div class="note-preview" 
+			style="border-left: 3px solid ${noteColors.find(c => c.class === note.color)?.color || '#ccc'}">
+			<span class="note-type-icon">${noteTypes.find(t => t.type === note.type)?.icon || '📝'}</span>
+			<span class="note-text">${sanitizeHTML(note.text.substring(0, 30))}${note.text.length > 30 ? '...' : ''}</span>
+			<button class="delete-single-note" 
+			data-date="${note.date}"
+			data-index="${data.notes.indexOf(note)}"
+			data-tooltip="Delete this specific note">
+			✕
+			</button>
+			</div>
+		`).join('')}
+		${hasMore ? `
+			<button class="show-all-notes" 
+			data-month="${monthYear}"
+			data-tooltip="Show all ${data.count} notes">
+			+${data.count - maxPreview} more...
+			</button>
+		` : ''}
+		</div>
+		</div>
+		</div>
+		`;
+		}).join('')
+		}
+		</div>
+		</div>
+		
+		<!-- Attachments section remains the same -->
+		${attachments.length > 0 ? `
+		<div class="clear-section">
+		<h4><i class="icon">📎</i> ${translations[currentLanguage].attachments || 'Attachments'}</h4>
+		<div class="attachments-list">
+		${attachments.slice(0, 5).map(attach => `
+			<div class="attachment-item">
+			<span class="attach-icon">${attach.name.match(/\.(jpg|jpeg|png|gif)$/i) ? '🖼️' : '📄'}</span>
+			<span class="attach-name">${attach.name}</span>
+			<span class="attach-size">${Math.round(attach.size / 1024)} KB</span>
+			<span class="attach-date">${attach.date}</span>
+			<button class="delete-attachment" 
+			data-id="${attach.id}"
+			data-tooltip="Delete this attachment">
+			✕
+			</button>
+			</div>
+		`).join('')}
+		${attachments.length > 5 ? `
+			<div class="more-attachments">
+			+${attachments.length - 5} more attachments
+			</div>
+		` : ''}
+		<button class="btn-clear-attachments">
+		<i class="icon">🗑️</i> ${translations[currentLanguage].clearAllAttachments || 'Clear All Attachments'}
+		</button>
+		</div>
+		</div>
+		` : ''}
         </div>
-    `;
-
-    // Add event listeners
-    document.querySelectorAll('.btn-clear-month').forEach(btn => {
-        btn.addEventListener('click', () => this.clearMonth(btn.dataset.month));
-    });
-
-    document.querySelectorAll('.delete-single-note').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const date = btn.dataset.date;
-            const index = parseInt(btn.dataset.index);
-            
-            if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
-                await this.deleteSingleNote(date, index);
-                this.showPartialClear(); // Refresh view
-            }
-        });
-    });
-
-    document.querySelectorAll('.show-all-notes').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const monthYear = btn.dataset.month;
-            this.showAllNotesForMonth(monthYear);
-        });
-    });
-
-    if (attachments.length > 0) {
-        document.querySelector('.btn-clear-attachments').addEventListener('click', () => {
-            this.promptClearAttachments(attachments.length);
-        });
-
-        document.querySelectorAll('.delete-attachment').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const id = btn.dataset.id;
-                await this.deleteSingleAttachment(id);
-                this.showPartialClear(); // Refresh view
-            });
-        });
-    }
-}
+		`;
+		
+		// Add event listeners
+		document.querySelectorAll('.btn-clear-month').forEach(btn => {
+			btn.addEventListener('click', () => this.clearMonth(btn.dataset.month));
+		});
+		
+		document.querySelectorAll('.delete-single-note').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
+				e.stopPropagation();
+				const date = btn.dataset.date;
+				const index = parseInt(btn.dataset.index);
+				
+				if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
+					await this.deleteSingleNote(date, index);
+					this.showPartialClear(); // Refresh view
+				}
+			});
+		});
+		
+		document.querySelectorAll('.show-all-notes').forEach(btn => {
+			btn.addEventListener('click', () => {
+				const monthYear = btn.dataset.month;
+				this.showAllNotesForMonth(monthYear);
+			});
+		});
+		
+		if (attachments.length > 0) {
+			document.querySelector('.btn-clear-attachments').addEventListener('click', () => {
+				this.promptClearAttachments(attachments.length);
+			});
+			
+			document.querySelectorAll('.delete-attachment').forEach(btn => {
+				btn.addEventListener('click', async (e) => {
+					e.stopPropagation();
+					const id = btn.dataset.id;
+					await this.deleteSingleAttachment(id);
+					this.showPartialClear(); // Refresh view
+				});
+			});
+		}
+	}
 	
     promptClearAttachments(count) {
         if (confirm(`${translations[currentLanguage].confirmClearAttachments || 'Are you sure you want to delete all'} ${count} ${translations[currentLanguage].attachments || 'attachments'}?`)) {
@@ -472,96 +489,96 @@ class SettingsManager {
 		}
 	}
 	
-async deleteSingleNote(dateKey, index) {
-    try {
-        if (window.notes[dateKey] && window.notes[dateKey].length > index) {
-            window.notes[dateKey].splice(index, 1);
-            
-            if (window.notes[dateKey].length === 0) {
-                delete window.notes[dateKey];
-            }
-            
-            await saveNotes();
-            showToast(translations[currentLanguage].noteDeleted || 'Note deleted');
-        }
-    } catch (error) {
-        console.error('Error deleting note:', error);
-        showToast(translations[currentLanguage].deleteError || 'Error deleting note');
-    }
-}
-
-async deleteSingleAttachment(id) {
-    try {
-        const db = await this.openDB();
-        const tx = db.transaction('attachments', 'readwrite');
-        await tx.objectStore('attachments').delete(id);
-        showToast(translations[currentLanguage].attachmentDeleted || 'Attachment deleted');
-    } catch (error) {
-        console.error('Error deleting attachment:', error);
-        showToast(translations[currentLanguage].deleteError || 'Error deleting attachment');
-    }
-}
-
-showAllNotesForMonth(monthYear) {
-    const [year, month] = monthYear.split('-').map(Number);
-    const monthStart = new Date(year, month, 1);
-    const monthEnd = new Date(year, month + 1, 0);
-    
-    const notesForMonth = Object.entries(window.notes)
+	async deleteSingleNote(dateKey, index) {
+		try {
+			if (window.notes[dateKey] && window.notes[dateKey].length > index) {
+				window.notes[dateKey].splice(index, 1);
+				
+				if (window.notes[dateKey].length === 0) {
+					delete window.notes[dateKey];
+				}
+				
+				await saveNotes();
+				showToast(translations[currentLanguage].noteDeleted || 'Note deleted');
+			}
+			} catch (error) {
+			console.error('Error deleting note:', error);
+			showToast(translations[currentLanguage].deleteError || 'Error deleting note');
+		}
+	}
+	
+	async deleteSingleAttachment(id) {
+		try {
+			const db = await this.openDB();
+			const tx = db.transaction('attachments', 'readwrite');
+			await tx.objectStore('attachments').delete(id);
+			showToast(translations[currentLanguage].attachmentDeleted || 'Attachment deleted');
+			} catch (error) {
+			console.error('Error deleting attachment:', error);
+			showToast(translations[currentLanguage].deleteError || 'Error deleting attachment');
+		}
+	}
+	
+	showAllNotesForMonth(monthYear) {
+		const [year, month] = monthYear.split('-').map(Number);
+		const monthStart = new Date(year, month, 1);
+		const monthEnd = new Date(year, month + 1, 0);
+		
+		const notesForMonth = Object.entries(window.notes)
         .filter(([dateKey]) => {
             const noteDate = new Date(dateKey);
             return noteDate >= monthStart && noteDate <= monthEnd;
-        })
+		})
         .flatMap(([dateKey, notes]) => notes.map(note => ({ ...note, dateKey })));
-    
-    const view = document.getElementById('clear-partial-view');
-    view.innerHTML = `
+		
+		const view = document.getElementById('clear-partial-view');
+		view.innerHTML = `
         <div class="all-notes-view">
-            <h3>All notes for ${translations[currentLanguage].months[month]} ${year}</h3>
-            <button class="btn-back" data-tooltip="Return to monthly view">
-                ← Back
-            </button>
-            <div class="notes-container">
-                ${notesForMonth.map(note => `
-                    <div class="full-note-item" 
-                         style="border-left: 3px solid ${noteColors.find(c => c.class === note.color)?.color || '#ccc'}">
-                        <div class="note-header">
-                            <span class="note-date">${note.dateKey}</span>
-                            <span class="note-type-icon">${noteTypes.find(t => t.type === note.type)?.icon || '📝'}</span>
-                        </div>
-                        <div class="note-content">
-                            ${note.time ? `<div class="note-time">${note.time}</div>` : ''}
-                            <div class="note-text">${sanitizeHTML(note.text)}</div>
-                        </div>
-                        <button class="delete-single-note" 
-                                data-date="${note.dateKey}"
-                                data-index="${window.notes[note.dateKey].indexOf(note)}"
-                                data-tooltip="Delete this note">
-                            ✕
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
+		<h3>All notes for ${translations[currentLanguage].months[month]} ${year}</h3>
+		<button class="btn-back" data-tooltip="Return to monthly view">
+		← Back
+		</button>
+		<div class="notes-container">
+		${notesForMonth.map(note => `
+		<div class="full-note-item" 
+		style="border-left: 3px solid ${noteColors.find(c => c.class === note.color)?.color || '#ccc'}">
+		<div class="note-header">
+		<span class="note-date">${note.dateKey}</span>
+		<span class="note-type-icon">${noteTypes.find(t => t.type === note.type)?.icon || '📝'}</span>
+		</div>
+		<div class="note-content">
+		${note.time ? `<div class="note-time">${note.time}</div>` : ''}
+		<div class="note-text">${sanitizeHTML(note.text)}</div>
+		</div>
+		<button class="delete-single-note" 
+		data-date="${note.dateKey}"
+		data-index="${window.notes[note.dateKey].indexOf(note)}"
+		data-tooltip="Delete this note">
+		✕
+		</button>
+		</div>
+		`).join('')}
+		</div>
         </div>
-    `;
-    
-    view.querySelector('.btn-back').addEventListener('click', () => {
-        this.showPartialClear();
-    });
-    
-    view.querySelectorAll('.delete-single-note').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const date = btn.dataset.date;
-            const index = parseInt(btn.dataset.index);
-            
-            if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
-                await this.deleteSingleNote(date, index);
-                this.showAllNotesForMonth(monthYear); // Refresh view
-            }
-        });
-    });
-}
+		`;
+		
+		view.querySelector('.btn-back').addEventListener('click', () => {
+			this.showPartialClear();
+		});
+		
+		view.querySelectorAll('.delete-single-note').forEach(btn => {
+			btn.addEventListener('click', async (e) => {
+				e.stopPropagation();
+				const date = btn.dataset.date;
+				const index = parseInt(btn.dataset.index);
+				
+				if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
+					await this.deleteSingleNote(date, index);
+					this.showAllNotesForMonth(monthYear); // Refresh view
+				}
+			});
+		});
+	}
 	async clearObjectStore(db, storeName) {
 		return new Promise((resolve, reject) => {
 			const tx = db.transaction(storeName, 'readwrite');
@@ -779,102 +796,110 @@ showAllNotesForMonth(monthYear) {
 		});
 	}
 	
-setupAutoCleanupToggle() {
-    // Remove any existing toggles first
-    document.querySelectorAll('.auto-clean-toggle').forEach(el => el.remove());
-    
-    const toggleContainer = document.createElement('div');
-    toggleContainer.className = 'setting-option';
-    toggleContainer.innerHTML = `
-        <label class="auto-clean-toggle">
-            <input type="checkbox" id="auto-clean-toggle">
-            <span class="toggle-slider"></span>
-            <span class="toggle-label">${translations[currentLanguage].autoCleanup || 'Automatic Cleanup'}</span>
-        </label>
-        <div class="tooltip">${translations[currentLanguage].autoCleanupTooltip || 'Automatically cleans old data every 15 days'}</div>
-    `;
-    
-    // Add to settings tab before the buttons
-    const settingsTab = document.getElementById('memory-tab');
-    const firstButton = settingsTab.querySelector('button');
-    settingsTab.insertBefore(toggleContainer, firstButton);
-    
-    // Load saved preference
-    const toggle = toggleContainer.querySelector('input');
-    toggle.checked = localStorage.getItem('autoCleanEnabled') === 'true';
-    
-    toggle.addEventListener('change', (e) => {
-        localStorage.setItem('autoCleanEnabled', e.target.checked);
-        if (e.target.checked) {
-            this.setupPeriodicCleanup();
-        }
-    });
-}
+	setupAutoCleanupToggle() {
+		// Remove any existing toggles first
+		document.querySelectorAll('.auto-clean-toggle').forEach(el => el.remove());
+		
+		// Create the toggle container
+		const optionDiv = document.createElement('div');
+		optionDiv.className = 'settings-periodic-option';
+		optionDiv.innerHTML = `
+        <div class="settings-toggle-container">
+		<label class="settings-toggle-switch">
+		<input type="checkbox" id="auto-clean-toggle">
+		<span class="settings-toggle-slider"></span>
+		</label>
+		<span class="settings-toggle-label">
+		${translations[currentLanguage].autoCleanup || 'Automatic Cleanup'}
+		<span class="settings-toggle-tooltip">
+		${translations[currentLanguage].autoCleanupTooltip || 'Automatically cleans old data every 15 days'}
+		</span>
+		</span>
+        </div>
+		`;
+		
+		// Add to the periodic activities tab
+		const periodicTab = document.getElementById('periodic-tab');
+		periodicTab.appendChild(optionDiv);
+		
+		// Load saved preference
+		const toggle = optionDiv.querySelector('#auto-clean-toggle');
+		toggle.checked = localStorage.getItem('autoCleanEnabled') === 'true';
+		
+		toggle.addEventListener('change', (e) => {
+    localStorage.setItem('autoCleanEnabled', e.target.checked);
+    if (e.target.checked) {
+        this.setupPeriodicCleanup();
+    }
+});
+		
+		// Add hover tooltip functionality - FIXED: using optionDiv instead of toggleContainer
+		const label = optionDiv.querySelector('.settings-toggle-label');
+		const tooltip = optionDiv.querySelector('.settings-toggle-tooltip');
+		
+		label.addEventListener('mouseenter', () => {
+			tooltip.style.visibility = 'visible';
+			tooltip.style.opacity = '1';
+		});
+		
+		label.addEventListener('mouseleave', () => {
+			tooltip.style.visibility = 'hidden';
+			tooltip.style.opacity = '0';
+		});
+	}
 	
 	async performSafeCleanup() {
-		try {
-			// 1. Cache cleanup
-			const cacheNames = await caches.keys();
-			await Promise.all(
-				cacheNames.map(name => {
-					if (name !== CACHE_NAME && 
-						!name.includes('notes') && 
-						!name.includes('prefs') && 
-						name !== 'large-assets-v1') {
-						return caches.delete(name);
-					}
-					return Promise.resolve();
-				})
-			);
-			
-			// 2. IndexedDB cleanup
-			const db = await window.appManager.openDB();
-			const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
-			
-			tx.onerror = (event) => {
-				console.error('Cleanup transaction error:', event.target.error);
-			};
-			
-			await Promise.all([
-				new Promise((resolve, reject) => {
-					const req = tx.objectStore('attachments').openCursor(IDBKeyRange.upperBound(
-						Date.now() - 30 * 24 * 60 * 60 * 1000 // Older than 30 days
-					));
-					
-					req.onsuccess = (e) => {
-						const cursor = e.target.result;
-						if (cursor) {
-							cursor.delete().onsuccess = () => cursor.continue();
-							} else {
-							resolve();
-						}
-					};
-					req.onerror = reject;
-				}),
-				new Promise((resolve, reject) => {
-					const req = tx.objectStore('SYNC_QUEUE').clear();
-					req.onsuccess = resolve;
-					req.onerror = reject;
-				})
-			]);
-			
-			// 3. Old notes cleanup
-			const sixMonthsAgo = new Date();
-			sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-			
-			for (const dateKey in window.notes) {
-				const noteDate = new Date(dateKey);
-				if (noteDate < sixMonthsAgo) {
-					delete window.notes[dateKey];
-				}
-			}
-			saveNotes();
-			
-			} catch (error) {
-			console.error('Cleanup failed:', error);
-			showToast(translations[currentLanguage].cleanupError || 'Cleanup failed');
-		}
-	}
+    // Double-check user preference
+    if (localStorage.getItem('autoCleanEnabled') !== 'true') {
+        console.log('Cleanup aborted - not enabled in settings');
+        return;
+    }
+    // user confirmation
+    const lang = translations[currentLanguage];
+    if (!confirm(lang.confirmCleanup || "Proceed with automatic cleanup?")) {
+        console.log('Cleanup canceled by user');
+        return;
+    }
+    // Explicit cleanup scope
+    const cleanupSettings = {
+        notes: true,
+        attachments: true,
+        syncQueue: true,
+        maxAgeDays: 30
+    };
+        console.log('Starting controlled cleanup', cleanupSettings);
+    try {
+        // 1. Clear old notes
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - cleanupSettings.maxAgeDays);
+        
+        // 2. Clear old attachments from IndexedDB
+        const db = await window.appManager.openDB();
+        const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
+        
+        // Delete attachments older than maxAgeDays
+        const attachmentsStore = tx.objectStore('attachments');
+        const attachmentsRequest = attachmentsStore.index('timestamp').openCursor(IDBKeyRange.upperBound(cutoffDate.getTime()));
+        
+        attachmentsRequest.onsuccess = (e) => {
+            const cursor = e.target.result;
+            if (cursor) {
+                console.log('Deleting old attachment:', cursor.value.id);
+                cursor.delete();
+                cursor.continue();
+            }
+        };
+        
+        // Clear sync queue
+        await tx.objectStore('SYNC_QUEUE').clear();
+        
+        await tx.complete;
+        console.log('Database cleanup complete');
+        
+    } catch (error) {
+        console.error('Cleanup error:', error);
+    }
+}
 	
 	setupPeriodicCleanup() {
 		if (localStorage.getItem('autoCleanEnabled') !== 'true') return;

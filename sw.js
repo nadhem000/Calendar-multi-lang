@@ -55,31 +55,37 @@ self.addEventListener('message', (event) => {
 self.addEventListener('install', (event) => {
   if (isLocalEnvironment) {
     console.log('Local environment detected, skipping cache');
-    return;
+    return self.skipWaiting(); // Important for local testing
   }
 
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // MODIFICATION: Filter out manifest.json from cached assets
-      const assetsToCache = ASSETS_TO_CACHE.filter(asset => 
-        !asset.endsWith('manifest.json') &&
-        !asset.endsWith('sw.js')
-      );
-      
-      return cache.keys().then(existingKeys => {
-        const dataToKeep = existingKeys.filter(key => 
-          key.url.includes('/api/notes') || 
-          key.url.includes('/prefs') ||
-          key.url.includes('/attachments')
-        );
-        
-        // Use filtered assets
-        return Promise.all([
-          cache.addAll(assetsToCache),
-          ...dataToKeep.map(item => cache.put(item.url, item))
-        ]);
-      });
-    }).then(() => self.skipWaiting())
+      // Cache ALL assets including manifest.json
+      return cache.addAll(ASSETS_TO_CACHE)
+        .then(() => {
+          console.log('All assets cached successfully');
+          return cache.keys(); // Get existing cached items
+        })
+        .then(existingKeys => {
+          // Preserve API data that shouldn't be overwritten
+          const dataToKeep = existingKeys.filter(key => 
+            key.url.includes('/api/notes') || 
+            key.url.includes('/prefs') ||
+            key.url.includes('/attachments')
+          );
+          
+          // Re-add preserved data
+          return Promise.all(
+            dataToKeep.map(item => cache.put(item.url, item))
+          );
+        });
+    })
+    .then(() => self.skipWaiting()) // Force activate new SW
+    .catch(error => {
+      console.error('Cache installation failed:', error);
+      // Even if caching fails, skip waiting to activate SW
+      return self.skipWaiting();
+    })
   );
 });
 
@@ -134,160 +140,163 @@ async function handleLargeAsset(request) {
 }
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-    
-    // Add language to cache key for API requests
-    if (url.pathname.startsWith('/api/')) {
-        const langAwareRequest = new Request(
-            `${url.pathname}?lang=${currentLanguage}`,
-            event.request
-        );
-        event.respondWith(handleApiFetch(langAwareRequest));
-        return;
-    }
+  
+  // Unified manifest.json handling
+  if (url.pathname.endsWith('manifest.json')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(cached => cached || fetch(event.request))
+        .catch(() => new Response('{}', {
+          headers: {'Content-Type': 'application/json'}
+        }))
+    );
+    return;
+  }
+
+  // Add language to cache key for API requests
+  if (url.pathname.startsWith('/api/')) {
+    const langAwareRequest = new Request(
+      `${url.pathname}?lang=${currentLanguage}`,
+      event.request
+    );
+    event.respondWith(handleApiFetch(langAwareRequest));
+    return;
+  }
+
   if (LARGE_ASSETS.some(asset => event.request.url.includes(asset))) {
     event.respondWith(handleLargeAsset(event.request));
     return;
   }
-    if (isLocalEnvironment) return;
-    
-	
-    // Handle widget data with network-first strategy
-    if (url.pathname === '/api/widget-data') {
-        event.respondWith(
-            (async () => {
-                try {
-                    // Try network first
-                    const networkResponse = await fetch(event.request);
-                    const cache = await caches.open(WIDGET_CACHE_NAME);
-                    await cache.put(event.request, networkResponse.clone());
-                    return networkResponse;
-					} catch (error) {
-                    // Fallback to cache
-                    
-					const cachedResponse = await caches.match(event.request);
-					if (cachedResponse) {
-						const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
-						if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
-							return cachedResponse;
-						}
-					}
-                    // Generate fallback data if no cache
-                    return handleWidgetData();
-				}
-			})()
-		);
-        return;
-	}
-	
-    // Handle share target
-    if (url.pathname === '/share-target') {
-        event.respondWith(handleShare(event.request));
-        return;
-	}
-	
-    // Handle app navigation (network-first)
-    if (event.request.mode === 'navigate') {
-        event.respondWith(
-            (async () => {
-                try {
-                    const networkResponse = await fetch(event.request);
-                    // Update cache with fresh response
-                    const cache = await caches.open(CACHE_NAME);
-                    await cache.put(event.request, networkResponse.clone());
-                    return networkResponse;
-					} catch {
-                    const cachedResponse = await caches.match('/index.html');
-                    return cachedResponse || new Response('Offline', { status: 200 });
-				}
-			})()
-		);
-        return;
-	}
-	
-    // Handle protocol requests
-    if (url.pathname === '/handle-protocol') {
-        event.respondWith(handleProtocolRequest(url));
-        return;
-	}
-	
-    // Cache-first strategy for static assets
-    if (CACHE_CONFIG.strategies.cacheFirst.some(path => url.pathname.startsWith(path))) {
-        event.respondWith(
-            (async () => {
-                // First try the cache
-                
-				const cachedResponse = await caches.match(event.request);
-				if (cachedResponse) {
-					const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
-					if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
-						return cachedResponse;
-					}
-				}
-                
-                // If not in cache, try network
-                try {
-                    const networkResponse = await fetch(event.request);
-                    if (networkResponse.ok) {
-                        const cache = await caches.open(CACHE_NAME);
-                        await cache.put(event.request, networkResponse.clone());
-					}
-                    return networkResponse;
-					} catch {
-                    return new Response('Offline', { status: 200 });
-				}
-			})()
-		);
-        return;
-	}
-	
-    // Default network-first strategy for other API requests
-    if (CACHE_CONFIG.strategies.networkFirst.some(path => url.pathname.startsWith(path))) {
-        event.respondWith(
-            (async () => {
-                try {
-                    // Try network first
-                    const networkResponse = await fetch(event.request);
-                    // Update cache
-                    const cache = await caches.open(CACHE_NAME);
-                    await cache.put(event.request, networkResponse.clone());
-                    return networkResponse;
-					} catch (error) {
-                    // Fallback to cache
-                    const cachedResponse = await caches.match(event.request);
-                    return cachedResponse || new Response('Offline', { status: 200 });
-				}
-			})()
-		);
-        return;
-	}
-	
-    // Fallback strategy for all other requests
+
+  if (isLocalEnvironment) return;
+
+  // Special route handlers
+  if (url.pathname === '/api/widget-data') {
+    event.respondWith(handleWidgetRequest(event.request));
+    return;
+  }
+  
+  if (url.pathname === '/share-target') {
+    event.respondWith(handleShare(event.request));
+    return;
+  }
+  
+  if (url.pathname === '/handle-protocol') {
+    event.respondWith(handleProtocolRequest(url));
+    return;
+  }
+
+  // Navigation requests
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-        (async () => {
-            // Try cache first
-            
-			const cachedResponse = await caches.match(event.request);
-			if (cachedResponse) {
-				const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
-				if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
-					return cachedResponse;
-				}
-			}
-            
-            // Then try network
-            try {
-                const networkResponse = await fetch(event.request);
-                if (networkResponse.ok) {
-                    const cache = await caches.open(CACHE_NAME);
-                    await cache.put(event.request, networkResponse.clone());
-				}
-                return networkResponse;
-				} catch {
-                return new Response('Offline', { status: 200 });
-			}
-		})()
-	);
+      handleNavigationRequest(event.request)
+    );
+    return;
+  }
+
+  // Apply caching strategies
+  if (CACHE_CONFIG.strategies.cacheFirst.some(path => url.pathname.startsWith(path))) {
+    event.respondWith(handleCacheFirst(event.request));
+    return;
+  }
+
+  if (CACHE_CONFIG.strategies.networkFirst.some(path => url.pathname.startsWith(path))) {
+    event.respondWith(handleNetworkFirst(event.request));
+    return;
+  }
+
+  // Fallback strategy
+  event.respondWith(handleFallbackRequest(event.request));
 });
+
+// Helper functions for better organization
+async function handleWidgetRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    const cache = await caches.open(WIDGET_CACHE_NAME);
+    await cache.put(request, networkResponse.clone());
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+      if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+        return cachedResponse;
+      }
+    }
+    return handleWidgetData();
+  }
+}
+
+async function handleNavigationRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, networkResponse.clone());
+    return networkResponse;
+  } catch {
+    return caches.match('/index.html') || 
+           new Response('<h1>Offline</h1><p>You are offline but this page is not cached.</p>', {
+             headers: {'Content-Type': 'text/html'}
+           });
+  }
+}
+
+async function handleCacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+    if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+      return cachedResponse;
+    }
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch {
+    return cachedResponse || Response.error();
+  }
+}
+
+async function handleNetworkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, networkResponse.clone());
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || Response.error();
+  }
+}
+
+async function handleFallbackRequest(request) {
+  try {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      const expiresHeader = cachedResponse.headers.get('sw-cache-expires');
+      if (!expiresHeader || Date.now() < parseInt(expiresHeader)) {
+        return cachedResponse;
+      }
+    }
+
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch {
+    return caches.match('/offline.html') || 
+           caches.match('/index.html') || 
+           new Response('Offline', { status: 200 });
+  }
+}
 async function safeFetch(url) {
     return fetch(url)
         .then(response => {

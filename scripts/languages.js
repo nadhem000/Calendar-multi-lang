@@ -96,7 +96,32 @@ const translations = {
 		},
 		descriptionLabel: "Description", // For the "📝" label
 		frequencyLabel: "Frequency",     // For the "⏰" label
-		time: "Time"
+		time: "Time",
+		memory: "Memory",
+		memoryMonitor: "Memory Monitor",
+		clearPartial: "Clear Partial Data",
+		clearAll: "Clear All Data",
+		clearOptions: "Clear Options",
+		notesByMonth: "Notes by Month",
+		clear: "Clear",
+		clearAllWarning: "WARNING: Data Deletion",
+		clearAllNotes: "All notes",
+		clearAllAttachments: "All attachments",
+		clearAllSync: "Sync queue",
+		clearAllLocalStorage: "LocalStorage data",
+		clearAllWarningText: "This action cannot be undone. Make sure to export important data first.",
+		cancel: "Cancel",
+		clearConfirm: "Clear Selected Data",
+		autoCleanup: "Automatic Cleanup",
+		autoCleanupTooltip: "Automatically cleans old data every 15 days",
+		monthCleared: "Month data cleared",
+		confirmDeleteSingleNote: "Delete this specific note?",
+		noteDeleted: "Note deleted",
+		attachmentDeleted: "Attachment deleted",
+		deleteError: "Error deleting",
+		seeMore: "See More",
+		localStorageWarning: "Clearing localStorage will reset all preferences and cached data",
+periodicActivities: "Periodic Activities"
 	},
     ar: {
         title: "التقويم",
@@ -146,7 +171,7 @@ const translations = {
 		backgroundSync: "مزامنة الخلفية نشطة",
 		periodicUpdate: "تم تفعيل التحديثات اليومية",
 		notesReminder: "لديك {count} ملاحظات لليوم",
-		dailyTip: "لا نصائح اليوم",
+		dailyTip: "نصيحة اليوم",
 		noTipToday: "لا ملاحظات اليوم",
 		noNotesToday: "لا ملاحظات اليوم",
 		sanitizeWarning: "ملاحظة: تم تنظيف الأحرف الخاصة تلقائيًا",
@@ -194,7 +219,32 @@ const translations = {
 		},
 		descriptionLabel: "الوصف",
 		frequencyLabel: "التكرار",
-		time: "وقت"
+		time: "وقت",
+		memory: "الذاكرة",
+		memoryMonitor: "مراقبة الذاكرة",
+		clearPartial: "مسح جزئي للبيانات",
+		clearAll: "مسح جميع البيانات",
+		clearOptions: "خيارات المسح",
+		notesByMonth: "الملاحظات حسب الشهر",
+		clear: "مسح",
+		clearAllWarning: "تحذير: حذف البيانات",
+		clearAllNotes: "جميع الملاحظات",
+		clearAllAttachments: "جميع المرفقات",
+		clearAllSync: "طابور المزامنة",
+		clearAllLocalStorage: "بيانات التخزين المحلي",
+		clearAllWarningText: "لا يمكن التراجع عن هذا الإجراء. تأكد من تصدير البيانات المهمة أولاً.",
+		cancel: "إلغاء",
+		clearConfirm: "مسح البيانات المحددة",
+		autoCleanup: "تنظيف تلقائي",
+		autoCleanupTooltip: "تنظيف البيانات القديمة تلقائيًا كل 15 يومًا",
+		monthCleared: "تم مسح بيانات الشهر",
+		confirmDeleteSingleNote: "هل تريد حذف هذه الملاحظة المحددة؟",
+		noteDeleted: "تم حذف الملاحظة",
+		attachmentDeleted: "تم حذف المرفق",
+		deleteError: "خطأ في الحذف",
+		seeMore: "عرض المزيد",
+		localStorageWarning: "مسح التخزين المحلي سيعيد تعيين جميع التفضيلات والبيانات المخزنة مؤقتًا",
+periodicActivities: "العمليات الدورية"
 	},
     fr: {
         title: "Calendrier",
@@ -244,8 +294,8 @@ const translations = {
 		backgroundSync: "Synchronisation en arrière-plan activée",
 		periodicUpdate: "Mises à jour quotidiennes activées",
 		notesReminder: "T'as {count} notes pour aujourd'hui",
-		dailyTip: "Conseil Quotidien",
-		noTipToday: "Pas des tips aujourd'hui",
+		dailyTip: "Astuce du jour",
+		noTipToday: "Pas d'astuce aujourd'hui",
 		noNotesToday: "Pas des notes aujourd'hui",
 		sanitizeWarning: "Remarque : Les caractères spéciaux ont été nettoyés automatiquement",
 		validationErrorText: "Veuillez saisir le texte de la note",
@@ -292,30 +342,72 @@ const translations = {
 		},
 		descriptionLabel: "Descrption",
 		frequencyLabel: "Fréquence",
-		time: "Heure"
+		time: "Heure",
+		memory: "Mémoire",
+		memoryMonitor: "Moniteur de mémoire",
+		clearPartial: "Effacer partiellement les données",
+		clearAll: "Effacer toutes les données",
+		clearOptions: "Options d'effacement",
+		notesByMonth: "Notes par mois",
+		clear: "Effacer",
+		clearAllWarning: "AVERTISSEMENT : Suppression de données",
+		clearAllNotes: "Toutes les notes",
+		clearAllAttachments: "Toutes les pièces jointes",
+		clearAllSync: "File de synchronisation",
+		clearAllLocalStorage: "Données du stockage local",
+		clearAllWarningText: "Cette action ne peut pas être annulée. Assurez-vous d'exporter d'abord les données importantes.",
+		cancel: "Annuler",
+		clearConfirm: "Effacer les données sélectionnées",
+		autoCleanup: "Nettoyage automatique",
+		autoCleanupTooltip: "Nettoie automatiquement les anciennes données tous les 15 jours",
+		monthCleared: "Données du mois effacées",
+		confirmDeleteSingleNote: "Supprimer cette note spécifique ?",
+		noteDeleted: "Note supprimée",
+		attachmentDeleted: "Pièce jointe supprimée",
+		deleteError: "Erreur de suppression",
+		seeMore: "Voir plus",
+		localStorageWarning: "Effacer le stockage local réinitialisera toutes les préférences et données en cache",
+periodicActivities: "activitées periodiques"
 	}
 };
 
 // Function to change language
 function changeLanguage(lang) {
-	const prevSystem = currentCalendarSystem;
-	currentLanguage = lang;
-	const langData = translations[lang];
-	// Update calendar system options
-	const systemSelect = document.getElementById('calendar-system');
-	if (systemSelect) {
-		systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-		.map(([value, name]) => 
-			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-		).join('');
-		currentCalendarSystem = prevSystem; // Restore previous system
-	}
+    const prevSystem = currentCalendarSystem;
+    currentLanguage = lang;
+    const langData = translations[lang];
+    
+    // Update calendar system options
+    const systemSelect = document.getElementById('calendar-system');
+    if (systemSelect) {
+        systemSelect.innerHTML = Object.entries(langData.calendarSystems)
+            .map(([value, name]) => 
+                `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+            ).join('');
+        currentCalendarSystem = prevSystem;
+    }
+    
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
     document.getElementById('plate-icon').setAttribute('title', langData.icons.plate);
     document.getElementById('health-icon').setAttribute('title', langData.icons.health);
     document.getElementById('mechanics-icon').setAttribute('title', langData.icons.mechanics);
-    document.getElementById('today-btn').innerHTML = `<i class="fas fa-calendar-day"></i> ${langData.todayText}`;
+    document.getElementById('today-btn').innerHTML = `📅 ${langData.todayText}`;
+    
+    // Update settings modal texts if it's open
+    if (window.settingsManager) {
+        window.settingsManager.updateLanguageTexts();
+        window.settingsManager.closeSettings(); // Force refresh
+        window.settingsManager.openSettings();
+    }
+    
+    // Update weekdays in calendar header
+    const weekdays = document.querySelectorAll('.weekdays div');
+    if (weekdays.length === 7) {
+        weekdays.forEach((day, index) => {
+            day.textContent = langData.weekdays[index];
+        });
+    }
     
     // Update calendar immediately
     renderCalendar(langData);
@@ -326,4 +418,4 @@ function changeLanguage(lang) {
     return langData;
 }
 // Initialize language
-let currentLanguage = 'en';
+/* let currentLanguage = 'en'; */
