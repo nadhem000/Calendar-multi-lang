@@ -17,61 +17,42 @@ class AppManager {
 		this.setupPushNotifications();
 	}
 	async performSafeCleanup() {
-		try {
-			// 1. Cache cleanup
-			const cacheNames = await caches.keys();
-			await Promise.all(
-				cacheNames.map(name => {
-					if (name !== this.CACHE_NAME && 
-						!name.includes('notes') && 
-						!name.includes('prefs') && 
-						name !== 'large-assets-v1') {
-						return caches.delete(name);
-					}
-					return Promise.resolve();
-				})
-			);
-			
-			// 2. IndexedDB cleanup with transaction error handling
-			try {
-				const db = await this.openDB();
-				const tx = db.transaction('attachments', 'readwrite');
-				const store = tx.objectStore('attachments');
-				const index = store.index('timestamp');
-				
-				tx.onerror = (event) => {
-					console.error('Cleanup transaction error:', event.target.error);
-				};
-				
-				return new Promise((resolve, reject) => {
-					const request = index.openCursor(IDBKeyRange.upperBound(
-						Date.now() - 30 * 24 * 60 * 60 * 1000
-					));
-					
-					request.onsuccess = (event) => {
-						const cursor = event.target.result;
-						if (cursor) {
-							cursor.delete().onsuccess = () => {
-								cursor.continue();
-							};
-							} else {
-							resolve();
-						}
-					};
-					
-					request.onerror = (event) => {
-						console.error('Cursor error:', event.target.error);
-						reject(event.target.error);
-					};
-				});
-				} catch (error) {
-				console.error('IndexedDB cleanup error:', error);
-			}
-			} catch (error) {
-			console.error('Cleanup failed:', error);
-			showToast(translations[currentLanguage].cleanupError);
-		}
-	}
+    const loading = showLoading();
+    try {
+        // 1. Clear notes older than 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        Object.keys(window.notes).forEach(dateKey => {
+            const noteDate = new Date(dateKey);
+            if (noteDate < sixMonthsAgo) {
+                delete window.notes[dateKey];
+            }
+        });
+
+        // 2. Clear old IndexedDB attachments (30+ days old)
+        const db = await this.openDB();
+        const tx = db.transaction('attachments', 'readwrite');
+        const store = tx.objectStore('attachments');
+        const index = store.index('timestamp');
+        
+        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        let cursor = await index.openCursor(IDBKeyRange.upperBound(thirtyDaysAgo));
+        
+        while (cursor) {
+            await cursor.delete();
+            cursor = await cursor.continue();
+        }
+
+        saveNotes();
+        showToast(translations[currentLanguage].storageCleared);
+    } catch (error) {
+        console.error('Cleanup failed:', error);
+        showToast(translations[currentLanguage].storageError);
+    } finally {
+        hideLoading(loading);
+    }
+}
     async withRetry(operation, maxRetries = 3, delay = 100) {
         let lastError;
         for (let i = 0; i < maxRetries; i++) {
@@ -106,44 +87,76 @@ class AppManager {
 		updateOnlineStatus();
 	}
 	async registerServiceWorker() {
-		const isLocalEnvironment = window.location.protocol === 'file:' || 
-		window.location.hostname === 'localhost' || 
-		window.location.hostname === '127.0.0.1';
-		
-		if (isLocalEnvironment) {
-			console.log('Local environment detected - skipping Service Worker');
-			return;
-		}
-		
-		if ('serviceWorker' in navigator) {
-			try {
-				const registration = await navigator.serviceWorker.register('./sw.js');
-				registration.addEventListener('updatefound', () => {
-					const newWorker = registration.installing;
-					newWorker.addEventListener('statechange', () => {
-						if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-							this.showUpdateNotification();
-						}
-					});
-				});
-				if (registration.waiting) {
-					this.showUpdateNotification();
-				}
-				if (registration.active) {
-					registration.active.postMessage({ 
-						type: 'INIT', 
-						cacheName: this.CACHE_NAME,
-						currentLanguage: window.currentLanguage || 'en' //  fallback
-					});
-				}
-				navigator.serviceWorker.addEventListener('controllerchange', () => {
-					window.location.reload();
-				});
-				} catch (error) {
-				console.error('ServiceWorker registration failed:', error);
-			}
-		}
-	}
+    const isLocalEnvironment = window.location.protocol === 'file:' || 
+        window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1';
+    
+    if (isLocalEnvironment) {
+        console.log('Local environment detected - skipping Service Worker');
+        return;
+    }
+    
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('./sw.js');
+            
+            // Version synchronization handling
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        const autoUpdate = localStorage.getItem('autoUpdate') === 'true';
+                        const lang = translations[currentLanguage].syncOptions;
+                        
+                        if (autoUpdate) {
+                            // Auto-update flow
+                            showToast(lang.updating);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            // Notification-only flow
+                            const notification = document.createElement('div');
+                            notification.className = 'update-notification';
+                            notification.innerHTML = `
+                                <p>${lang.newVersion}</p>
+                                <button id="reload-now">${translations[currentLanguage].reload || 'Reload'}</button>
+                            `;
+                            document.body.appendChild(notification);
+                            
+                            document.getElementById('reload-now').addEventListener('click', () => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                });
+            });
+
+            if (registration.waiting) {
+                if (localStorage.getItem('autoUpdate') === 'true') {
+                    window.location.reload();
+                }
+            }
+
+            if (registration.active) {
+                registration.active.postMessage({ 
+                    type: 'INIT', 
+                    currentLanguage: window.currentLanguage || 'en'
+                });
+            }
+            
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (localStorage.getItem('autoUpdate') === 'true') {
+                    window.location.reload();
+                }
+            });
+            
+        } catch (error) {
+            console.error('ServiceWorker registration failed:', error);
+        }
+    }
+}
 	async cacheAssets() {
 		if ('caches' in window) {
 			try {
@@ -192,73 +205,90 @@ class AppManager {
 			throw error;
 		}
 	}
-	openDB() {
-		return new Promise((resolve, reject) => {
-			const request = indexedDB.open(this.dbName, this.dbVersion);
-			
-			request.onupgradeneeded = (e) => {
-				const db = e.target.result;
-				const oldVersion = e.oldVersion || 0; // Handle first creation (oldVersion=0)
-				// Migration handling
-				if (oldVersion < 1) {
-					// Initial version
-					db.createObjectStore('attachments', { keyPath: 'id' });
-				}
-				
-				if (oldVersion < 2) {
-					// Version 2 adds timestamp index
-					const tx = e.target.transaction;
-					const store = tx.objectStore('attachments');
-					store.createIndex('timestamp', 'timestamp', { unique: false });
-				}
-				
-				if (oldVersion < 3) {
-					// Version 3 adds SYNC_QUEUE
-					if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
-						db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
-					}
-				}
-			};
-			request.onerror = (event) => {
-				console.error('Database error:', event.target.error);
-				reject(new Error(`Database error: ${event.target.error.message}`));
-			};
-			
-			request.onblocked = () => {
-				console.warn('Database access blocked');
-				reject(new Error('Database access blocked by another connection'));
-			};
-			
-			request.onupgradeneeded = (e) => {
-				const db = e.target.result;
-				try {
-					if (!db.objectStoreNames.contains('attachments')) {
-						const store = db.createObjectStore('attachments', { keyPath: 'id' });
-						store.createIndex('timestamp', 'timestamp', { unique: false });
-					}
-					if (!db.objectStoreNames.contains('SYNC_QUEUE')) {
-						db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
-					}
-					} catch (error) {
-					console.error('Database upgrade error:', error);
-					reject(error);
-				}
-			};
-			
-			request.onsuccess = (e) => {
-				const db = e.target.result;
-				
-				// error handling for database operations
-				db.onerror = (event) => {
-					console.error('Database operation error:', event.target.error);
-				};
-				
-				resolve(db);
-			};
-			request.onerror = () => reject('IndexedDB open failed');
-			request.onsuccess = (e) => resolve(e.target.result);
-		});
-	}
+	async openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(this.dbName, this.dbVersion);
+        
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            const oldVersion = e.oldVersion || 0;
+            
+            // Initial version
+            if (oldVersion < 1) {
+                const attachmentsStore = db.createObjectStore('attachments', { keyPath: 'id' });
+                attachmentsStore.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+            
+            // Version 2 adds SYNC_QUEUE
+            if (oldVersion < 2) {
+                db.createObjectStore('SYNC_QUEUE', { autoIncrement: true });
+            }
+            
+            // Version 3 adds sync metadata
+            if (oldVersion < 3) {
+                if (!db.objectStoreNames.contains('sync_metadata')) {
+                    const metaStore = db.createObjectStore('sync_metadata', { keyPath: 'key' });
+                    metaStore.createIndex('lastSynced', 'lastSynced', { unique: false });
+                }
+            }
+        };
+        
+        request.onsuccess = (e) => {
+            const db = e.target.result;
+            
+            // Storage synchronization if enabled
+            if (localStorage.getItem('syncStorage') === 'true') {
+                this.syncStorageWithDB(db).catch(console.error);
+            }
+            
+            db.onerror = (event) => {
+                console.error('Database error:', event.target.error);
+            };
+            
+            resolve(db);
+        };
+        
+        request.onerror = (event) => {
+            reject(`IndexedDB open failed: ${event.target.error}`);
+        };
+    });
+}
+
+async syncStorageWithDB(db) {
+    if (localStorage.getItem('syncStorage') !== 'true') return;
+    // Sync notes from localStorage to IndexedDB
+    const notes = JSON.parse(localStorage.getItem('calendarNotes') || '{}');
+    const tx = db.transaction(['attachments', 'sync_metadata'], 'readwrite');
+    
+    // Store notes in IndexedDB
+    const metaStore = tx.objectStore('sync_metadata');
+    await metaStore.put({ 
+        key: 'last_storage_sync', 
+        value: notes,
+        lastSynced: Date.now() 
+    });
+    
+    // Sync attachments from IndexedDB to localStorage (for fallback)
+    const attachments = [];
+    const attachmentsStore = tx.objectStore('attachments');
+    const cursorRequest = attachmentsStore.openCursor();
+    
+    cursorRequest.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+            attachments.push(cursor.value);
+            cursor.continue();
+        } else {
+            // Store attachments metadata in localStorage
+            localStorage.setItem('attachments_meta', JSON.stringify({
+                count: attachments.length,
+                lastUpdated: Date.now()
+            }));
+        }
+    };
+    
+    await tx.complete;
+}
 	setupInstallPrompt() {
 		let deferredPrompt;
 		
@@ -371,36 +401,39 @@ class AppManager {
 		}
 	}
 	// limit sync frequency
-	async setupBackgroundSync() {
-		if ('SyncManager' in window) {
-			try {
-				const registration = await navigator.serviceWorker.ready;
-				// Check last sync time
-				const lastSync = localStorage.getItem('lastSync');
-				if (!lastSync || Date.now() - parseInt(lastSync) > 6 * 60 * 60 * 1000) {
-					await registration.sync.register(this.BACKGROUND_SYNC_TAG);
-					localStorage.setItem('lastSync', Date.now().toString());
-				}
-				} catch (error) {
-				console.log('Background Sync not supported:', error);
-			}
-		}
-	}
-	async registerPeriodicSync() {
-		if ('PeriodicSyncManager' in window) {
-			try {
-				const status = await navigator.permissions.query({name: 'periodic-background-sync'});
-				if (status.state === 'granted') {
-					const registration = await navigator.serviceWorker.ready;
-					await registration.periodicSync.register(this.PERIODIC_SYNC_TAG, {
-						minInterval: 24 * 60 * 60 * 1000
-					});
-				}
-				} catch (error) {
-				console.log('Periodic Sync not supported:', error);
-			}
-		}
-	}
+async setupBackgroundSync() {
+    if (localStorage.getItem('syncStorage') !== 'true') return;
+    
+    if ('SyncManager' in window) {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const lastSync = localStorage.getItem('lastSync');
+            if (!lastSync || Date.now() - parseInt(lastSync) > 6 * 60 * 60 * 1000) {
+                await registration.sync.register(this.BACKGROUND_SYNC_TAG);
+                localStorage.setItem('lastSync', Date.now().toString());
+            }
+        } catch (error) {
+            console.log('Background Sync not supported:', error);
+        }
+    }
+}
+async registerPeriodicSync() {
+    if (localStorage.getItem('autoUpdate') !== 'true') return;
+    
+    if ('PeriodicSyncManager' in window) {
+        try {
+            const status = await navigator.permissions.query({name: 'periodic-background-sync'});
+            if (status.state === 'granted') {
+                const registration = await navigator.serviceWorker.ready;
+                await registration.periodicSync.register(this.PERIODIC_SYNC_TAG, {
+                    minInterval: 24 * 60 * 60 * 1000
+                });
+            }
+        } catch (error) {
+            console.log('Periodic Sync not supported:', error);
+        }
+    }
+}
 	async updateWidget() {
 		if ('updateWidgets' in navigator) {
 			try {
@@ -516,7 +549,7 @@ class AppManager {
 	sanitizeURL(url) {
 		try {
 			const parsed = new URL(url);
-			// Allow both http/https and your custom protocol
+			// Allow both http/https and custom protocol
 			if (!['https:', 'http:', 'web+calmultilang:'].includes(parsed.protocol)) {
 				return null;
 			}
@@ -528,15 +561,30 @@ class AppManager {
 			return null;
 		}
 	}
-	async checkStorageUsage() {
-		if ('storage' in navigator && 'estimate' in navigator.storage) {
-			const estimate = await navigator.storage.estimate();
-			const usageRatio = estimate.usage / estimate.quota;
-			if (usageRatio > 0.8) {
-				await this.cleanupOldData();
-			}
-		}
-	}
+	
+async checkStorageUsage() {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const estimate = await navigator.storage.estimate();
+        const usageRatio = estimate.usage / estimate.quota;
+        
+        // Update storage indicator UI
+        this.updateStorageUI(usageRatio);
+
+        // New emergency handling
+        if (usageRatio > 0.9) {
+            const emergencyCleanEnabled = localStorage.getItem('emergencyCleanEnabled') === 'true';
+            
+            if (emergencyCleanEnabled) {
+                showToast(translations[currentLanguage].storageClearing);
+                await this.performSafeCleanup();
+            } else {
+                if (confirm(translations[currentLanguage].storageWarning90)) {
+                    await this.performSafeCleanup();
+                }
+            }
+        }
+    }
+}
 	static async processFile(file) {
 		try {
 			const result = await this.storeImage(file);
@@ -546,6 +594,26 @@ class AppManager {
 			throw error;
 		}
 	}
+async checkSyncQueue() {
+    if (localStorage.getItem('syncStorage') !== 'true') return;
+    
+    try {
+        const db = await this.openDB();
+        const tx = db.transaction('SYNC_QUEUE', 'readonly');
+        const count = await tx.objectStore('SYNC_QUEUE').count();
+        
+        if (count > 0) {
+            showToast(translations[currentLanguage].syncProgress || 'Sync in progress...');
+            if ('SyncManager' in window) {
+                const registration = await navigator.serviceWorker.ready;
+                await registration.sync.register(this.BACKGROUND_SYNC_TAG);
+            }
+        }
+    } catch (error) {
+        console.error('Sync queue check failed:', error);
+    }
+}
+
 }
 class FileManager {
 	static async storeFile(file) {
@@ -686,6 +754,9 @@ class FileManager {
 	}
 }
 document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus(); // Initial check
 	handleAppRouting();
 	window.appManager = new AppManager();
 	window.appManager.init().catch(error => {

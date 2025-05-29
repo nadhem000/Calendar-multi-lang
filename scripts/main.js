@@ -228,6 +228,21 @@ function safeRenderCalendar() {
         showToast('Calendar error - please refresh');
 	}
 }
+function updateOnlineStatus() {
+    const statusElement = document.getElementById('online-status');
+    if (!statusElement) return;
+    
+    if (navigator.onLine) {
+        statusElement.className = 'online';
+        statusElement.title = translations[currentLanguage].onlineStatus || 'Online';
+    } else {
+        statusElement.className = 'offline';
+        statusElement.title = translations[currentLanguage].offlineStatus || 'Offline';
+        if (localStorage.getItem('syncStorage') === 'true') {
+            showToast(translations[currentLanguage].offlineSave || 'Working offline - changes will sync when online');
+        }
+    }
+}
 // Performance metrics
 window.addEventListener('load', () => {
   setTimeout(() => {

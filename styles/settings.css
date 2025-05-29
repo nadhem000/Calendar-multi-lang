@@ -108,6 +108,7 @@
     font-weight: 500;
     color: #333;
     position: relative;
+    cursor: pointer;
 }
 
 .settings-toggle-tooltip {
@@ -125,6 +126,7 @@
     transform: translateX(-50%);
     opacity: 0;
     transition: opacity 0.3s;
+    font-size: 0.8em;
 }
 
 .settings-toggle-tooltip::after {
@@ -139,6 +141,10 @@
 }
 
 .settings-toggle-container:hover .settings-toggle-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.settings-toggle-label:hover {
     visibility: visible;
     opacity: 1;
 }
@@ -213,4 +219,108 @@
 #memory-monitor-view.hidden,
 #clear-partial-view.hidden {
     display: none !important;
+}
+
+.settings-sync-options-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.settings-sync-option {
+    margin: 15px 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.settings-sync-option:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.settings-sync-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-sync-slider {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #ccc;
+    border-radius: 24px;
+    transition: .4s;
+}
+
+.settings-sync-slider:before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 2px;
+    bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .settings-sync-slider {
+    background: #4CAF50;
+}
+
+input:checked + .settings-sync-slider:before {
+    transform: translateX(26px);
+}
+
+.settings-sync-label {
+    font-weight: 500;
+    color: #333;
+    position: relative;
+}
+
+.settings-tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85em;
+    font-weight: normal;
+}
+
+.settings-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.settings-sync-toggle:hover .settings-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

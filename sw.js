@@ -10,7 +10,7 @@ const isLocalEnvironment = (() => {
 })();
 let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
-const WIDGET_CACHE_NAME = 'widget-data-cache-v4';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v5';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';
@@ -23,7 +23,7 @@ const LARGE_ASSETS = [
 // Update the openDB function to match version:
 const openDB = () => {
 	return new Promise((resolve, reject) => {
-		const request = indexedDB.open('CalendarAttachments', 2); // Match version number
+		const request = indexedDB.open('CalendarAttachments', 5); // Match version number
 		
 		request.onupgradeneeded = (e) => {
 			const db = e.target.result;
@@ -319,9 +319,12 @@ async function safeFetch(url) {
 async function handleApiFetch(request) {
     const cache = await caches.open(`${CACHE_NAME}-${currentLanguage}`);
     try {
-        const networkResponse = await fetch(request);
-        await cache.put(request, networkResponse.clone());
-        return networkResponse;
+        if (localStorage.getItem('syncStorage') === 'true') {
+            const networkResponse = await fetch(request);
+            await cache.put(request, networkResponse.clone());
+            return networkResponse;
+        }
+        throw new Error('Sync disabled by user');
     } catch {
         const cached = await cache.match(request);
         return cached || Response.error();
@@ -419,7 +422,10 @@ self.addEventListener('periodicsync', (event) => {
 	}
 });
 
+
 async function processSyncQueue() {
+    if (localStorage.getItem('syncStorage') !== 'true') return;
+    
     const db = await openDB();
     const tx = db.transaction(SYNC_QUEUE, 'readwrite');
     const queue = tx.objectStore(SYNC_QUEUE);
@@ -432,24 +438,26 @@ async function processSyncQueue() {
                 method: 'POST',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
-			});
+            });
             await cursor.delete();
-			} catch (error) {
+        } catch (error) {
             console.error('Sync failed:', error);
-		}
+        }
         cursor = await cursor.continue();
-	}
+    }
 }
 
 async function backgroundUpdate() {
+    if (localStorage.getItem('autoUpdate') !== 'true') return;
+    
     try {
         const updates = await fetch('/api/updates');
         const data = await updates.json();
         const cache = await caches.open(CACHE_NAME);
         await cache.put('/data/notes', new Response(JSON.stringify(data)));
-		} catch (error) {
+    } catch (error) {
         console.error('Background update failed:', error);
-	}
+    }
 }
 
 self.addEventListener('push', (event) => {

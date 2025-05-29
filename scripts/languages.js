@@ -121,7 +121,21 @@ const translations = {
 		deleteError: "Error deleting",
 		seeMore: "See More",
 		localStorageWarning: "Clearing localStorage will reset all preferences and cached data",
-periodicActivities: "Periodic Activities"
+periodicActivities: "Periodic Activities",
+emergencyCleanup: "Auto-clean when storage full",
+emergencyCleanupTooltip: "Automatically cleans old data when storage reaches 90% capacity",
+storageWarning90: "Your storage is 90% full. Clean old data?",
+storageClearing: "Cleaning old data to free space...",
+syncOptions: {
+    storage: "Sync Storage (LocalStorage ↔ DB)",
+    storageTooltip: "Keep LocalStorage and IndexedDB in sync automatically",
+    version: "Auto-update App",
+    versionTooltip: "Automatically install new versions when available",
+    calendar: "Sync Calendar Systems",
+    calendarTooltip: "Keep Gregorian and Hijri dates synchronized",
+    newVersion: "New version available!",
+    updating: "Updating to new version..."
+}
 	},
     ar: {
         title: "التقويم",
@@ -244,7 +258,21 @@ periodicActivities: "Periodic Activities"
 		deleteError: "خطأ في الحذف",
 		seeMore: "عرض المزيد",
 		localStorageWarning: "مسح التخزين المحلي سيعيد تعيين جميع التفضيلات والبيانات المخزنة مؤقتًا",
-periodicActivities: "العمليات الدورية"
+periodicActivities: "العمليات الدورية",
+emergencyCleanup: "تنظيف تلقائي عند امتلاء التخزين",
+emergencyCleanupTooltip: "يقوم بتنظيف البيانات القديمة تلقائيًا عندما يصل التخزين إلى 90% من السعة",
+storageWarning90: "التخزين ممتلئ بنسبة 90%. هل تريد تنظيف البيانات القديمة؟",
+storageClearing: "جاري تنظيف البيانات القديمة لتوفير مساحة...",
+syncOptions: {
+    storage: "مزامنة التخزين (LocalStorage ↔ قاعدة البيانات)",
+    storageTooltip: "الحفاظ على مزامنة LocalStorage و IndexedDB تلقائيًا",
+    version: "تحديث التطبيق التلقائي",
+    versionTooltip: "تثبيت الإصدارات الجديدة تلقائيًا عند توفرها",
+    calendar: "مزامنة أنظمة التقويم",
+    calendarTooltip: "الحفاظ على تواريخ التقويم الميلادي والهجري متزامنة",
+    newVersion: "إصدار جديد متاح!",
+    updating: "جارٍ التحديث إلى الإصدار الجديد..."
+}
 	},
     fr: {
         title: "Calendrier",
@@ -367,7 +395,21 @@ periodicActivities: "العمليات الدورية"
 		deleteError: "Erreur de suppression",
 		seeMore: "Voir plus",
 		localStorageWarning: "Effacer le stockage local réinitialisera toutes les préférences et données en cache",
-periodicActivities: "activitées periodiques"
+periodicActivities: "activitées periodiques",
+emergencyCleanup: "Nettoyage automatique en cas de stockage plein",
+emergencyCleanupTooltip: "Nettoie automatiquement les anciennes données lorsque le stockage atteint 90% de capacité",
+storageWarning90: "Votre stockage est plein à 90%. Nettoyer les anciennes données ?",
+storageClearing: "Nettoyage des anciennes données pour libérer de l'espace...",
+syncOptions: {
+    storage: "Synchroniser le stockage (LocalStorage ↔ DB)",
+    storageTooltip: "Garder LocalStorage et IndexedDB synchronisés automatiquement",
+    version: "Mise à jour automatique",
+    versionTooltip: "Installer automatiquement les nouvelles versions lorsqu'elles sont disponibles",
+    calendar: "Synchroniser les systèmes de calendrier",
+    calendarTooltip: "Garder les dates grégoriennes et hijri synchronisées",
+    newVersion: "Nouvelle version disponible !",
+    updating: "Mise à jour vers la nouvelle version..."
+}
 	}
 };
 
