@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="manifest" href="./manifest.json">
+		<meta http-equiv="Content-Security-Policy" 
+		content="default-src 'self' https://*.netlify.app;
+		script-src 'self' 'unsafe-inline';
+		style-src 'self' 'unsafe-inline';
+		img-src 'self' data: https:;
+		connect-src 'self' https://*.netlify.app;
+		form-action 'self';
+		base-uri 'self';
+		frame-src 'none';">
+		<title>Calendar</title>
+		<link rel="stylesheet" href="styles/main.css">
+		<link rel="stylesheet" href="styles/settings.css">
+		<!-- Font Awesome CDN removed -->
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1 class="title">Calendar</h1>
+				<div class="language-selector">
+					<select id="language-select">
+						<option value="en">English</option>
+						<option value="ar">العربية (Arabic)</option>
+						<option value="fr">Français (French)</option>
+					</select>
+				</div><!-- Calendar System Selector -->
+				<select id="calendar-system">
+					<option value="gregorian">Gregorian</option>
+					<option value="hijri">Hijri</option>
+				</select>
+				<button id="settings-btn" class="settings-button" title="Settings">
+					⚙️
+				</button>
+			</header>
+			
+			<div class="main-content">
+				<aside class="sidebar">
+					<div class="icon" id="plate-icon" title="Plate">
+						🍽️
+					</div>
+					<div class="icon" id="health-icon" title="Health">
+						❤️
+					</div>
+					<div class="icon" id="mechanics-icon" title="Mechanics">
+						⚙️
+					</div>
+				</aside>
+				
+				<main class="calendar-container">
+					<div class="calendar-header">
+						<button id="prev-month">◀</button>
+						<h2 id="month-year-display">Month Year</h2>
+						<button id="next-month">▶</button>
+						<button id="today-btn" class="today-button" title="Return to today">
+							📅 Today
+						</button>
+					</div>
+					<div id="today-date-label" class="today-date"></div>
+					<div class="weekdays">
+						<div>Sun</div>
+						<div>Mon</div>
+						<div>Tue</div>
+						<div>Wed</div>
+						<div>Thu</div>
+						<div>Fri</div>
+						<div>Sat</div>
+					</div>
+					<div class="days" id="calendar-days"></div>
+				</main>
+			</div>
+		</div>
+		<div id="tips-modal" class="tips-modal">
+			<!-- Content will be injected by JavaScript -->
+		</div>
+		<div id="app-controls">
+			<button id="install-btn" style="display:none;"></button>
+			<div id="storage-indicator-container">
+				<div id="storage-indicator"></div>
+			</div>
+			<div id="online-status" title="Online"></div>
+		</div>
+		<div id="settings-modal" class="modal">
+			<div class="modal-content">
+				<span class="close-modal">&times;</span>
+				<h2 id="settings-title">Settings</h2>
+				
+				<div class="settings-tabs">
+					<button class="settings-tab-btn active" data-tab="notifications">Notifications</button>
+					<button class="settings-tab-btn" data-tab="memory">Memory</button>
+					<button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
+				</div>
+				
+				<div id="notifications-tab" class="settings-tab-content active">
+					<h3>Notification Settings</h3>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="daily-tips-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">Daily Tips</div>
+									<div class="tooltip">Receive daily tips notifications at 9 AM</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="note-reminders-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">Note Reminders</div>
+									<div class="tooltip">Get reminders about your daily notes</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="updates-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">App Updates</div>
+									<div class="tooltip">Notify about new app versions</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="memory-tab" class="settings-tab-content">
+					<h3>Memory Management</h3>
+				<button id="memory-monitor-btn">Memory Monitor</button>
+				<button id="clear-partial-btn">Clear Partial Data</button>
+				<button id="clear-all-btn">Clear All Data</button>
+				
+				<div id="memory-monitor-view" class="hidden">
+					<!-- Will be populated by JavaScript -->
+				</div>
+				
+				<div id="clear-partial-view" class="hidden">
+					<!-- Will be populated by JavaScript -->
+				</div>
+</div>
+<div id="periodic-tab" class="settings-tab-content">
+	<h3>Periodic Activities</h3>
+	<!-- The auto-clean toggle will be moved here by JavaScript -->
+</div>
+</div>
+</div>
+<script src="scripts/languages.js"></script>
+<script src="scripts/config.js"></script>
+<script src="scripts/app-manager.js"></script>
+<script src="scripts/converter.js"></script>
+<script src="scripts/calendar.js"></script>
+<script src="scripts/notes.js"></script>
+<script src="scripts/addons.js"></script>
+<script src="scripts/settings.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>
