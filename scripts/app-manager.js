@@ -9,14 +9,14 @@ class AppManager {
 		
 	}
 	async init() {
-    await this.registerServiceWorker();
-    this.setupInstallPrompt();
-    this.setupStorageManagement();
-    this.setupBackgroundSync();
-    this.registerPeriodicSync();
-    this.setupPushNotifications();
-    this.checkNotificationSettings();
-    this.setupNotificationSettings(); 
+		await this.registerServiceWorker();
+		this.setupInstallPrompt();
+		this.setupStorageManagement();
+		this.setupBackgroundSync();
+		this.registerPeriodicSync();
+		this.setupPushNotifications();
+		this.checkNotificationSettings();
+		this.setupNotificationSettings(); 
 	}
 	async performSafeCleanup() {
 		const loading = showLoading();
@@ -506,76 +506,76 @@ class AppManager {
 			throw error;
 		}
 	}
-async checkNotificationSettings() {
-    // Only proceed if notifications are enabled in settings
-    if (localStorage.getItem('dailyTipsEnabled') === 'true') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            this.scheduleDailyNotifications();
-        }
+	async checkNotificationSettings() {
+		// Only proceed if notifications are enabled in settings
+		if (localStorage.getItem('dailyTipsEnabled') === 'true') {
+			const permission = await Notification.requestPermission();
+			if (permission === 'granted') {
+				this.scheduleDailyNotifications();
+			}
+		}
+		
+		if (localStorage.getItem('noteRemindersEnabled') === 'true') {
+			const permission = await Notification.requestPermission();
+			if (permission === 'granted') {
+				this.setupNoteReminders();
+			}
+		}
+	}
+	async setupNotificationSettings() {
+    // Initialize with default values if not set
+    if (localStorage.getItem('dailyTipsEnabled') === null) {
+        localStorage.setItem('dailyTipsEnabled', 'false');
     }
+    if (localStorage.getItem('noteRemindersEnabled') === null) {
+        localStorage.setItem('noteRemindersEnabled', 'false');
+    }
+    if (localStorage.getItem('appUpdatesEnabled') === null) {
+        localStorage.setItem('appUpdatesEnabled', 'false');
+    }
+
+    // Set initial toggle states
+    document.getElementById('daily-tips-toggle').checked = 
+        localStorage.getItem('dailyTipsEnabled') === 'true';
+    document.getElementById('note-reminders-toggle').checked = 
+        localStorage.getItem('noteRemindersEnabled') === 'true';
+    document.getElementById('updates-toggle').checked = 
+        localStorage.getItem('appUpdatesEnabled') === 'true';
+
+    // Add event listeners
+    document.getElementById('daily-tips-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('dailyTipsEnabled', e.target.checked);
+        this.handleNotificationPermission(e.target.checked, 'dailyTipsEnabled');
+    });
     
-    if (localStorage.getItem('noteRemindersEnabled') === 'true') {
+    document.getElementById('note-reminders-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('noteRemindersEnabled', e.target.checked);
+        this.handleNotificationPermission(e.target.checked, 'noteRemindersEnabled');
+    });
+    
+    document.getElementById('updates-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('appUpdatesEnabled', e.target.checked);
+    });
+}
+async handleNotificationPermission(enable, settingType) {
+    if (enable) {
         const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            this.setupNoteReminders();
+        if (permission !== 'granted') {
+            // Revert the toggle if permission denied
+            document.getElementById(`${settingType.replace('Enabled', '-toggle')}`).checked = false;
+            localStorage.setItem(settingType, 'false');
+            showToast(translations[currentLanguage].notificationPermissionRequired || 
+                    "Please enable notifications in browser settings");
+        } else {
+            // Start the appropriate notification service
+            if (settingType === 'dailyTipsEnabled') {
+                this.scheduleDailyNotifications();
+            } else if (settingType === 'noteRemindersEnabled') {
+                this.setupNoteReminders();
+            }
         }
     }
 }
-	async setupNotificationSettings() {
-		// Load saved preferences
-		document.getElementById('daily-tips-toggle').checked = 
-        localStorage.getItem('dailyTipsEnabled') === 'true';
-		document.getElementById('note-reminders-toggle').checked = 
-        localStorage.getItem('noteRemindersEnabled') === 'true';
-		document.getElementById('updates-toggle').checked = 
-        localStorage.getItem('appUpdatesEnabled') === 'true';
-		
-		// Add event listeners
-		document.getElementById('daily-tips-toggle').addEventListener('change', (e) => {
-			localStorage.setItem('dailyTipsEnabled', e.target.checked);
-			if (e.target.checked) {
-				this.scheduleDailyNotifications();
-				} else {
-				// Clear any scheduled notifications
-				if ('Notification' in window) {
-					Notification.requestPermission().then(() => {
-						navigator.serviceWorker.getRegistration().then(reg => {
-							if (reg) {
-								reg.getNotifications({ tag: 'daily-tip' }).then(notifications => {
-									notifications.forEach(n => n.close());
-								});
-							}
-						});
-					});
-				}
-			}
-		});
-		
-		document.getElementById('note-reminders-toggle').addEventListener('change', (e) => {
-			localStorage.setItem('noteRemindersEnabled', e.target.checked);
-			if (e.target.checked) {
-				this.setupNoteReminders();
-				} else {
-				// Clear any scheduled reminders
-				if ('Notification' in window) {
-					Notification.requestPermission().then(() => {
-						navigator.serviceWorker.getRegistration().then(reg => {
-							if (reg) {
-								reg.getNotifications({ tag: 'notes-reminder' }).then(notifications => {
-									notifications.forEach(n => n.close());
-								});
-							}
-						});
-					});
-				}
-			}
-		});
-		
-		document.getElementById('updates-toggle').addEventListener('change', (e) => {
-			localStorage.setItem('appUpdatesEnabled', e.target.checked);
-		});
-	}
 	async setupPushNotifications() {
 		if ('Notification' in window && 'serviceWorker' in navigator) {
 			try {
@@ -590,134 +590,134 @@ async checkNotificationSettings() {
 			}
 		}
 	}
-async scheduleDailyNotifications() {
-    // Double check the setting and permission
-    if (localStorage.getItem('dailyTipsEnabled') !== 'true') return;
-    
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    
-    const now = new Date();
-    const firstNotification = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        9, 0, 0
-    );
-    
-    if (now > firstNotification) {
-        firstNotification.setDate(firstNotification.getDate() + 1);
-    }
-    
-    const timeout = firstNotification.getTime() - now.getTime();
-    
-    setTimeout(() => {
-        this.showDailyTipNotification();
-        // Set interval for daily notifications
-        setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
-    }, timeout);
-}
-async showDailyTipNotification() {
-    if (localStorage.getItem('dailyTipsEnabled') !== 'true') return;
-    if (!('Notification' in window) || !window.iconTips || !window.iconTips[currentLanguage]) return;
-    
-    const categories = Object.keys(window.iconTips[currentLanguage]);
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    const tips = window.iconTips[currentLanguage][randomCategory];
-    
-    if (tips && tips.length > 0) {
-        const randomTip = tips[Math.floor(Math.random() * tips.length)];
-        
-        if ('serviceWorker' in navigator) {
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                reg.showNotification(translations[currentLanguage].icons[randomCategory], {
-                    body: `${randomTip.name}: ${randomTip.description}`,
-                    icon: './assets/icons/android/icon-192.png',
-                    tag: 'daily-tip',
-                    badge: './assets/icons/android/icon-72.png'
-                });
-            } catch (error) {
-                console.error('Service Worker notification failed:', error);
-                // Fallback to regular notifications
-                new Notification(translations[currentLanguage].icons[randomCategory], {
-                    body: `${randomTip.name}: ${randomTip.description}`,
-                    icon: './assets/icons/android/icon-192.png',
-                    tag: 'daily-tip'
-                });
-            }
-        } else {
-            new Notification(translations[currentLanguage].icons[randomCategory], {
-                body: `${randomTip.name}: ${randomTip.description}`,
-                icon: './assets/icons/android/icon-192.png',
-                tag: 'daily-tip'
-            });
-        }
-    }
-}
-async setupNoteReminders() {
-    // Double check the setting and permission
-    if (localStorage.getItem('noteRemindersEnabled') !== 'true') return;
-    
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    if (!('Notification' in window)) return;
-    
-    // Clear any existing interval
-    if (this.noteReminderInterval) {
-        clearInterval(this.noteReminderInterval);
-    }
-    
-    // Set up new interval
-    this.noteReminderInterval = setInterval(() => {
-        const today = new Date().toISOString().split('T')[0];
-        if (window.notes && window.notes[today] && window.notes[today].length > 0) {
-            const count = window.notes[today].length;
-            const message = translations[currentLanguage].notesReminder.replace('{count}', count);
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(translations[currentLanguage].title, {
-                        body: message,
-                        icon: './assets/icons/android/icon-192.png',
-                        tag: 'notes-reminder',
-                        badge: './assets/icons/android/icon-72.png'
-                    });
-                });
-            } else {
-                new Notification(translations[currentLanguage].title, {
-                    body: message,
-                    icon: './assets/icons/android/icon-192.png',
-                    tag: 'notes-reminder'
-                });
-            }
-        }
-    }, 24 * 60 * 60 * 1000); // Check once per day
-    
-    // Also check immediately if there are notes for today
-    const today = new Date().toISOString().split('T')[0];
-    if (window.notes && window.notes[today] && window.notes[today].length > 0) {
-        const count = window.notes[today].length;
-        const message = translations[currentLanguage].notesReminder.replace('{count}', count);
-        
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification(translations[currentLanguage].title, {
-                    body: message,
-                    icon: './assets/icons/android/icon-192.png',
-                    tag: 'notes-reminder',
-                    badge: './assets/icons/android/icon-72.png'
-                });
-            });
-        } else {
-            new Notification(translations[currentLanguage].title, {
-                body: message,
-                icon: './assets/icons/android/icon-192.png',
-                tag: 'notes-reminder'
-            });
-        }
-    }
-}
+	async scheduleDailyNotifications() {
+		// Double check the setting and permission
+		if (localStorage.getItem('dailyTipsEnabled') !== 'true') return;
+		
+		const permission = await Notification.requestPermission();
+		if (permission !== 'granted') return;
+		
+		const now = new Date();
+		const firstNotification = new Date(
+			now.getFullYear(),
+			now.getMonth(),
+			now.getDate(),
+			9, 0, 0
+		);
+		
+		if (now > firstNotification) {
+			firstNotification.setDate(firstNotification.getDate() + 1);
+		}
+		
+		const timeout = firstNotification.getTime() - now.getTime();
+		
+		setTimeout(() => {
+			this.showDailyTipNotification();
+			// Set interval for daily notifications
+			setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
+		}, timeout);
+	}
+	async showDailyTipNotification() {
+		if (localStorage.getItem('dailyTipsEnabled') !== 'true') return;
+		if (!('Notification' in window) || !window.iconTips || !window.iconTips[currentLanguage]) return;
+		
+		const categories = Object.keys(window.iconTips[currentLanguage]);
+		const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+		const tips = window.iconTips[currentLanguage][randomCategory];
+		
+		if (tips && tips.length > 0) {
+			const randomTip = tips[Math.floor(Math.random() * tips.length)];
+			
+			if ('serviceWorker' in navigator) {
+				try {
+					const reg = await navigator.serviceWorker.ready;
+					reg.showNotification(translations[currentLanguage].icons[randomCategory], {
+						body: `${randomTip.name}: ${randomTip.description}`,
+						icon: './assets/icons/android/icon-192.png',
+						tag: 'daily-tip',
+						badge: './assets/icons/android/icon-72.png'
+					});
+					} catch (error) {
+					console.error('Service Worker notification failed:', error);
+					// Fallback to regular notifications
+					new Notification(translations[currentLanguage].icons[randomCategory], {
+						body: `${randomTip.name}: ${randomTip.description}`,
+						icon: './assets/icons/android/icon-192.png',
+						tag: 'daily-tip'
+					});
+				}
+				} else {
+				new Notification(translations[currentLanguage].icons[randomCategory], {
+					body: `${randomTip.name}: ${randomTip.description}`,
+					icon: './assets/icons/android/icon-192.png',
+					tag: 'daily-tip'
+				});
+			}
+		}
+	}
+	async setupNoteReminders() {
+		// Double check the setting and permission
+		if (localStorage.getItem('noteRemindersEnabled') !== 'true') return;
+		
+		const permission = await Notification.requestPermission();
+		if (permission !== 'granted') return;
+		if (!('Notification' in window)) return;
+		
+		// Clear any existing interval
+		if (this.noteReminderInterval) {
+			clearInterval(this.noteReminderInterval);
+		}
+		
+		// Set up new interval
+		this.noteReminderInterval = setInterval(() => {
+			const today = new Date().toISOString().split('T')[0];
+			if (window.notes && window.notes[today] && window.notes[today].length > 0) {
+				const count = window.notes[today].length;
+				const message = translations[currentLanguage].notesReminder.replace('{count}', count);
+				
+				if ('serviceWorker' in navigator) {
+					navigator.serviceWorker.ready.then(reg => {
+						reg.showNotification(translations[currentLanguage].title, {
+							body: message,
+							icon: './assets/icons/android/icon-192.png',
+							tag: 'notes-reminder',
+							badge: './assets/icons/android/icon-72.png'
+						});
+					});
+					} else {
+					new Notification(translations[currentLanguage].title, {
+						body: message,
+						icon: './assets/icons/android/icon-192.png',
+						tag: 'notes-reminder'
+					});
+				}
+			}
+		}, 24 * 60 * 60 * 1000); // Check once per day
+		
+		// Also check immediately if there are notes for today
+		const today = new Date().toISOString().split('T')[0];
+		if (window.notes && window.notes[today] && window.notes[today].length > 0) {
+			const count = window.notes[today].length;
+			const message = translations[currentLanguage].notesReminder.replace('{count}', count);
+			
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.ready.then(reg => {
+					reg.showNotification(translations[currentLanguage].title, {
+						body: message,
+						icon: './assets/icons/android/icon-192.png',
+						tag: 'notes-reminder',
+						badge: './assets/icons/android/icon-72.png'
+					});
+				});
+				} else {
+				new Notification(translations[currentLanguage].title, {
+					body: message,
+					icon: './assets/icons/android/icon-192.png',
+					tag: 'notes-reminder'
+				});
+			}
+		}
+	}
 	showUpdateNotification() {
 		if ('Notification' in window && Notification.permission === 'granted') {
 			const notification = new Notification(window.translations[currentLanguage].updateAvailable, {

@@ -137,6 +137,7 @@ const translations = {
 			updating: "Updating to new version..."
 		},
 		notifications: "Notifications",
+notificationPermissionRequired: "Please enable notifications in browser settings",
 dailyTips: "Daily Tips",
 noteReminders: "Note Reminders",
 appUpdates: "App Updates",
@@ -281,6 +282,7 @@ appUpdatesTooltip: "Notify about new app versions"
 			updating: "جارٍ التحديث إلى الإصدار الجديد..."
 		},
 		notifications: "الإشعارات",
+notificationPermissionRequired: "الرجاء تمكين الإشعارات في إعدادات المتصفح",
 dailyTips: "نصائح يومية",
 noteReminders: "تذكير الملاحظات",
 appUpdates: "تحديثات التطبيق",
@@ -425,6 +427,7 @@ appUpdatesTooltip: "إشعار عند توفر تحديثات جديدة"
 			updating: "Mise à jour vers la nouvelle version..."
 		},
 		notifications: "Notifications",
+notificationPermissionRequired: "Veuillez activer les notifications dans les paramètres du navigateur",
 dailyTips: "Conseils Quotidiens",
 noteReminders: "Rappels de Notes",
 appUpdates: "Mises à jour",

@@ -99,6 +99,12 @@ console.log('DOM elements ready:', {
     prevMonthBtn: !!document.getElementById('prev-month'),
     todayBtn: !!document.getElementById('today-btn')
 });
+    // Initialize with default false values if they don't exist
+    ['dailyTipsEnabled', 'noteRemindersEnabled', 'appUpdatesEnabled'].forEach(setting => {
+        if (localStorage.getItem(setting) === null) {
+            localStorage.setItem(setting, 'false');
+        }
+    });
     // Initialize language select
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
