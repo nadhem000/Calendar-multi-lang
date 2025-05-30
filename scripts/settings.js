@@ -18,39 +18,44 @@ class SettingsManager {
 		}
 	}
 	
-    initModal() {
-		// Close modal when clicking X
-		this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
-		
-		// Close when clicking outside modal
-		this.modal.addEventListener('click', (e) => {
-			if (e.target === this.modal) this.closeSettings();
-		});
-		
-		// Tab switching - fixed version
-		document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-			btn.addEventListener('click', () => {
-				// Hide all sub-views when switching tabs
-				document.querySelectorAll('[id$="-view"]').forEach(view => {
-					view.classList.add('hidden');
-				});
-				// Remove active class from all buttons
-				document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
-				// Remove active class from all content
-				document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
-				
-				// Add active class to clicked button
-				btn.classList.add('active');
-				// Show corresponding content
-				const tabId = btn.dataset.tab + '-tab';
-				document.getElementById(tabId).classList.add('active');
-				
-				// Hide any open sub-views when switching tabs
-				document.getElementById('memory-monitor-view').classList.add('hidden');
-				document.getElementById('clear-partial-view').classList.add('hidden');
-			});
-		});
-		
+    // In the initModal method, update the tab switching logic:
+initModal() {
+    // Close modal when clicking X
+    this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
+    
+    // Close when clicking outside modal
+    this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) this.closeSettings();
+    });
+    
+    // Tab switching
+    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+            
+            // Hide all sub-views
+            document.querySelectorAll('[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Remove active class from all content
+            document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            // Show corresponding content
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+    
+    // Make notifications tab active by default
+    document.querySelector('[data-tab="notifications"]').classList.add('active');
+    document.getElementById('notifications-tab').classList.add('active');
+    
 		// Memory management buttons
 		document.getElementById('memory-monitor-btn').addEventListener('click', () => this.showMemoryMonitor());
 		document.getElementById('clear-partial-btn').addEventListener('click', () => this.showPartialClear());
@@ -81,6 +86,27 @@ class SettingsManager {
 		document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
 		document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
 		document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
+    document.querySelector('[data-tab="notifications"]').textContent = lang.notifications || 'Notifications';
+    document.querySelector('#notifications-tab h3').textContent = lang.notifications || 'Notification Settings';
+    
+    const dailyTipsLabel = document.querySelector('#daily-tips-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
+    if (dailyTipsLabel) dailyTipsLabel.textContent = lang.dailyTips || 'Daily Tips';
+    
+    const noteRemindersLabel = document.querySelector('#note-reminders-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
+    if (noteRemindersLabel) noteRemindersLabel.textContent = lang.noteReminders || 'Note Reminders';
+    
+    const updatesLabel = document.querySelector('#updates-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
+    if (updatesLabel) updatesLabel.textContent = lang.appUpdates || 'App Updates';
+    
+    // Update tooltips
+    const dailyTipsTooltip = document.querySelector('#daily-tips-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
+    if (dailyTipsTooltip) dailyTipsTooltip.textContent = lang.dailyTipsTooltip || 'Receive daily tips notifications at 9 AM';
+    
+    const noteRemindersTooltip = document.querySelector('#note-reminders-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
+    if (noteRemindersTooltip) noteRemindersTooltip.textContent = lang.noteRemindersTooltip || 'Get reminders about your daily notes';
+    
+    const updatesTooltip = document.querySelector('#updates-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
+    if (updatesTooltip) updatesTooltip.textContent = lang.appUpdatesTooltip || 'Notify about new app versions';
 	}
 	
     async countObjectStore(db, storeName) {
@@ -948,77 +974,77 @@ class SettingsManager {
 		});
 	}
 	setupSyncToggles() {
-    // First ensure the current language has syncOptions
-    const langData = translations[currentLanguage];
-    if (!langData || !langData.syncOptions) {
-        console.error('Sync options not available for current language');
-        return;
-    }
-
-    const syncOptions = langData.syncOptions;
-    
-    const syncSection = document.createElement('div');
-    syncSection.className = 'settings-sync-options-section';
-    syncSection.innerHTML = `
-    <h3>${translations[currentLanguage].syncTitle || 'Synchronization'}</h3>
-    
-    <div class="settings-sync-option">
-    <label class="settings-sync-toggle">
-    <input type="checkbox" id="sync-storage">
-    <span class="settings-sync-slider"></span>
-    <span class="settings-sync-label">
-    ${syncOptions.storage}
-    <span class="settings-tooltip">${syncOptions.storageTooltip}</span>
-    </span>
-    </label>
-    </div>
-    
-    <div class="settings-sync-option">
-    <label class="settings-sync-toggle">
-    <input type="checkbox" id="sync-version">
-    <span class="settings-sync-slider"></span>
-    <span class="settings-sync-label">
-    ${syncOptions.version}
-    <span class="settings-tooltip">${syncOptions.versionTooltip}</span>
-    </span>
-    </label>
-    </div>
-    
-    <div class="settings-sync-option">
-    <label class="settings-sync-toggle">
-    <input type="checkbox" id="sync-calendar">
-    <span class="settings-sync-slider"></span>
-    <span class="settings-sync-label">
-    ${syncOptions.calendar}
-    <span class="settings-tooltip">${syncOptions.calendarTooltip}</span>
-    </span>
-    </label>
-    </div>
-    `;
-    
-    // Add to periodic tab or create new tab
-    document.getElementById('periodic-tab').appendChild(syncSection);
-    
-    // Load saved preferences
-    document.getElementById('sync-storage').checked = localStorage.getItem('syncStorage') === 'true';
-    document.getElementById('sync-version').checked = localStorage.getItem('autoUpdate') === 'true';
-    document.getElementById('sync-calendar').checked = localStorage.getItem('syncCalendars') === 'true';
-    
-    // Add event listeners
-    document.getElementById('sync-storage').addEventListener('change', (e) => {
-        localStorage.setItem('syncStorage', e.target.checked);
-    });
-    
-    document.getElementById('sync-version').addEventListener('change', (e) => {
-        localStorage.setItem('autoUpdate', e.target.checked);
-    });
-    
-    document.getElementById('sync-calendar').addEventListener('change', (e) => {
-        localStorage.setItem('syncCalendars', e.target.checked);
-        if (e.target.checked) this.syncCalendarSystems();
-    });
-}
-// calendar sync
+		// First ensure the current language has syncOptions
+		const langData = translations[currentLanguage];
+		if (!langData || !langData.syncOptions) {
+			console.error('Sync options not available for current language');
+			return;
+		}
+		
+		const syncOptions = langData.syncOptions;
+		
+		const syncSection = document.createElement('div');
+		syncSection.className = 'settings-sync-options-section';
+		syncSection.innerHTML = `
+		<h3>${translations[currentLanguage].syncTitle || 'Synchronization'}</h3>
+		
+		<div class="settings-sync-option">
+		<label class="settings-sync-toggle">
+		<input type="checkbox" id="sync-storage">
+		<span class="settings-sync-slider"></span>
+		<span class="settings-sync-label">
+		${syncOptions.storage}
+		<span class="settings-tooltip">${syncOptions.storageTooltip}</span>
+		</span>
+		</label>
+		</div>
+		
+		<div class="settings-sync-option">
+		<label class="settings-sync-toggle">
+		<input type="checkbox" id="sync-version">
+		<span class="settings-sync-slider"></span>
+		<span class="settings-sync-label">
+		${syncOptions.version}
+		<span class="settings-tooltip">${syncOptions.versionTooltip}</span>
+		</span>
+		</label>
+		</div>
+		
+		<div class="settings-sync-option">
+		<label class="settings-sync-toggle">
+		<input type="checkbox" id="sync-calendar">
+		<span class="settings-sync-slider"></span>
+		<span class="settings-sync-label">
+		${syncOptions.calendar}
+		<span class="settings-tooltip">${syncOptions.calendarTooltip}</span>
+		</span>
+		</label>
+		</div>
+		`;
+		
+		// Add to periodic tab or create new tab
+		document.getElementById('periodic-tab').appendChild(syncSection);
+		
+		// Load saved preferences
+		document.getElementById('sync-storage').checked = localStorage.getItem('syncStorage') === 'true';
+		document.getElementById('sync-version').checked = localStorage.getItem('autoUpdate') === 'true';
+		document.getElementById('sync-calendar').checked = localStorage.getItem('syncCalendars') === 'true';
+		
+		// Add event listeners
+		document.getElementById('sync-storage').addEventListener('change', (e) => {
+			localStorage.setItem('syncStorage', e.target.checked);
+		});
+		
+		document.getElementById('sync-version').addEventListener('change', (e) => {
+			localStorage.setItem('autoUpdate', e.target.checked);
+		});
+		
+		document.getElementById('sync-calendar').addEventListener('change', (e) => {
+			localStorage.setItem('syncCalendars', e.target.checked);
+			if (e.target.checked) this.syncCalendarSystems();
+		});
+	}
+	// calendar sync
 	syncCalendarSystems() {
 		if (localStorage.getItem('syncCalendars') !== 'true') return;
 		

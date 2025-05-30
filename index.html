@@ -90,37 +90,81 @@
 				<h2 id="settings-title">Settings</h2>
 				
 				<div class="settings-tabs">
-					<button class="settings-tab-btn active" data-tab="memory">Memory</button>
+					<button class="settings-tab-btn active" data-tab="notifications">Notifications</button>
+					<button class="settings-tab-btn" data-tab="memory">Memory</button>
 					<button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
 				</div>
-				<div id="memory-tab" class="settings-tab-content active">
+				
+				<div id="notifications-tab" class="settings-tab-content active">
+					<h3>Notification Settings</h3>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="daily-tips-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">Daily Tips</div>
+									<div class="tooltip">Receive daily tips notifications at 9 AM</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="note-reminders-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">Note Reminders</div>
+									<div class="tooltip">Get reminders about your daily notes</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="settings-notifications-option">
+						<div class="settings-notifications-toggle-container">
+							<div class="settings-notifications-toggle">
+								<input type="checkbox" id="updates-toggle">
+								<div class="settings-notifications-slider"></div>
+								<div class="settings-notifications-label">
+									<div class="label-text">App Updates</div>
+									<div class="tooltip">Notify about new app versions</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="memory-tab" class="settings-tab-content">
 					<h3>Memory Management</h3>
-					<button id="memory-monitor-btn">Memory Monitor</button>
-					<button id="clear-partial-btn">Clear Partial Data</button>
-					<button id="clear-all-btn">Clear All Data</button>
-					
-					<div id="memory-monitor-view" class="hidden">
-						<!-- Will be populated by JavaScript -->
-					</div>
-					
-					<div id="clear-partial-view" class="hidden">
-						<!-- Will be populated by JavaScript -->
-					</div>
+				<button id="memory-monitor-btn">Memory Monitor</button>
+				<button id="clear-partial-btn">Clear Partial Data</button>
+				<button id="clear-all-btn">Clear All Data</button>
+				
+				<div id="memory-monitor-view" class="hidden">
+					<!-- Will be populated by JavaScript -->
 				</div>
-				<div id="periodic-tab" class="settings-tab-content">
-					<h3>Periodic Activities</h3>
-					<!-- The auto-clean toggle will be moved here by JavaScript -->
+				
+				<div id="clear-partial-view" class="hidden">
+					<!-- Will be populated by JavaScript -->
 				</div>
-			</div>
-		</div>
-		<script src="scripts/languages.js"></script>
-		<script src="scripts/config.js"></script>
-		<script src="scripts/app-manager.js"></script>
-		<script src="scripts/converter.js"></script>
-		<script src="scripts/calendar.js"></script>
-		<script src="scripts/notes.js"></script>
-		<script src="scripts/addons.js"></script>
-		<script src="scripts/settings.js"></script>
-		<script src="scripts/main.js"></script>
-	</body>
+</div>
+<div id="periodic-tab" class="settings-tab-content">
+	<h3>Periodic Activities</h3>
+	<!-- The auto-clean toggle will be moved here by JavaScript -->
+</div>
+</div>
+</div>
+<script src="scripts/languages.js"></script>
+<script src="scripts/config.js"></script>
+<script src="scripts/app-manager.js"></script>
+<script src="scripts/converter.js"></script>
+<script src="scripts/calendar.js"></script>
+<script src="scripts/notes.js"></script>
+<script src="scripts/addons.js"></script>
+<script src="scripts/settings.js"></script>
+<script src="scripts/main.js"></script>
+</body>
 </html>

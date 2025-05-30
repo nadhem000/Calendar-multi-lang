@@ -177,6 +177,16 @@ console.log('DOM elements ready:', {
         }
     });
 }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data.type === 'SHOW_TIP' && typeof showTipsModal === 'function') {
+            showTipsModal(event.data.category);
+        } else if (event.data.type === 'SHOW_NOTES' && typeof openNoteModal === 'function') {
+            const date = new Date(event.data.date);
+            openNoteModal(date);
+        }
+    });
+}
     // Initialize with loading indicator
     const loadingOverlay = showLoading();
     
@@ -227,21 +237,6 @@ function safeRenderCalendar() {
         console.error('Calendar render failed:', e);
         showToast('Calendar error - please refresh');
 	}
-}
-function updateOnlineStatus() {
-    const statusElement = document.getElementById('online-status');
-    if (!statusElement) return;
-    
-    if (navigator.onLine) {
-        statusElement.className = 'online';
-        statusElement.title = translations[currentLanguage].onlineStatus || 'Online';
-    } else {
-        statusElement.className = 'offline';
-        statusElement.title = translations[currentLanguage].offlineStatus || 'Offline';
-        if (localStorage.getItem('syncStorage') === 'true') {
-            showToast(translations[currentLanguage].offlineSave || 'Working offline - changes will sync when online');
-        }
-    }
 }
 // Performance metrics
 window.addEventListener('load', () => {

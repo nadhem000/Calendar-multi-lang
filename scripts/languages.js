@@ -121,21 +121,28 @@ const translations = {
 		deleteError: "Error deleting",
 		seeMore: "See More",
 		localStorageWarning: "Clearing localStorage will reset all preferences and cached data",
-periodicActivities: "Periodic Activities",
-emergencyCleanup: "Auto-clean when storage full",
-emergencyCleanupTooltip: "Automatically cleans old data when storage reaches 90% capacity",
-storageWarning90: "Your storage is 90% full. Clean old data?",
-storageClearing: "Cleaning old data to free space...",
-syncOptions: {
-    storage: "Sync Storage (LocalStorage ↔ DB)",
-    storageTooltip: "Keep LocalStorage and IndexedDB in sync automatically",
-    version: "Auto-update App",
-    versionTooltip: "Automatically install new versions when available",
-    calendar: "Sync Calendar Systems",
-    calendarTooltip: "Keep Gregorian and Hijri dates synchronized",
-    newVersion: "New version available!",
-    updating: "Updating to new version..."
-}
+		periodicActivities: "Periodic Activities",
+		emergencyCleanup: "Auto-clean when storage full",
+		emergencyCleanupTooltip: "Automatically cleans old data when storage reaches 90% capacity",
+		storageWarning90: "Your storage is 90% full. Clean old data?",
+		storageClearing: "Cleaning old data to free space...",
+		syncOptions: {
+			storage: "Sync Storage (LocalStorage ↔ DB)",
+			storageTooltip: "Keep LocalStorage and IndexedDB in sync automatically",
+			version: "Auto-update App",
+			versionTooltip: "Automatically install new versions when available",
+			calendar: "Sync Calendar Systems",
+			calendarTooltip: "Keep Gregorian and Hijri dates synchronized",
+			newVersion: "New version available!",
+			updating: "Updating to new version..."
+		},
+		notifications: "Notifications",
+dailyTips: "Daily Tips",
+noteReminders: "Note Reminders",
+appUpdates: "App Updates",
+dailyTipsTooltip: "Receive daily tips notifications at 9 AM",
+noteRemindersTooltip: "Get reminders about your daily notes",
+appUpdatesTooltip: "Notify about new app versions"
 	},
     ar: {
         title: "التقويم",
@@ -258,21 +265,28 @@ syncOptions: {
 		deleteError: "خطأ في الحذف",
 		seeMore: "عرض المزيد",
 		localStorageWarning: "مسح التخزين المحلي سيعيد تعيين جميع التفضيلات والبيانات المخزنة مؤقتًا",
-periodicActivities: "العمليات الدورية",
-emergencyCleanup: "تنظيف تلقائي عند امتلاء التخزين",
-emergencyCleanupTooltip: "يقوم بتنظيف البيانات القديمة تلقائيًا عندما يصل التخزين إلى 90% من السعة",
-storageWarning90: "التخزين ممتلئ بنسبة 90%. هل تريد تنظيف البيانات القديمة؟",
-storageClearing: "جاري تنظيف البيانات القديمة لتوفير مساحة...",
-syncOptions: {
-    storage: "مزامنة التخزين (LocalStorage ↔ قاعدة البيانات)",
-    storageTooltip: "الحفاظ على مزامنة LocalStorage و IndexedDB تلقائيًا",
-    version: "تحديث التطبيق التلقائي",
-    versionTooltip: "تثبيت الإصدارات الجديدة تلقائيًا عند توفرها",
-    calendar: "مزامنة أنظمة التقويم",
-    calendarTooltip: "الحفاظ على تواريخ التقويم الميلادي والهجري متزامنة",
-    newVersion: "إصدار جديد متاح!",
-    updating: "جارٍ التحديث إلى الإصدار الجديد..."
-}
+		periodicActivities: "العمليات الدورية",
+		emergencyCleanup: "تنظيف تلقائي عند امتلاء التخزين",
+		emergencyCleanupTooltip: "يقوم بتنظيف البيانات القديمة تلقائيًا عندما يصل التخزين إلى 90% من السعة",
+		storageWarning90: "التخزين ممتلئ بنسبة 90%. هل تريد تنظيف البيانات القديمة؟",
+		storageClearing: "جاري تنظيف البيانات القديمة لتوفير مساحة...",
+		syncOptions: {
+			storage: "مزامنة التخزين (LocalStorage ↔ قاعدة البيانات)",
+			storageTooltip: "الحفاظ على مزامنة LocalStorage و IndexedDB تلقائيًا",
+			version: "تحديث التطبيق التلقائي",
+			versionTooltip: "تثبيت الإصدارات الجديدة تلقائيًا عند توفرها",
+			calendar: "مزامنة أنظمة التقويم",
+			calendarTooltip: "الحفاظ على تواريخ التقويم الميلادي والهجري متزامنة",
+			newVersion: "إصدار جديد متاح!",
+			updating: "جارٍ التحديث إلى الإصدار الجديد..."
+		},
+		notifications: "الإشعارات",
+dailyTips: "نصائح يومية",
+noteReminders: "تذكير الملاحظات",
+appUpdates: "تحديثات التطبيق",
+dailyTipsTooltip: "تلقي إشعارات النصائح اليومية الساعة 9 صباحاً",
+noteRemindersTooltip: "الحصول على تذكير بملاحظات اليوم",
+appUpdatesTooltip: "إشعار عند توفر تحديثات جديدة"
 	},
     fr: {
         title: "Calendrier",
@@ -395,21 +409,28 @@ syncOptions: {
 		deleteError: "Erreur de suppression",
 		seeMore: "Voir plus",
 		localStorageWarning: "Effacer le stockage local réinitialisera toutes les préférences et données en cache",
-periodicActivities: "activitées periodiques",
-emergencyCleanup: "Nettoyage automatique en cas de stockage plein",
-emergencyCleanupTooltip: "Nettoie automatiquement les anciennes données lorsque le stockage atteint 90% de capacité",
-storageWarning90: "Votre stockage est plein à 90%. Nettoyer les anciennes données ?",
-storageClearing: "Nettoyage des anciennes données pour libérer de l'espace...",
-syncOptions: {
-    storage: "Synchroniser le stockage (LocalStorage ↔ DB)",
-    storageTooltip: "Garder LocalStorage et IndexedDB synchronisés automatiquement",
-    version: "Mise à jour automatique",
-    versionTooltip: "Installer automatiquement les nouvelles versions lorsqu'elles sont disponibles",
-    calendar: "Synchroniser les systèmes de calendrier",
-    calendarTooltip: "Garder les dates grégoriennes et hijri synchronisées",
-    newVersion: "Nouvelle version disponible !",
-    updating: "Mise à jour vers la nouvelle version..."
-}
+		periodicActivities: "activitées periodiques",
+		emergencyCleanup: "Nettoyage automatique en cas de stockage plein",
+		emergencyCleanupTooltip: "Nettoie automatiquement les anciennes données lorsque le stockage atteint 90% de capacité",
+		storageWarning90: "Votre stockage est plein à 90%. Nettoyer les anciennes données ?",
+		storageClearing: "Nettoyage des anciennes données pour libérer de l'espace...",
+		syncOptions: {
+			storage: "Synchroniser le stockage (LocalStorage ↔ DB)",
+			storageTooltip: "Garder LocalStorage et IndexedDB synchronisés automatiquement",
+			version: "Mise à jour automatique",
+			versionTooltip: "Installer automatiquement les nouvelles versions lorsqu'elles sont disponibles",
+			calendar: "Synchroniser les systèmes de calendrier",
+			calendarTooltip: "Garder les dates grégoriennes et hijri synchronisées",
+			newVersion: "Nouvelle version disponible !",
+			updating: "Mise à jour vers la nouvelle version..."
+		},
+		notifications: "Notifications",
+dailyTips: "Conseils Quotidiens",
+noteReminders: "Rappels de Notes",
+appUpdates: "Mises à jour",
+dailyTipsTooltip: "Recevoir des conseils quotidiens à 9h",
+noteRemindersTooltip: "Recevoir des rappels sur vos notes quotidiennes",
+appUpdatesTooltip: "Notifier des nouvelles versions de l'application"
 	}
 };
 
@@ -423,11 +444,11 @@ function changeLanguage(lang) {
     const systemSelect = document.getElementById('calendar-system');
     if (systemSelect) {
         systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-            .map(([value, name]) => 
-                `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-            ).join('');
+		.map(([value, name]) => 
+			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+		).join('');
         currentCalendarSystem = prevSystem;
-    }
+	}
     
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
@@ -441,15 +462,15 @@ function changeLanguage(lang) {
         window.settingsManager.updateLanguageTexts();
         window.settingsManager.closeSettings(); // Force refresh
         window.settingsManager.openSettings();
-    }
+	}
     
     // Update weekdays in calendar header
     const weekdays = document.querySelectorAll('.weekdays div');
     if (weekdays.length === 7) {
         weekdays.forEach((day, index) => {
             day.textContent = langData.weekdays[index];
-        });
-    }
+		});
+	}
     
     // Update calendar immediately
     renderCalendar(langData);
@@ -460,4 +481,4 @@ function changeLanguage(lang) {
     return langData;
 }
 // Initialize language
-/* let currentLanguage = 'en'; */
+/* let currentLanguage = 'en'; */	
