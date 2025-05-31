@@ -78,33 +78,27 @@ function createEventDetailsModal() {
     modal.querySelector('.close-modal').addEventListener('click', () => {
         modal.style.display = 'none';
 	});
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
-});
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) {
+			modal.style.display = 'none';
+		}
+	});
     
     return modal;
 }
 // Main initialization - wrap everything in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
-console.log('Environment:', window.location.hostname);
-console.log('Scripts loaded:', {
-    languages: typeof translations,
-    calendar: typeof renderCalendar,
-    notes: typeof initNotes
-});
-console.log('DOM elements ready:', {
-    nextMonthBtn: !!document.getElementById('next-month'),
-    prevMonthBtn: !!document.getElementById('prev-month'),
-    todayBtn: !!document.getElementById('today-btn')
-});
-    // Initialize with default false values if they don't exist
-    ['dailyTipsEnabled', 'noteRemindersEnabled', 'appUpdatesEnabled'].forEach(setting => {
-        if (localStorage.getItem(setting) === null) {
-            localStorage.setItem(setting, 'false');
-        }
-    });
+	console.log('Environment:', window.location.hostname);
+	console.log('Scripts loaded:', {
+		languages: typeof translations,
+		calendar: typeof renderCalendar,
+		notes: typeof initNotes
+	});
+	console.log('DOM elements ready:', {
+		nextMonthBtn: !!document.getElementById('next-month'),
+		prevMonthBtn: !!document.getElementById('prev-month'),
+		todayBtn: !!document.getElementById('today-btn')
+	});
     // Initialize language select
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
@@ -177,22 +171,12 @@ console.log('DOM elements ready:', {
 		});
 	}
 	if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'NETWORK_ERROR') {
-            showToast(event.data.message);
-        }
-    });
-}
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', event => {
-        if (event.data.type === 'SHOW_TIP' && typeof showTipsModal === 'function') {
-            showTipsModal(event.data.category);
-        } else if (event.data.type === 'SHOW_NOTES' && typeof openNoteModal === 'function') {
-            const date = new Date(event.data.date);
-            openNoteModal(date);
-        }
-    });
-}
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (event.data.type === 'NETWORK_ERROR') {
+				showToast(event.data.message);
+			}
+		});
+	}
     // Initialize with loading indicator
     const loadingOverlay = showLoading();
     
@@ -244,16 +228,31 @@ function safeRenderCalendar() {
         showToast('Calendar error - please refresh');
 	}
 }
+function updateOnlineStatus() {
+    const statusElement = document.getElementById('online-status');
+    if (!statusElement) return;
+    
+    if (navigator.onLine) {
+        statusElement.className = 'online';
+        statusElement.title = translations[currentLanguage].onlineStatus || 'Online';
+		} else {
+        statusElement.className = 'offline';
+        statusElement.title = translations[currentLanguage].offlineStatus || 'Offline';
+        if (localStorage.getItem('syncStorage') === 'true') {
+            showToast(translations[currentLanguage].offlineSave || 'Working offline - changes will sync when online');
+		}
+	}
+}
 // Performance metrics
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    const timing = performance.timing;
-    const loadTime = timing.loadEventEnd - timing.navigationStart;
-    console.log('Page load time:', loadTime + 'ms');
-    
-    // Log resource timing
-    performance.getEntriesByType('resource').forEach(resource => {
-      console.log(`${resource.name} loaded in ${resource.duration}ms`);
-    });
-  }, 0);
+	setTimeout(() => {
+		const timing = performance.timing;
+		const loadTime = timing.loadEventEnd - timing.navigationStart;
+		console.log('Page load time:', loadTime + 'ms');
+		
+		// Log resource timing
+		performance.getEntriesByType('resource').forEach(resource => {
+			console.log(`${resource.name} loaded in ${resource.duration}ms`);
+		});
+	}, 0);
 });

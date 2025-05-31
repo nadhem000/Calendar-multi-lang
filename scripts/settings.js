@@ -9,113 +9,113 @@ class SettingsManager {
 		this.setupMemoryEmergencyToggle();
 		this.setupSyncToggles();
 	}
-	
-    
     initSettingsButton() {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => this.openSettings());
 		}
 	}
-	
-    // In the initModal method, update the tab switching logic:
-initModal() {
-    // Close modal when clicking X
-    this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
-    
-    // Close when clicking outside modal
-    this.modal.addEventListener('click', (e) => {
-        if (e.target === this.modal) this.closeSettings();
-    });
-    
-    // Tab switching
-    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-            
-            // Hide all sub-views
-            document.querySelectorAll('[id$="-view"]').forEach(view => {
-                view.classList.add('hidden');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
-            
-            // Remove active class from all content
-            document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked button
-            btn.classList.add('active');
-            
-            // Show corresponding content
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        });
-    });
-    
-    // Make notifications tab active by default
-    document.querySelector('[data-tab="notifications"]').classList.add('active');
-    document.getElementById('notifications-tab').classList.add('active');
-    
+    initModal() {
+		// Close modal when clicking X
+		this.modal.querySelector('.close-modal').addEventListener('click', () => this.closeSettings());
+		// Close when clicking outside modal
+		this.modal.addEventListener('click', (e) => {
+			if (e.target === this.modal) this.closeSettings();
+		});
+		// Tab switching - fixed version
+		document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+			btn.addEventListener('click', () => {
+				// Hide all sub-views when switching tabs
+				document.querySelectorAll('[id$="-view"]').forEach(view => {
+					view.classList.add('hidden');
+				});
+				// Remove active class from all buttons
+				document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+				// Remove active class from all content
+				document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
+				// Add active class to clicked button
+				btn.classList.add('active');
+				// Show corresponding content
+				const tabId = btn.dataset.tab + '-tab';
+				document.getElementById(tabId).classList.add('active');
+				// Hide any open sub-views when switching tabs
+				document.getElementById('memory-monitor-view').classList.add('hidden');
+				document.getElementById('clear-partial-view').classList.add('hidden');
+			});
+		});
+		// Add notification toggle listeners
+		document.querySelectorAll('.settings-notifications-checkbox').forEach((checkbox, index) => {
+			checkbox.addEventListener('change', (e) => {
+				const key = index === 0 ? 'notifyUpdates' : 'notifyDaily';
+				localStorage.setItem(key, e.target.checked);
+				console.log(`${key} set to ${e.target.checked}`);
+				// Restart notifications if needed
+				if (index === 1 && e.target.checked) {
+					window.notificationManager.scheduleDailyNotifications();
+				}
+			});
+		});
+		// Add test button listener
+		document.querySelector('.settings-notifications-test-btn').addEventListener('click', () => {
+			window.notificationManager.showTestNotification();
+		});
 		// Memory management buttons
 		document.getElementById('memory-monitor-btn').addEventListener('click', () => this.showMemoryMonitor());
 		document.getElementById('clear-partial-btn').addEventListener('click', () => this.showPartialClear());
 		document.getElementById('clear-all-btn').addEventListener('click', () => this.promptClearAll());
 	}
-	
     openSettings() {
         this.modal.style.display = 'block';
         this.updateLanguageTexts();
 	}
-	
     closeSettings() {
         this.modal.style.display = 'none';
         // Hide any open sub-views
         document.getElementById('memory-monitor-view').classList.add('hidden');
         document.getElementById('clear-partial-view').classList.add('hidden');
 	}
-	
     updateLanguageTexts() {
-        const lang = translations[currentLanguage];
-        this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
-        document.querySelector('[data-tab="memory"]').textContent = lang.memory || 'Memory';
-        document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
-        document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
-        document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
-		document.querySelector('[data-tab="periodic"]').textContent = lang.periodicActivities || 'Periodic Activities';
-		this.modal.querySelector('.close-modal').textContent = lang.close || '×';
-		document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
-		document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
-		document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
-    document.querySelector('[data-tab="notifications"]').textContent = lang.notifications || 'Notifications';
-    document.querySelector('#notifications-tab h3').textContent = lang.notifications || 'Notification Settings';
+    const lang = translations[currentLanguage];
+    this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
     
-    const dailyTipsLabel = document.querySelector('#daily-tips-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
-    if (dailyTipsLabel) dailyTipsLabel.textContent = lang.dailyTips || 'Daily Tips';
+    // Memory tab
+    document.querySelector('[data-tab="memory"]').textContent = lang.memory || 'Memory';
+    document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
+    document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
+    document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
     
-    const noteRemindersLabel = document.querySelector('#note-reminders-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
-    if (noteRemindersLabel) noteRemindersLabel.textContent = lang.noteReminders || 'Note Reminders';
+    // Periodic Activities tab
+    document.querySelector('[data-tab="periodic"]').textContent = lang.periodicActivities || 'Periodic Activities';
     
-    const updatesLabel = document.querySelector('#updates-toggle + .settings-notifications-slider + .settings-notifications-label .label-text');
-    if (updatesLabel) updatesLabel.textContent = lang.appUpdates || 'App Updates';
+    // Notifications tab
+    document.querySelector('[data-tab="notifications"]').textContent = lang.notificationSettings || 'Notifications';
+    document.querySelector('.settings-notifications-title').textContent = lang.notificationSettings || 'Notification Settings';
+    document.querySelectorAll('.settings-notifications-label .notification-text')[0].textContent = lang.enableUpdateReminders || 'Enable updates reminders';
+    document.querySelectorAll('.settings-notifications-tooltip')[0].textContent = lang.updateRemindersTooltip || 'Get reminders when updates are available';
+    document.querySelectorAll('.settings-notifications-label .notification-text')[1].textContent = lang.enableDailyNotifications || 'Enable daily notifications';
+    document.querySelectorAll('.settings-notifications-tooltip')[1].textContent = lang.dailyNotificationsTooltip || 'Receive daily summary notifications';
+    document.querySelectorAll('.settings-notifications-label .notification-text')[2].textContent = lang.notificationSound || 'Notification sound';
+    document.querySelectorAll('.settings-notifications-label .notification-text')[3].textContent = lang.notificationTime || 'Notification time';
     
-    // Update tooltips
-    const dailyTipsTooltip = document.querySelector('#daily-tips-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
-    if (dailyTipsTooltip) dailyTipsTooltip.textContent = lang.dailyTipsTooltip || 'Receive daily tips notifications at 9 AM';
+    // Close button
+    this.modal.querySelector('.close-modal').textContent = lang.close || '×';
     
-    const noteRemindersTooltip = document.querySelector('#note-reminders-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
-    if (noteRemindersTooltip) noteRemindersTooltip.textContent = lang.noteRemindersTooltip || 'Get reminders about your daily notes';
+    // Sync options (if they exist)
+    if (document.querySelector('.settings-sync-options-section h3')) {
+        document.querySelector('.settings-sync-options-section h3').textContent = lang.synchronization || 'Synchronization';
+    }
     
-    const updatesTooltip = document.querySelector('#updates-toggle + .settings-notifications-slider + .settings-notifications-label .tooltip');
-    if (updatesTooltip) updatesTooltip.textContent = lang.appUpdatesTooltip || 'Notify about new app versions';
-	}
-	
+    // Memory visualization
+    if (document.querySelector('.circle-label')) {
+        document.querySelector('.circle-label').textContent = lang.storageUsed || 'Storage Used';
+    }
+}
     async countObjectStore(db, storeName) {
         return new Promise((resolve, reject) => {
             try {
                 const tx = db.transaction(storeName, 'readonly');
                 const store = tx.objectStore(storeName);
                 const request = store.count();
-                
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = (e) => {
                     console.error(`Error counting ${storeName}:`, e.target.error);
@@ -127,7 +127,6 @@ initModal() {
 			}
 		});
 	}
-	
     async showMemoryMonitor() {
 		const view = document.getElementById('memory-monitor-view');
 		view.innerHTML = `
@@ -137,13 +136,11 @@ initModal() {
         </div>
 		`;
 		view.classList.remove('hidden');
-		
 		try {
 			// Get storage estimates
 			const estimate = await navigator.storage.estimate();
 			const notesCount = Object.keys(window.notes || {}).reduce((acc, date) => 
 			acc + (window.notes[date]?.length || 0), 0);
-			
 			// Get IndexedDB stats
 			let dbStats = { attachments: 0, syncQueue: 0, size: 0 };
 			try {
@@ -154,7 +151,6 @@ initModal() {
 				} catch (e) {
 				console.error('Error accessing IndexedDB:', e);
 			}
-			
 			// Format sizes
 			const formatBytes = (bytes) => {
 				if (bytes === 0) return '0 Bytes';
@@ -163,7 +159,6 @@ initModal() {
 				const i = Math.floor(Math.log(bytes) / Math.log(k));
 				return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 			};
-			
 			view.innerHTML = `
             <div class="memory-visualization">
 			<div class="storage-circle-container">
@@ -176,7 +171,6 @@ initModal() {
 			</div>
 			<div class="circle-label">Storage Used</div>
 			</div>
-			
 			<div class="storage-legend">
 			<div class="legend-item">
 			<span>Notes</span>
@@ -195,16 +189,13 @@ initModal() {
 			<span>${formatBytes(dbStats.size)}</span>
 			</div>
 			</div>
-			
 			<button class="btn-see-more">${translations[currentLanguage].seeMore || 'See More'}</button>
             </div>
 			`;
-			
 			// Style the "See More" button properly
 			view.querySelector('.btn-see-more').addEventListener('click', () => {
 				this.showDetailedMemoryView();
 			});
-			
 			} catch (error) {
 			view.innerHTML = `
             <div class="error-message">
@@ -217,18 +208,15 @@ initModal() {
 	async showDetailedMemoryView() {
 		const view = document.getElementById('memory-monitor-view');
 		view.innerHTML = '<div class="loading-spinner"></div>';
-		
 		try {
 			// Get detailed storage information
 			const estimate = await navigator.storage.estimate();
 			const notesCount = Object.keys(window.notes || {}).reduce((acc, date) => 
 			acc + (window.notes[date]?.length || 0), 0);
-			
 			const db = await window.appManager.openDB();
 			const attachmentsCount = await this.countObjectStore(db, 'attachments');
 			const syncQueueCount = await this.countObjectStore(db, 'SYNC_QUEUE');
 			const dbSize = await this.estimateDBSize(db);
-			
 			// Format sizes
 			const formatBytes = (bytes) => {
 				if (bytes === 0) return '0 Bytes';
@@ -237,7 +225,6 @@ initModal() {
 				const i = Math.floor(Math.log(bytes) / Math.log(k));
 				return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 			};
-			
 			view.innerHTML = `
             <div class="detailed-memory-view">
 			<div class="detail-card">
@@ -247,7 +234,6 @@ initModal() {
 			<div class="detail-label">Notes</div>
 			</div>
 			</div>
-			
 			<div class="detail-card">
 			<div class="detail-icon">📎</div>
 			<div class="detail-content">
@@ -255,7 +241,6 @@ initModal() {
 			<div class="detail-label">Attachments</div>
 			</div>
 			</div>
-			
 			<div class="detail-card">
 			<div class="detail-icon">🔄</div>
 			<div class="detail-content">
@@ -263,7 +248,6 @@ initModal() {
 			<div class="detail-label">Pending Syncs</div>
 			</div>
 			</div>
-			
 			<div class="detail-card">
 			<div class="detail-icon">💾</div>
 			<div class="detail-content">
@@ -271,7 +255,6 @@ initModal() {
 			<div class="detail-label">IndexedDB Size</div>
 			</div>
 			</div>
-			
 			<div class="detail-card">
 			<div class="detail-icon">📊</div>
 			<div class="detail-content">
@@ -279,7 +262,6 @@ initModal() {
 			<div class="detail-label">Storage Used</div>
 			</div>
 			</div>
-			
 			<div class="detail-card">
 			<div class="detail-icon">🏷️</div>
 			<div class="detail-content">
@@ -287,13 +269,11 @@ initModal() {
 			<div class="detail-label">Total Storage</div>
 			</div>
 			</div>
-			
 			<button class="btn-back" data-tooltip="Return to summary view">
 			← Back
 			</button>
             </div>
 			`;
-			
 			view.querySelector('.btn-back').addEventListener('click', () => {
 				this.showMemoryMonitor();
 			});
@@ -306,23 +286,19 @@ initModal() {
 			`;
 		}
 	}
-	
     async showPartialClear() {
         const view = document.getElementById('clear-partial-view');
         view.innerHTML = '<div class="loading-spinners"></div>';
         view.classList.remove('hidden');
-		
         try {
             // Group notes by month and collect attachments
             const notesByMonth = {};
             const attachments = [];
-            
             // Get attachments from IndexedDB
             const db = await window.appManager.openDB();
             const tx = db.transaction('attachments', 'readonly');
             const store = tx.objectStore('attachments');
             const cursorRequest = store.openCursor();
-            
             cursorRequest.onsuccess = (e) => {
                 const cursor = e.target.result;
                 if (cursor) {
@@ -338,16 +314,13 @@ initModal() {
                     this.renderPartialClearView(view, notesByMonth, attachments);
 				}
 			};
-            
             cursorRequest.onerror = () => {
                 this.renderPartialClearView(view, notesByMonth, []);
 			};
-            
             // Process notes
             Object.keys(window.notes).forEach(date => {
                 const noteDate = new Date(date);
                 const monthYear = `${noteDate.getFullYear()}-${noteDate.getMonth()}`;
-                
                 if (!notesByMonth[monthYear]) {
                     notesByMonth[monthYear] = {
                         count: 0,
@@ -356,13 +329,11 @@ initModal() {
                         notes: []
 					};
 				}
-                
                 notesByMonth[monthYear].count += window.notes[date].length;
                 notesByMonth[monthYear].notes.push(...window.notes[date]);
                 if (date < notesByMonth[monthYear].oldest) notesByMonth[monthYear].oldest = date;
                 if (date > notesByMonth[monthYear].newest) notesByMonth[monthYear].newest = date;
 			});
-            
 			} catch (error) {
             view.innerHTML = `
 			<div class="error-message">
@@ -372,12 +343,10 @@ initModal() {
             `;
 		}
 	}
-	
     renderPartialClearView(view, notesByMonth, attachments) {
 		view.innerHTML = `
         <div class="clear-options">
 		<h3><i class="icon">🗑️</i> ${translations[currentLanguage].clearOptions || 'Clear Options'}</h3>
-		
 		<div class="clear-section">
 		<h4><i class="icon">📅</i> ${translations[currentLanguage].notesByMonth || 'Notes by Month'}</h4>
 		<div class="months-list">
@@ -388,7 +357,6 @@ initModal() {
 		const monthName = translations[currentLanguage].months[parseInt(month)];
 		const maxPreview = 3;
 		const hasMore = data.notes.length > maxPreview;
-		
 		return `
 		<div class="month-card">
 		<div class="month-header">
@@ -437,7 +405,6 @@ initModal() {
 		}
 		</div>
 		</div>
-		
 		<!-- Attachments section remains the same -->
 		${attachments.length > 0 ? `
 		<div class="clear-section">
@@ -469,37 +436,31 @@ initModal() {
 		` : ''}
         </div>
 		`;
-		
 		// Add event listeners
 		document.querySelectorAll('.btn-clear-month').forEach(btn => {
 			btn.addEventListener('click', () => this.clearMonth(btn.dataset.month));
 		});
-		
 		document.querySelectorAll('.delete-single-note').forEach(btn => {
 			btn.addEventListener('click', async (e) => {
 				e.stopPropagation();
 				const date = btn.dataset.date;
 				const index = parseInt(btn.dataset.index);
-				
 				if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
 					await this.deleteSingleNote(date, index);
 					this.showPartialClear(); // Refresh view
 				}
 			});
 		});
-		
 		document.querySelectorAll('.show-all-notes').forEach(btn => {
 			btn.addEventListener('click', () => {
 				const monthYear = btn.dataset.month;
 				this.showAllNotesForMonth(monthYear);
 			});
 		});
-		
 		if (attachments.length > 0) {
 			document.querySelector('.btn-clear-attachments').addEventListener('click', () => {
 				this.promptClearAttachments(attachments.length);
 			});
-			
 			document.querySelectorAll('.delete-attachment').forEach(btn => {
 				btn.addEventListener('click', async (e) => {
 					e.stopPropagation();
@@ -510,22 +471,18 @@ initModal() {
 			});
 		}
 	}
-	
     promptClearAttachments(count) {
         if (confirm(`${translations[currentLanguage].confirmClearAttachments || 'Are you sure you want to delete all'} ${count} ${translations[currentLanguage].attachments || 'attachments'}?`)) {
             this.clearAllAttachments();
 		}
 	}
-	
 	async deleteSingleNote(dateKey, index) {
 		try {
 			if (window.notes[dateKey] && window.notes[dateKey].length > index) {
 				window.notes[dateKey].splice(index, 1);
-				
 				if (window.notes[dateKey].length === 0) {
 					delete window.notes[dateKey];
 				}
-				
 				await saveNotes();
 				showToast(translations[currentLanguage].noteDeleted || 'Note deleted');
 			}
@@ -534,7 +491,6 @@ initModal() {
 			showToast(translations[currentLanguage].deleteError || 'Error deleting note');
 		}
 	}
-	
 	async deleteSingleAttachment(id) {
 		try {
 			const db = await this.openDB();
@@ -546,19 +502,16 @@ initModal() {
 			showToast(translations[currentLanguage].deleteError || 'Error deleting attachment');
 		}
 	}
-	
 	showAllNotesForMonth(monthYear) {
 		const [year, month] = monthYear.split('-').map(Number);
 		const monthStart = new Date(year, month, 1);
 		const monthEnd = new Date(year, month + 1, 0);
-		
 		const notesForMonth = Object.entries(window.notes)
         .filter(([dateKey]) => {
             const noteDate = new Date(dateKey);
             return noteDate >= monthStart && noteDate <= monthEnd;
 		})
         .flatMap(([dateKey, notes]) => notes.map(note => ({ ...note, dateKey })));
-		
 		const view = document.getElementById('clear-partial-view');
 		view.innerHTML = `
         <div class="all-notes-view">
@@ -589,17 +542,14 @@ initModal() {
 		</div>
         </div>
 		`;
-		
 		view.querySelector('.btn-back').addEventListener('click', () => {
 			this.showPartialClear();
 		});
-		
 		view.querySelectorAll('.delete-single-note').forEach(btn => {
 			btn.addEventListener('click', async (e) => {
 				e.stopPropagation();
 				const date = btn.dataset.date;
 				const index = parseInt(btn.dataset.index);
-				
 				if (confirm(translations[currentLanguage].confirmDeleteSingleNote || "Delete this specific note?")) {
 					await this.deleteSingleNote(date, index);
 					this.showAllNotesForMonth(monthYear); // Refresh view
@@ -612,7 +562,6 @@ initModal() {
 			const tx = db.transaction(storeName, 'readwrite');
 			const store = tx.objectStore(storeName);
 			const request = store.clear();
-			
 			request.onsuccess = () => resolve();
 			request.onerror = (e) => reject(e.target.error);
 		});
@@ -631,7 +580,6 @@ initModal() {
             hideLoading(loading);
 		}
 	}
-	
     promptClearAll() {
         const lang = translations[currentLanguage];
         const modal = document.createElement('div');
@@ -639,7 +587,6 @@ initModal() {
         modal.innerHTML = `
 		<div class="confirm-content">
 		<h3><i class="icon">⚠️</i> ${lang.clearAllWarning || 'WARNING: Data Deletion'}</h3>
-		
 		<div class="clear-options">
 		<label class="option-item">
 		<input type="checkbox" id="clear-notes" checked>
@@ -648,7 +595,6 @@ initModal() {
 		<i class="icon">📝</i> ${lang.clearAllNotes || 'All notes'}
 		</span>
 		</label>
-		
 		<label class="option-item">
 		<input type="checkbox" id="clear-attachments" checked>
 		<span class="checkmark"></span>
@@ -656,7 +602,6 @@ initModal() {
 		<i class="icon">📎</i> ${lang.clearAllAttachments || 'All attachments'}
 		</span>
 		</label>
-		
 		<label class="option-item">
 		<input type="checkbox" id="clear-sync" checked>
 		<span class="checkmark"></span>
@@ -664,7 +609,6 @@ initModal() {
 		<i class="icon">🔄</i> ${lang.clearAllSync || 'Sync queue'}
 		</span>
 		</label>
-		
 		<label class="option-item">
 		<input type="checkbox" id="clear-localstorage">
 		<span class="checkmark"></span>
@@ -674,41 +618,33 @@ initModal() {
 		</span>
 		</label>
 		</div>
-		
 		<div class="warning-message">
 		<i class="icon">⚠️</i>
 		<p>${lang.clearAllWarningText || 'This action cannot be undone. Make sure to export important data first.'}</p>
 		</div>
-		
 		<div class="confirm-buttons">
 		<button class="btn-cancel">${lang.cancel || 'Cancel'}</button>
 		<button class="btn-confirm">${lang.clearConfirm || 'Clear Selected Data'}</button>
 		</div>
 		</div>
         `;
-        
         document.body.appendChild(modal);
-        
         // Add tooltips
         this.addTooltip(modal.querySelector('#clear-localstorage ~ .option-label'), 
 		lang.localStorageWarning || 'Clearing localStorage will reset all preferences and cached data');
-        
         // Event listeners
         modal.querySelector('.btn-cancel').addEventListener('click', () => {
             modal.remove();
 		});
-        
         modal.querySelector('.btn-confirm').addEventListener('click', async () => {
             const clearNotes = modal.querySelector('#clear-notes').checked;
             const clearAttachments = modal.querySelector('#clear-attachments').checked;
             const clearSync = modal.querySelector('#clear-sync').checked;
             const clearLocalStorage = modal.querySelector('#clear-localstorage').checked;
-            
             await this.executeClearAll(clearNotes, clearAttachments, clearSync, clearLocalStorage);
             modal.remove();
 		});
 	}
-	
     async executeClearAll(clearNotes, clearAttachments, clearSync, clearLocalStorage) {
         const loading = showLoading();
         try {
@@ -717,14 +653,12 @@ initModal() {
                 window.notes = {};
                 saveNotes();
 			}
-            
             // Clear IndexedDB
             if (clearAttachments || clearSync) {
                 const db = await window.appManager.openDB();
                 if (clearAttachments) await this.clearObjectStore(db, 'attachments');
                 if (clearSync) await this.clearObjectStore(db, 'SYNC_QUEUE');
 			}
-            
             // Clear localStorage
             if (clearLocalStorage) {
                 const langPref = localStorage.getItem('selectedLanguage');
@@ -733,7 +667,6 @@ initModal() {
                 if (langPref) localStorage.setItem('selectedLanguage', langPref);
                 if (calendarPref) localStorage.setItem('calendarSystem', calendarPref);
 			}
-            
             showToast(translations[currentLanguage].clearCompleted || 'Data cleared successfully');
             this.closeSettings();
 			} catch (error) {
@@ -743,18 +676,15 @@ initModal() {
             hideLoading(loading);
 		}
 	}
-	
     addTooltip(element, text) {
         const tooltip = document.createElement('div');
         tooltip.className = 'tooltip';
         tooltip.textContent = text;
         element.appendChild(tooltip);
-        
         element.addEventListener('mouseenter', () => {
             tooltip.style.visibility = 'visible';
             tooltip.style.opacity = '1';
 		});
-        
         element.addEventListener('mouseleave', () => {
             tooltip.style.visibility = 'hidden';
             tooltip.style.opacity = '0';
@@ -766,7 +696,6 @@ initModal() {
 			const [year, month] = monthYear.split('-').map(Number);
 			const monthStart = new Date(year, month, 1);
 			const monthEnd = new Date(year, month + 1, 0);
-			
 			// Delete notes in this month range
 			Object.keys(window.notes).forEach(dateKey => {
 				const noteDate = new Date(dateKey);
@@ -774,7 +703,6 @@ initModal() {
 					delete window.notes[dateKey];
 				}
 			});
-			
 			saveNotes();
 			showToast(translations[currentLanguage].monthCleared || 'Month data cleared');
 			this.showPartialClear(); // Refresh view
@@ -790,12 +718,10 @@ initModal() {
             let size = 0;
             const stores = ['attachments', 'SYNC_QUEUE'];
             let storesProcessed = 0;
-            
             stores.forEach(storeName => {
                 const tx = db.transaction(storeName, 'readonly');
                 const store = tx.objectStore(storeName);
                 const request = store.openCursor();
-                
                 request.onsuccess = (e) => {
                     const cursor = e.target.result;
                     if (cursor) {
@@ -813,7 +739,6 @@ initModal() {
 						}
 					}
 				};
-                
                 request.onerror = () => {
                     storesProcessed++;
                     if (storesProcessed === stores.length) {
@@ -823,11 +748,9 @@ initModal() {
 			});
 		});
 	}
-	
 	setupAutoCleanupToggle() {
 		// Remove any existing toggles first
 		document.querySelectorAll('.auto-clean-toggle').forEach(el => el.remove());
-		
 		// Create the toggle container
 		const optionDiv = document.createElement('div');
 		optionDiv.className = 'settings-periodic-option';
@@ -845,37 +768,30 @@ initModal() {
 		</span>
         </div>
 		`;
-		
 		// Add to the periodic activities tab
 		const periodicTab = document.getElementById('periodic-tab');
 		periodicTab.appendChild(optionDiv);
-		
 		// Load saved preference
 		const toggle = optionDiv.querySelector('#auto-clean-toggle');
 		toggle.checked = localStorage.getItem('autoCleanEnabled') === 'true';
-		
 		toggle.addEventListener('change', (e) => {
 			localStorage.setItem('autoCleanEnabled', e.target.checked);
 			if (e.target.checked) {
 				this.setupPeriodicCleanup();
 			}
 		});
-		
 		// Add hover tooltip functionality - FIXED: using optionDiv instead of toggleContainer
 		const label = optionDiv.querySelector('.settings-toggle-label');
 		const tooltip = optionDiv.querySelector('.settings-toggle-tooltip');
-		
 		label.addEventListener('mouseenter', () => {
 			tooltip.style.visibility = 'visible';
 			tooltip.style.opacity = '1';
 		});
-		
 		label.addEventListener('mouseleave', () => {
 			tooltip.style.visibility = 'hidden';
 			tooltip.style.opacity = '0';
 		});
 	}
-	
 	async performSafeCleanup() {
 		// Double-check user preference
 		if (localStorage.getItem('autoCleanEnabled') !== 'true') {
@@ -900,15 +816,12 @@ initModal() {
 			// 1. Clear old notes
 			const cutoffDate = new Date();
 			cutoffDate.setDate(cutoffDate.getDate() - cleanupSettings.maxAgeDays);
-			
 			// 2. Clear old attachments from IndexedDB
 			const db = await window.appManager.openDB();
 			const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
-			
 			// Delete attachments older than maxAgeDays
 			const attachmentsStore = tx.objectStore('attachments');
 			const attachmentsRequest = attachmentsStore.index('timestamp').openCursor(IDBKeyRange.upperBound(cutoffDate.getTime()));
-			
 			attachmentsRequest.onsuccess = (e) => {
 				const cursor = e.target.result;
 				if (cursor) {
@@ -917,24 +830,18 @@ initModal() {
 					cursor.continue();
 				}
 			};
-			
 			// Clear sync queue
 			await tx.objectStore('SYNC_QUEUE').clear();
-			
 			await tx.complete;
 			console.log('Database cleanup complete');
-			
 			} catch (error) {
 			console.error('Cleanup error:', error);
 		}
 	}
-	
 	setupPeriodicCleanup() {
 		if (localStorage.getItem('autoCleanEnabled') !== 'true') return;
-		
 		// Clean every 15 days
 		const cleanupInterval = 15 * 24 * 60 * 60 * 1000;
-		
 		setInterval(async () => {
 			if (navigator.onLine) {
 				await this.performSafeCleanup();
@@ -942,7 +849,6 @@ initModal() {
 			}
 		}, cleanupInterval);
 	}
-	
 	setupMemoryEmergencyToggle() {
 		const optionDiv = document.createElement('div');
 		optionDiv.className = 'settings-periodic-option';
@@ -961,14 +867,11 @@ initModal() {
         </span>
 		</div>
 		`;
-		
 		// Add to periodic tab
 		document.getElementById('periodic-tab').appendChild(optionDiv);
-		
 		// Load saved preference
 		const toggle = optionDiv.querySelector('#emergency-clean-toggle');
 		toggle.checked = localStorage.getItem('emergencyCleanEnabled') === 'true';
-		
 		toggle.addEventListener('change', (e) => {
 			localStorage.setItem('emergencyCleanEnabled', e.target.checked);
 		});
@@ -980,14 +883,11 @@ initModal() {
 			console.error('Sync options not available for current language');
 			return;
 		}
-		
 		const syncOptions = langData.syncOptions;
-		
 		const syncSection = document.createElement('div');
 		syncSection.className = 'settings-sync-options-section';
 		syncSection.innerHTML = `
 		<h3>${translations[currentLanguage].syncTitle || 'Synchronization'}</h3>
-		
 		<div class="settings-sync-option">
 		<label class="settings-sync-toggle">
 		<input type="checkbox" id="sync-storage">
@@ -998,7 +898,6 @@ initModal() {
 		</span>
 		</label>
 		</div>
-		
 		<div class="settings-sync-option">
 		<label class="settings-sync-toggle">
 		<input type="checkbox" id="sync-version">
@@ -1009,7 +908,6 @@ initModal() {
 		</span>
 		</label>
 		</div>
-		
 		<div class="settings-sync-option">
 		<label class="settings-sync-toggle">
 		<input type="checkbox" id="sync-calendar">
@@ -1021,24 +919,19 @@ initModal() {
 		</label>
 		</div>
 		`;
-		
 		// Add to periodic tab or create new tab
 		document.getElementById('periodic-tab').appendChild(syncSection);
-		
 		// Load saved preferences
 		document.getElementById('sync-storage').checked = localStorage.getItem('syncStorage') === 'true';
 		document.getElementById('sync-version').checked = localStorage.getItem('autoUpdate') === 'true';
 		document.getElementById('sync-calendar').checked = localStorage.getItem('syncCalendars') === 'true';
-		
 		// Add event listeners
 		document.getElementById('sync-storage').addEventListener('change', (e) => {
 			localStorage.setItem('syncStorage', e.target.checked);
 		});
-		
 		document.getElementById('sync-version').addEventListener('change', (e) => {
 			localStorage.setItem('autoUpdate', e.target.checked);
 		});
-		
 		document.getElementById('sync-calendar').addEventListener('change', (e) => {
 			localStorage.setItem('syncCalendars', e.target.checked);
 			if (e.target.checked) this.syncCalendarSystems();
@@ -1047,7 +940,6 @@ initModal() {
 	// calendar sync
 	syncCalendarSystems() {
 		if (localStorage.getItem('syncCalendars') !== 'true') return;
-		
 		// calendar sync logic here
 		console.log("Calendar systems synchronization enabled");
 		// This would convert dates between systems when enabled

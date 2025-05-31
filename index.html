@@ -16,6 +16,7 @@
 		<title>Calendar</title>
 		<link rel="stylesheet" href="styles/main.css">
 		<link rel="stylesheet" href="styles/settings.css">
+		<link rel="stylesheet" href="styles/notifications.css">
 		<!-- Font Awesome CDN removed -->
 	</head>
 	<body>
@@ -47,7 +48,7 @@
 						❤️
 					</div>
 					<div class="icon" id="mechanics-icon" title="Mechanics">
-						⚙️
+						🛠️
 					</div>
 				</aside>
 				
@@ -94,77 +95,89 @@
 					<button class="settings-tab-btn" data-tab="memory">Memory</button>
 					<button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
 				</div>
-				
 				<div id="notifications-tab" class="settings-tab-content active">
-					<h3>Notification Settings</h3>
-					
-					<div class="settings-notifications-option">
-						<div class="settings-notifications-toggle-container">
-							<div class="settings-notifications-toggle">
-								<input type="checkbox" id="daily-tips-toggle">
-								<div class="settings-notifications-slider"></div>
-								<div class="settings-notifications-label">
-									<div class="label-text">Daily Tips</div>
-									<div class="tooltip">Receive daily tips notifications at 9 AM</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="settings-notifications-option">
-						<div class="settings-notifications-toggle-container">
-							<div class="settings-notifications-toggle">
-								<input type="checkbox" id="note-reminders-toggle">
-								<div class="settings-notifications-slider"></div>
-								<div class="settings-notifications-label">
-									<div class="label-text">Note Reminders</div>
-									<div class="tooltip">Get reminders about your daily notes</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="settings-notifications-option">
-						<div class="settings-notifications-toggle-container">
-							<div class="settings-notifications-toggle">
-								<input type="checkbox" id="updates-toggle">
-								<div class="settings-notifications-slider"></div>
-								<div class="settings-notifications-label">
-									<div class="label-text">App Updates</div>
-									<div class="tooltip">Notify about new app versions</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+    <h3 class="settings-notifications-title">Notification Settings</h3>
+    
+    <div class="settings-notifications-container">
+        <div class="settings-notifications-item">
+            <label class="settings-notifications-label">
+                <span class="notification-icon">🔄</span>
+                <span class="notification-text">Enable updates reminders</span>
+                <span class="settings-notifications-tooltip">Get reminders when updates are available</span>
+                <label class="settings-notifications-toggle">
+                    <input type="checkbox" class="settings-notifications-checkbox">
+                    <span class="settings-notifications-slider"></span>
+                </label>
+            </label>
+        </div>
+
+        <div class="settings-notifications-item">
+            <label class="settings-notifications-label">
+                <span class="notification-icon">📅</span>
+                <span class="notification-text">Enable daily notifications</span>
+                <span class="settings-notifications-tooltip">Receive daily summary notifications</span>
+                <label class="settings-notifications-toggle">
+                    <input type="checkbox" class="settings-notifications-checkbox">
+                    <span class="settings-notifications-slider"></span>
+                </label>
+            </label>
+        </div>
+
+        <div class="settings-notifications-item">
+            <label class="settings-notifications-label">
+                <span class="notification-icon">🔔</span>
+                <span class="notification-text">Notification sound</span>
+                <select class="settings-notifications-select">
+                    <option value="default">Default</option>
+                    <option value="chime">Chime</option>
+                    <option value="bell">Bell</option>
+                    <option value="none">None</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="settings-notifications-item">
+            <label class="settings-notifications-label">
+                <span class="notification-icon">⏰</span>
+                <span class="notification-text">Notification time</span>
+                <input type="time" class="settings-notifications-time" value="09:00">
+            </label>
+        </div>
+    </div>
+    
+    <button class="settings-notifications-test-btn">
+        <span class="test-icon">🔊</span> Test Notification
+    </button>
+</div>
 				<div id="memory-tab" class="settings-tab-content">
 					<h3>Memory Management</h3>
-				<button id="memory-monitor-btn">Memory Monitor</button>
-				<button id="clear-partial-btn">Clear Partial Data</button>
-				<button id="clear-all-btn">Clear All Data</button>
-				
-				<div id="memory-monitor-view" class="hidden">
-					<!-- Will be populated by JavaScript -->
+					<button id="memory-monitor-btn">Memory Monitor</button>
+					<button id="clear-partial-btn">Clear Partial Data</button>
+					<button id="clear-all-btn">Clear All Data</button>
+					
+					<div id="memory-monitor-view" class="hidden">
+						<!-- Will be populated by JavaScript -->
+					</div>
+					
+					<div id="clear-partial-view" class="hidden">
+						<!-- Will be populated by JavaScript -->
+					</div>
 				</div>
-				
-				<div id="clear-partial-view" class="hidden">
-					<!-- Will be populated by JavaScript -->
+				<div id="periodic-tab" class="settings-tab-content">
+					<h3>Periodic Activities</h3>
+					<!-- The auto-clean toggle will be moved here by JavaScript -->
 				</div>
-</div>
-<div id="periodic-tab" class="settings-tab-content">
-	<h3>Periodic Activities</h3>
-	<!-- The auto-clean toggle will be moved here by JavaScript -->
-</div>
-</div>
-</div>
-<script src="scripts/languages.js"></script>
-<script src="scripts/config.js"></script>
-<script src="scripts/app-manager.js"></script>
-<script src="scripts/converter.js"></script>
-<script src="scripts/calendar.js"></script>
-<script src="scripts/notes.js"></script>
-<script src="scripts/addons.js"></script>
-<script src="scripts/settings.js"></script>
-<script src="scripts/main.js"></script>
-</body>
+			</div>
+		</div>
+		<script src="scripts/languages.js"></script>
+		<script src="scripts/config.js"></script>
+		<script src="scripts/app-manager.js"></script>
+		<script src="scripts/converter.js"></script>
+		<script src="scripts/calendar.js"></script>
+		<script src="scripts/notes.js"></script>
+		<script src="scripts/addons.js"></script>
+		<script src="scripts/settings.js"></script>
+<script src="scripts/notifications.js"></script>
+		<script src="scripts/main.js"></script>
+	</body>
 </html>
