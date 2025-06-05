@@ -153,9 +153,29 @@ const translations = {
 		memoryManagement: "Memory Management",
 		synchronization: "Synchronization",
 		storageUsed: "Storage Used",
-syncOptionsTitle: "Data Synchronization",
-updateOptionsTitle: "Update Settings",
-confirmCleanup: "Proceed with automatic cleanup?"
+		syncOptionsTitle: "Data Synchronization",
+		updateOptionsTitle: "Update Settings",
+		confirmCleanup: "Proceed with automatic cleanup?",
+		generalResearch: "General Research",
+		dateResearch: "Date Research",
+		noteResearch: "Note Research",
+		generalResearchDesc: "This will contain general search functionality across all data.",
+		dateResearchDesc: "This will contain date-specific search functionality.",
+		noteResearchDesc: "This will contain note content search functionality.",
+		searchEverything: "Search everything...",
+		search: "Search",
+		findDates: "Find Dates",
+		searchNotes: "Search Notes",
+  searchResults: "Search Results",
+  noteResults: "Note Results",
+  dateResults: "Date Results",
+  noResults: "No results found",
+  noResultsForDate: "No results for this date",
+  searchError: "Error performing search",
+  tip: "Tip",
+  generalResearchDesc: "Search across all notes, tips, and attachments.",
+  dateResearchDesc: "Find notes and events by specific date.",
+  noteResearchDesc: "Search within note content."
 	},
     ar: {
         title: "التقويم",
@@ -310,10 +330,30 @@ confirmCleanup: "Proceed with automatic cleanup?"
 		memoryManagement: "إدارة الذاكرة",
 		synchronization: "المزامنة",
 		storageUsed: "التخزين المستخدم",
-syncOptionsTitle: "مزامنة البيانات",
-updateOptionsTitle: "إعدادات التحديث",
-confirmCleanup: "المتابعة بالتنظيف التلقائي؟",
-storageError: "خطأ أثناء التنظيف"
+		syncOptionsTitle: "مزامنة البيانات",
+		updateOptionsTitle: "إعدادات التحديث",
+		confirmCleanup: "المتابعة بالتنظيف التلقائي؟",
+		storageError: "خطأ أثناء التنظيف",
+		"generalResearch": "البحث العام",
+		"dateResearch": "تاريخ البحث",
+		"noteResearch": "ملاحظة البحث",
+		"generalResearchDesc": "سيحتوي هذا على وظيفة البحث العامة عبر جميع البيانات.",
+		"dateResearchDesc": "سيحتوي هذا على وظيفة البحث المتعلقة بالتاريخ.",
+		"noteResearchDesc": "سيحتوي هذا على وظيفة البحث عن محتوى الملاحظات.",
+		"searchEverything": "ابحث عن كل شيء...",
+		"search": "بحث",
+		"findDates": "ابحث عن التواريخ",
+		"searchNotes": "ابحث عن الملاحظات",
+  searchResults: "نتائج البحث",
+  noteResults: "نتائج الملاحظات",
+  dateResults: "نتائج التاريخ",
+  noResults: "لا توجد نتائج",
+  noResultsForDate: "لا توجد نتائج لهذا التاريخ",
+  searchError: "خطأ في البحث",
+  tip: "نصيحة",
+  generalResearchDesc: "ابحث في جميع الملاحظات والنصائح والمرفقات.",
+  dateResearchDesc: "ابحث عن الملاحظات والأحداث حسب تاريخ محدد.",
+  noteResearchDesc: "ابحث في محتوى الملاحظة."
 	},
     fr: {
         title: "Calendrier",
@@ -468,10 +508,30 @@ storageError: "خطأ أثناء التنظيف"
 		memoryManagement: "Gestion de la mémoire",
 		synchronization: "Synchronisation",
 		storageUsed: "Stockage utilisé",
-syncOptionsTitle: "Synchronisation des données",
-updateOptionsTitle: "Paramètres de mise à jour",
-confirmCleanup: "Procéder au nettoyage automatique ?",
-storageError: "Erreur lors du nettoyage"
+		syncOptionsTitle: "Synchronisation des données",
+		updateOptionsTitle: "Paramètres de mise à jour",
+		confirmCleanup: "Procéder au nettoyage automatique ?",
+		storageError: "Erreur lors du nettoyage",
+		"generalResearch": "Recherche Générale",
+		"dateResearch": "Recherche par Date",
+		"noteResearch": "Recherche de Notes",
+		"generalResearchDesc": "Cela contiendra une fonctionnalité de recherche générale à travers toutes les données.",
+		"dateResearchDesc": "Cela contiendra une fonctionnalité de recherche spécifique à la date.",
+		"noteResearchDesc": "Cela contiendra une fonctionnalité de recherche du contenu des notes.",
+		"searchEverything": "Rechercher tout...",
+		"search": "Chercher",
+		"findDates": "Trouver des Dates",
+		"searchNotes": "Rechercher des Notes",
+  searchResults: "Résultats de recherche",
+  noteResults: "Résultats de notes",
+  dateResults: "Résultats par date",
+  noResults: "Aucun résultat trouvé",
+  noResultsForDate: "Aucun résultat pour cette date",
+  searchError: "Erreur lors de la recherche",
+  tip: "Astuce",
+  generalResearchDesc: "Recherchez dans toutes les notes, astuces et pièces jointes.",
+  dateResearchDesc: "Trouvez des notes et événements par date spécifique.",
+  noteResearchDesc: "Recherchez dans le contenu des notes."
 	}
 };
 
@@ -487,9 +547,9 @@ function changeLanguage(lang) {
         systemSelect.innerHTML = Object.entries(langData.calendarSystems)
         .map(([value, name]) => 
             `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-        ).join('');
+		).join('');
         currentCalendarSystem = prevSystem;
-    }
+	}
     
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
@@ -505,14 +565,14 @@ function changeLanguage(lang) {
     
     if (window.settingsManager) {
         window.settingsManager.updateLanguageTexts();
-    }
+	}
     // Update weekdays in calendar header
     const weekdays = document.querySelectorAll('.weekdays div');
     if (weekdays.length === 7) {
         weekdays.forEach((day, index) => {
             day.textContent = langData.weekdays[index];
-        });
-    }
+		});
+	}
     
     // Update calendar immediately
     renderCalendar(langData);

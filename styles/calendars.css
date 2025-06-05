@@ -1,0 +1,38 @@
+/* Calendar Settings Tab */
+.settings-calendar-container {
+    margin-top: 20px;
+}
+
+.settings-calendar-item {
+    margin: 15px 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.settings-calendar-item:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.settings-calendar-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-calendar-select {
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+}
+
+.calendar-icon {
+    font-size: 1.2em;
+}

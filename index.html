@@ -4,39 +4,42 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="manifest" href="./manifest.json">
-     <meta http-equiv="Content-Security-Policy" 
-content="default-src 'self' https://*.netlify.app;
-script-src 'self' 'unsafe-inline';
-style-src 'self' 'unsafe-inline';
-img-src 'self' data: https:;
-media-src 'self' https:;
-connect-src 'self' https://*.netlify.app;
-form-action 'self';
-base-uri 'self';
-frame-src 'none'">
+		<meta http-equiv="Content-Security-Policy" 
+		content="default-src 'self' https://*.netlify.app;
+		script-src 'self' 'unsafe-inline';
+		style-src 'self' 'unsafe-inline';
+		img-src 'self' data: https:;
+		media-src 'self' https:;
+		connect-src 'self' https://*.netlify.app;
+		form-action 'self';
+		base-uri 'self';
+		frame-src 'none'">
 		<title>Calendar</title>
 		<link rel="stylesheet" href="styles/main.css">
 		<link rel="stylesheet" href="styles/settings.css">
 		<link rel="stylesheet" href="styles/memories.css">
+		<link rel="stylesheet" href="styles/languages.css">
 		<link rel="stylesheet" href="styles/notifications.css">
 		<link rel="stylesheet" href="styles/synchronizations.css">
-		<!-- Font Awesome CDN removed -->
+		<link rel="stylesheet" href="styles/research.css">
+		<link rel="stylesheet" href="styles/calendars.css">
 	</head>
 	<body>
 		<div class="container">
 			<header>
 				<h1 class="title">Calendar</h1>
-				<div class="language-selector">
+				<!-- <div class="language-selector">
 					<select id="language-select">
-						<option value="en">English</option>
-						<option value="ar">العربية (Arabic)</option>
-						<option value="fr">Français (French)</option>
+					<option value="en">English</option>
+					<option value="ar">العربية (Arabic)</option>
+					<option value="fr">Français (French)</option>
 					</select>
-				</div><!-- Calendar System Selector -->
-				<select id="calendar-system">
+				</div> -->
+				<!-- Calendar System Selector -->
+				<!-- <select id="calendar-system">
 					<option value="gregorian">Gregorian</option>
 					<option value="hijri">Hijri</option>
-				</select>
+				</select> -->
 				<button id="settings-btn" class="settings-button" title="Settings">
 					⚙️
 				</button>
@@ -94,64 +97,127 @@ frame-src 'none'">
 				<h2 id="settings-title">Settings</h2>
 				
 				<div class="settings-tabs">
-					<button class="settings-tab-btn active" data-tab="notifications">Notifications</button>
+					<button class="settings-tab-btn active" data-tab="language">Language</button>
+					<button class="settings-tab-btn" data-tab="calendar">Calendar</button>
+					<button class="settings-tab-btn" data-tab="research">Research</button>
+					<button class="settings-tab-btn" data-tab="notifications">Notifications</button>
 					<button class="settings-tab-btn" data-tab="memory">Memory</button>
 					<button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
 				</div>
-				<div id="notifications-tab" class="settings-tab-content active">
-    <h3 class="settings-notifications-title">Notification Settings</h3>
-    
-    <div class="settings-notifications-container">
-        <div class="settings-notifications-item">
-            <label class="settings-notifications-label">
-                <span class="notification-icon">🔄</span>
-                <span class="notification-text">Enable updates reminders</span>
-                <span class="settings-notifications-tooltip">Get reminders when updates are available</span>
-                <label class="settings-notifications-toggle">
-                    <input type="checkbox" class="settings-notifications-checkbox">
-                    <span class="settings-notifications-slider"></span>
-                </label>
-            </label>
-        </div>
-
-        <div class="settings-notifications-item">
-            <label class="settings-notifications-label">
-                <span class="notification-icon">📅</span>
-                <span class="notification-text">Enable daily notifications</span>
-                <span class="settings-notifications-tooltip">Receive daily summary notifications</span>
-                <label class="settings-notifications-toggle">
-                    <input type="checkbox" class="settings-notifications-checkbox">
-                    <span class="settings-notifications-slider"></span>
-                </label>
-            </label>
-        </div>
-
-        <div class="settings-notifications-item">
-            <label class="settings-notifications-label">
-                <span class="notification-icon">🔔</span>
-                <span class="notification-text">Notification sound</span>
-                <select class="settings-notifications-select">
-                    <option value="default">Default</option>
-                    <option value="chime">Chime</option>
-                    <option value="bell">Bell</option>
-                    <option value="none">None</option>
-                </select>
-            </label>
-        </div>
-
-        <div class="settings-notifications-item">
-            <label class="settings-notifications-label">
-                <span class="notification-icon">⏰</span>
-                <span class="notification-text">Notification time</span>
-                <input type="time" class="settings-notifications-time" value="09:00">
-            </label>
-        </div>
-    </div>
-    
-    <button class="settings-notifications-test-btn">
-        <span class="test-icon">🔊</span> Test Notification
-    </button>
-</div>
+				
+				<!-- Language Tab -->
+				<div id="language-tab" class="settings-tab-content active">
+					<h3>Language Settings</h3>
+					<div class="settings-language-container">
+						<div class="settings-language-item">
+							<label class="settings-language-label">
+								<span class="language-icon">🌐</span>
+								<span class="language-text">Application Language</span>
+								<select id="language-select-settings" class="settings-language-select">
+									<option value="en">English</option>
+									<option value="ar">العربية (Arabic)</option>
+									<option value="fr">Français (French)</option>
+								</select>
+							</label>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Calendar Tab -->
+				<div id="calendar-tab" class="settings-tab-content">
+					<h3>Calendar Settings</h3>
+					<div class="settings-calendar-container">
+						<div class="settings-calendar-item">
+							<label class="settings-calendar-label">
+								<span class="calendar-icon">📅</span>
+								<span class="calendar-text">Calendar System</span>
+								<select id="calendar-system-settings" class="settings-calendar-select">
+									<option value="gregorian">Gregorian</option>
+									<option value="hijri">Hijri</option>
+								</select>
+							</label>
+						</div>
+					</div>
+				</div>
+				<!-- Research Tab -->
+				<div id="research-tab" class="settings-tab-content">
+					<h3>Research Tools</h3>
+					<button class="settings-research-btn settings-research-general-btn">
+						<span class="research-icon">🔍</span> General Research
+					</button>
+					<button class="settings-research-btn settings-research-date-btn">
+						<span class="research-icon">📅</span> Date Research
+					</button>
+					<button class="settings-research-btn settings-research-note-btn">
+						<span class="research-icon">📝</span> Note Research
+					</button>
+					
+					<div id="research-general-view" class="hidden">
+						<!-- Will be populated by JavaScript -->
+					</div>
+					
+					<div id="research-date-view" class="hidden">
+						<!-- Will be populated by JavaScript -->
+					</div>
+					
+					<div id="research-note-view" class="hidden">
+						<!-- Will be populated by JavaScript -->
+					</div>
+				</div>
+				<div id="notifications-tab" class="settings-tab-content">
+					<h3 class="settings-notifications-title">Notification Settings</h3>
+					
+					<div class="settings-notifications-container">
+						<div class="settings-notifications-item">
+							<label class="settings-notifications-label">
+								<span class="notification-icon">🔄</span>
+								<span class="notification-text">Enable updates reminders</span>
+								<span class="settings-notifications-tooltip">Get reminders when updates are available</span>
+								<label class="settings-notifications-toggle">
+									<input type="checkbox" class="settings-notifications-checkbox">
+									<span class="settings-notifications-slider"></span>
+								</label>
+							</label>
+						</div>
+						
+						<div class="settings-notifications-item">
+							<label class="settings-notifications-label">
+								<span class="notification-icon">📅</span>
+								<span class="notification-text">Enable daily notifications</span>
+								<span class="settings-notifications-tooltip">Receive daily summary notifications</span>
+								<label class="settings-notifications-toggle">
+									<input type="checkbox" class="settings-notifications-checkbox">
+									<span class="settings-notifications-slider"></span>
+								</label>
+							</label>
+						</div>
+						
+						<div class="settings-notifications-item">
+							<label class="settings-notifications-label">
+								<span class="notification-icon">🔔</span>
+								<span class="notification-text">Notification sound</span>
+								<select class="settings-notifications-select">
+									<option value="default">Default</option>
+									<option value="chime">Chime</option>
+									<option value="bell">Bell</option>
+									<option value="none">None</option>
+								</select>
+							</label>
+						</div>
+						
+						<div class="settings-notifications-item">
+							<label class="settings-notifications-label">
+								<span class="notification-icon">⏰</span>
+								<span class="notification-text">Notification time</span>
+								<input type="time" class="settings-notifications-time" value="09:00">
+							</label>
+						</div>
+					</div>
+					
+					<button class="settings-notifications-test-btn">
+						<span class="test-icon">🔊</span> Test Notification
+					</button>
+				</div>
 				<div id="memory-tab" class="settings-tab-content">
 					<h3>Memory Management</h3>
 					<button id="memory-monitor-btn">Memory Monitor</button>
@@ -180,9 +246,10 @@ frame-src 'none'">
 		<script src="scripts/notes.js"></script>
 		<script src="scripts/addons.js"></script>
 		<script src="scripts/settings.js"></script>
-<script src="scripts/notifications.js"></script>
-<script src="scripts/memories.js"></script>
-<script src="scripts/synchronizations.js"></script>
+		<script src="scripts/notifications.js"></script>
+		<script src="scripts/memories.js"></script>
+		<script src="scripts/synchronizations.js"></script>
+		<script src="scripts/research.js"></script>
 		<script src="scripts/main.js"></script>
 	</body>
 </html>

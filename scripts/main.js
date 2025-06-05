@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		prevMonthBtn: !!document.getElementById('prev-month'),
 		todayBtn: !!document.getElementById('today-btn')
 	});
-    // Initialize language select
+    /* // Initialize language select
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) {
         languageSelect.value = window.currentLanguage;
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('calendarSystem', window.currentCalendarSystem);
             renderCalendar(translations[window.currentLanguage]);
 		});
-	}
+	} */
 	
     // Set up navigation buttons - only if they exist
     const nextMonthBtn = document.getElementById('next-month');

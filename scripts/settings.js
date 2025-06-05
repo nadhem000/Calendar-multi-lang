@@ -39,6 +39,29 @@ class SettingsManager {
 				document.getElementById('clear-partial-view').classList.add('hidden');
 			});
 		});
+    
+    // Language select listener
+    const langSelectSettings = this.modal.querySelector('#language-select-settings');
+    if (langSelectSettings) {
+        langSelectSettings.value = window.currentLanguage;
+        langSelectSettings.addEventListener('change', function() {
+            window.currentLanguage = this.value;
+            localStorage.setItem('selectedLanguage', window.currentLanguage);
+            renderCalendar(translations[window.currentLanguage]);
+            window.settingsManager.updateLanguageTexts();
+        });
+    }
+
+    // Calendar system select listener
+    const calendarSelectSettings = this.modal.querySelector('#calendar-system-settings');
+    if (calendarSelectSettings) {
+        calendarSelectSettings.value = window.currentCalendarSystem;
+        calendarSelectSettings.addEventListener('change', function() {
+            window.currentCalendarSystem = this.value;
+            localStorage.setItem('calendarSystem', window.currentCalendarSystem);
+            renderCalendar(translations[window.currentLanguage]);
+        });
+    }
 		// Add notification toggle listeners
 		document.querySelectorAll('.settings-notifications-checkbox').forEach((checkbox, index) => {
 			checkbox.addEventListener('change', (e) => {
@@ -114,8 +137,29 @@ if (soundSelect) {
 	}
     
     updateLanguageTexts() {
-        const lang = translations[currentLanguage];
-        this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
+    const lang = translations[currentLanguage];
+    this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
+    
+    // Language tab
+    document.querySelector('[data-tab="language"]').textContent = lang.language || 'Language';
+    document.querySelector('#language-tab h3').textContent = lang.languageSettings || 'Language Settings';
+    document.querySelector('.language-text').textContent = lang.applicationLanguage || 'Application Language';
+    
+    // Calendar tab
+    document.querySelector('[data-tab="calendar"]').textContent = lang.calendar || 'Calendar';
+    document.querySelector('#calendar-tab h3').textContent = lang.calendarSettings || 'Calendar Settings';
+    document.querySelector('.calendar-text').textContent = lang.calendarSystem || 'Calendar System';
+    
+    // Update language select options
+    const langSelect = this.modal.querySelector('#language-select-settings');
+    if (langSelect) {
+        Array.from(langSelect.options).forEach(option => {
+            if (option.value === 'en') option.text = lang.english || 'English';
+            if (option.value === 'ar') option.text = lang.arabic || 'العربية (Arabic)';
+            if (option.value === 'fr') option.text = lang.french || 'Français (French)';
+        });
+        langSelect.value = window.currentLanguage;
+    }
     // Preserve notification settings when language changes
     const timeInput = document.querySelector('.settings-notifications-time');
     const soundSelect = document.querySelector('.settings-notifications-select');
