@@ -5,7 +5,7 @@ class AppManager {
 		this.BACKGROUND_SYNC_TAG = 'background-sync';
 		this.PERIODIC_SYNC_TAG = 'periodic-sync';
 		this.dbName = 'CalendarAttachments';
-		this.dbVersion = 5;  // Consistent version
+		this.dbVersion = 6;  // Consistent version
 	}
 	async init() {
 		await this.registerServiceWorker();
@@ -102,7 +102,7 @@ class AppManager {
                             showToast(lang.updating);
                             setTimeout(() => {
                                 window.location.reload();
-                            }, 1500);
+                            }, 1600);
                         } /* else {
                             // Notification-only flow
                             const notification = document.createElement('div');
@@ -605,14 +605,15 @@ class FileManager {
 	}
 }
 document.addEventListener('DOMContentLoaded', () => {
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-updateOnlineStatus(); // Initial check
-	handleAppRouting();
-	window.appManager = new AppManager();
-	window.appManager.init().catch(error => {
-		console.error('Initialization error:', error);
-	});
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus(); // Initial check
+    handleAppRouting();
+    window.appManager = new AppManager();
+    window.synchronizationManager = new SynchronizationManager();
+    window.appManager.init().catch(error => {
+        console.error('Initialization error:', error);
+    });
 });
 if ('launchQueue' in window) {
 	window.launchQueue.setConsumer((launchParams) => {

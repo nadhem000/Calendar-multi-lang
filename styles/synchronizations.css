@@ -1,0 +1,153 @@
+/* Synchronization Settings Styles */
+.settings-synchronization-option {
+    margin: 15px 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.settings-synchronization-option:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.settings-synchronization-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-synchronization-slider {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background: #ccc;
+    border-radius: 24px;
+    transition: .4s;
+}
+
+.settings-synchronization-slider:before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 2px;
+    bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .settings-synchronization-slider {
+    background: #4CAF50;
+}
+
+input:checked + .settings-synchronization-slider:before {
+    transform: translateX(26px);
+}
+
+.settings-synchronization-label {
+    font-weight: 500;
+    color: #333;
+    position: relative;
+}
+
+.settings-synchronization-tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85em;
+    font-weight: normal;
+}
+
+.settings-synchronization-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.settings-synchronization-toggle:hover .settings-synchronization-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.settings-synchronization-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    margin: 0 0 15px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.settings-synchronization-subtitle::before {
+    content: "↳";
+    margin-right: 8px;
+    color: #888;
+}
+
+.settings-synchronization-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-synchronization-section {
+    background: rgba(0,0,0,0.02);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.settings-synchronization-group {
+    margin-bottom: 20px;
+}
+
+.settings-synchronization-group:last-child {
+    margin-bottom: 0;
+}
+
+
+.settings-synchronization-subtitle .icon {
+    font-size: 1.1rem;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* RTL Support */
+[dir="rtl"] .settings-synchronization-toggle,
+[dir="rtl"] .settings-synchronization-label {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .settings-synchronization-subtitle::before,
+[dir="rtl"] .settings-synchronization-title::before {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+[dir="rtl"] input:checked + .settings-synchronization-slider:before {
+    transform: translateX(-26px);
+}

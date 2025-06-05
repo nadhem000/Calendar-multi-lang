@@ -10,7 +10,7 @@ const isLocalEnvironment = (() => {
 })();
 let initialized = false;
 const CACHE_NAME = CACHE_CONFIG.name;
-const WIDGET_CACHE_NAME = 'widget-data-cache-v5';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v6';
 const ASSETS_TO_CACHE = CACHE_CONFIG.assets;
 const BACKGROUND_SYNC_TAG = 'sync-notes';
 const PERIODIC_SYNC_TAG = 'periodic-update';
@@ -23,7 +23,7 @@ const LARGE_ASSETS = [
 // Update the openDB function to match version:
 const openDB = () => {
 	return new Promise((resolve, reject) => {
-		const request = indexedDB.open('CalendarAttachments', 5); // Match version number
+		const request = indexedDB.open('CalendarAttachments', 6); // Match version number
 		request.onupgradeneeded = (e) => {
 			const db = e.target.result;
 			if (!db.objectStoreNames.contains('attachments')) {
@@ -103,7 +103,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 async function handleLargeAsset(request) {
-  const cache = await caches.open('large-assets-v5');
+  const cache = await caches.open('large-assets-v6');
   const cached = await cache.match(request);
   // 1. Return cached version if fresh (<30 days old)
   if (cached) {

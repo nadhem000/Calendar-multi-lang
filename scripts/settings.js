@@ -1,14 +1,10 @@
 // settings.js
 class SettingsManager {
     constructor() {
-		this.modal = document.getElementById('settings-modal');
-		this.initSettingsButton();
-		this.initModal();
-		this.setupAutoCleanupToggle();
-		this.setupPeriodicCleanup();
-		this.setupMemoryEmergencyToggle();
-		this.setupSyncToggles();
-	}
+        this.modal = document.getElementById('settings-modal');
+        this.initSettingsButton();
+        this.initModal();
+    }
     initSettingsButton() {
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) {
@@ -22,7 +18,7 @@ class SettingsManager {
 		this.modal.addEventListener('click', (e) => {
 			if (e.target === this.modal) this.closeSettings();
 		});
-		// Tab switching - fixed version
+		// Tab switching 
 		document.querySelectorAll('.settings-tab-btn').forEach(btn => {
 			btn.addEventListener('click', () => {
 				// Hide all sub-views when switching tabs
@@ -55,6 +51,29 @@ class SettingsManager {
 				}
 			});
 		});
+    // Add notification time listener
+const timeInput = document.querySelector('.settings-notifications-time');
+if (timeInput) {
+    // Initialize from localStorage
+    const savedTime = localStorage.getItem('notificationTime') || '09:00';
+    timeInput.value = savedTime;
+    
+    timeInput.addEventListener('change', (e) => {
+        localStorage.setItem('notificationTime', e.target.value);
+    });
+}
+
+// Add notification sound listener
+const soundSelect = document.querySelector('.settings-notifications-select');
+if (soundSelect) {
+    // Initialize from localStorage
+    const savedSound = localStorage.getItem('notificationSound') || 'default';
+    soundSelect.value = savedSound;
+    
+    soundSelect.addEventListener('change', (e) => {
+        localStorage.setItem('notificationSound', e.target.value);
+    });
+}
 		// Add test button listener
 		document.querySelector('.settings-notifications-test-btn').addEventListener('click', () => {
 			window.notificationManager.showTestNotification();
@@ -64,52 +83,85 @@ class SettingsManager {
 		document.getElementById('clear-partial-btn').addEventListener('click', () => this.showPartialClear());
 		document.getElementById('clear-all-btn').addEventListener('click', () => this.promptClearAll());
 	}
+    
     openSettings() {
-        this.modal.style.display = 'block';
-        this.updateLanguageTexts();
-	}
+    this.modal.style.display = 'block';
+    this.updateLanguageTexts();
+    
+    // Refresh notification toggle states
+    const checkboxes = this.modal.querySelectorAll('.settings-notifications-checkbox');
+    if (checkboxes.length >= 2) {
+        checkboxes[0].checked = localStorage.getItem('notifyUpdates') === 'true';
+        checkboxes[1].checked = localStorage.getItem('notifyDaily') === 'true';
+    }
+    
+    // Refresh time and sound settings
+    const timeInput = this.modal.querySelector('.settings-notifications-time');
+    const soundSelect = this.modal.querySelector('.settings-notifications-select');
+    if (timeInput) timeInput.value = localStorage.getItem('notificationTime') || '09:00';
+    if (soundSelect) soundSelect.value = localStorage.getItem('notificationSound') || 'default';
+    
+    // Initialize synchronization manager if not already done
+    if (window.synchronizationManager && !window.synchronizationManager.initialized) {
+        window.synchronizationManager.initialize();
+    }
+}
     closeSettings() {
         this.modal.style.display = 'none';
         // Hide any open sub-views
         document.getElementById('memory-monitor-view').classList.add('hidden');
         document.getElementById('clear-partial-view').classList.add('hidden');
 	}
+    
     updateLanguageTexts() {
-    const lang = translations[currentLanguage];
-    this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
-    
-    // Memory tab
-    document.querySelector('[data-tab="memory"]').textContent = lang.memory || 'Memory';
-    document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
-    document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
-    document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
-    
-    // Periodic Activities tab
-    document.querySelector('[data-tab="periodic"]').textContent = lang.periodicActivities || 'Periodic Activities';
-    
-    // Notifications tab
-    document.querySelector('[data-tab="notifications"]').textContent = lang.notificationSettings || 'Notifications';
-    document.querySelector('.settings-notifications-title').textContent = lang.notificationSettings || 'Notification Settings';
-    document.querySelectorAll('.settings-notifications-label .notification-text')[0].textContent = lang.enableUpdateReminders || 'Enable updates reminders';
-    document.querySelectorAll('.settings-notifications-tooltip')[0].textContent = lang.updateRemindersTooltip || 'Get reminders when updates are available';
-    document.querySelectorAll('.settings-notifications-label .notification-text')[1].textContent = lang.enableDailyNotifications || 'Enable daily notifications';
-    document.querySelectorAll('.settings-notifications-tooltip')[1].textContent = lang.dailyNotificationsTooltip || 'Receive daily summary notifications';
-    document.querySelectorAll('.settings-notifications-label .notification-text')[2].textContent = lang.notificationSound || 'Notification sound';
-    document.querySelectorAll('.settings-notifications-label .notification-text')[3].textContent = lang.notificationTime || 'Notification time';
-    
-    // Close button
-    this.modal.querySelector('.close-modal').textContent = lang.close || '×';
-    
-    // Sync options (if they exist)
-    if (document.querySelector('.settings-sync-options-section h3')) {
-        document.querySelector('.settings-sync-options-section h3').textContent = lang.synchronization || 'Synchronization';
+        const lang = translations[currentLanguage];
+        this.modal.querySelector('#settings-title').textContent = lang.title || 'Settings';
+    // Preserve notification settings when language changes
+    const timeInput = document.querySelector('.settings-notifications-time');
+    const soundSelect = document.querySelector('.settings-notifications-select');
+    const savedTime = timeInput ? timeInput.value : '09:00';
+    const savedSound = soundSelect ? soundSelect.value : 'default';
+        
+        // Memory tab
+        document.querySelector('[data-tab="memory"]').textContent = lang.memory || 'Memory';
+        document.getElementById('memory-monitor-btn').textContent = lang.memoryMonitor || 'Memory Monitor';
+        document.getElementById('clear-partial-btn').textContent = lang.clearPartial || 'Clear Partial Data';
+        document.getElementById('clear-all-btn').textContent = lang.clearAll || 'Clear All Data';
+        
+        // Periodic Activities tab
+        document.querySelector('[data-tab="periodic"]').textContent = lang.periodicActivities || 'Periodic Activities';
+        
+        // Notifications tab
+        document.querySelector('[data-tab="notifications"]').textContent = lang.notificationSettings || 'Notifications';
+        document.querySelector('.settings-notifications-title').textContent = lang.notificationSettings || 'Notification Settings';
+        document.querySelectorAll('.settings-notifications-label .notification-text')[0].textContent = lang.enableUpdateReminders || 'Enable updates reminders';
+        document.querySelectorAll('.settings-notifications-tooltip')[0].textContent = lang.updateRemindersTooltip || 'Get reminders when updates are available';
+        document.querySelectorAll('.settings-notifications-label .notification-text')[1].textContent = lang.enableDailyNotifications || 'Enable daily notifications';
+        document.querySelectorAll('.settings-notifications-tooltip')[1].textContent = lang.dailyNotificationsTooltip || 'Receive daily summary notifications';
+        document.querySelectorAll('.settings-notifications-label .notification-text')[2].textContent = lang.notificationSound || 'Notification sound';
+        document.querySelectorAll('.settings-notifications-label .notification-text')[3].textContent = lang.notificationTime || 'Notification time';
+    // Restore values after language update
+    if (timeInput) timeInput.value = savedTime;
+    if (soundSelect) soundSelect.value = savedSound;
+        
+        // Close button
+        this.modal.querySelector('.close-modal').textContent = lang.close || '×';
+        
+        // Sync options (if they exist)
+        if (document.querySelector('.settings-sync-options-section h3')) {
+            document.querySelector('.settings-sync-options-section h3').textContent = lang.synchronization || 'Synchronization';
+        }
+        
+        // Memory visualization
+        if (document.querySelector('.circle-label')) {
+            document.querySelector('.circle-label').textContent = lang.storageUsed || 'Storage Used';
+        }
+        
+        // Update synchronization section
+        if (window.synchronizationManager) {
+            window.synchronizationManager.updateLanguageTexts();
+        }
     }
-    
-    // Memory visualization
-    if (document.querySelector('.circle-label')) {
-        document.querySelector('.circle-label').textContent = lang.storageUsed || 'Storage Used';
-    }
-}
     async countObjectStore(db, storeName) {
         return new Promise((resolve, reject) => {
             try {
@@ -747,202 +799,6 @@ class SettingsManager {
 				};
 			});
 		});
-	}
-	setupAutoCleanupToggle() {
-		// Remove any existing toggles first
-		document.querySelectorAll('.auto-clean-toggle').forEach(el => el.remove());
-		// Create the toggle container
-		const optionDiv = document.createElement('div');
-		optionDiv.className = 'settings-periodic-option';
-		optionDiv.innerHTML = `
-        <div class="settings-toggle-container">
-		<label class="settings-toggle-switch">
-		<input type="checkbox" id="auto-clean-toggle">
-		<span class="settings-toggle-slider"></span>
-		</label>
-		<span class="settings-toggle-label">
-		${translations[currentLanguage].autoCleanup || 'Automatic Cleanup'}
-		<span class="settings-toggle-tooltip">
-		${translations[currentLanguage].autoCleanupTooltip || 'Automatically cleans old data every 15 days'}
-		</span>
-		</span>
-        </div>
-		`;
-		// Add to the periodic activities tab
-		const periodicTab = document.getElementById('periodic-tab');
-		periodicTab.appendChild(optionDiv);
-		// Load saved preference
-		const toggle = optionDiv.querySelector('#auto-clean-toggle');
-		toggle.checked = localStorage.getItem('autoCleanEnabled') === 'true';
-		toggle.addEventListener('change', (e) => {
-			localStorage.setItem('autoCleanEnabled', e.target.checked);
-			if (e.target.checked) {
-				this.setupPeriodicCleanup();
-			}
-		});
-		// Add hover tooltip functionality - FIXED: using optionDiv instead of toggleContainer
-		const label = optionDiv.querySelector('.settings-toggle-label');
-		const tooltip = optionDiv.querySelector('.settings-toggle-tooltip');
-		label.addEventListener('mouseenter', () => {
-			tooltip.style.visibility = 'visible';
-			tooltip.style.opacity = '1';
-		});
-		label.addEventListener('mouseleave', () => {
-			tooltip.style.visibility = 'hidden';
-			tooltip.style.opacity = '0';
-		});
-	}
-	async performSafeCleanup() {
-		// Double-check user preference
-		if (localStorage.getItem('autoCleanEnabled') !== 'true') {
-			console.log('Cleanup aborted - not enabled in settings');
-			return;
-		}
-		// user confirmation
-		const lang = translations[currentLanguage];
-		if (!confirm(lang.confirmCleanup || "Proceed with automatic cleanup?")) {
-			console.log('Cleanup canceled by user');
-			return;
-		}
-		// Explicit cleanup scope
-		const cleanupSettings = {
-			notes: true,
-			attachments: true,
-			syncQueue: true,
-			maxAgeDays: 30
-		};
-        console.log('Starting controlled cleanup', cleanupSettings);
-		try {
-			// 1. Clear old notes
-			const cutoffDate = new Date();
-			cutoffDate.setDate(cutoffDate.getDate() - cleanupSettings.maxAgeDays);
-			// 2. Clear old attachments from IndexedDB
-			const db = await window.appManager.openDB();
-			const tx = db.transaction(['attachments', 'SYNC_QUEUE'], 'readwrite');
-			// Delete attachments older than maxAgeDays
-			const attachmentsStore = tx.objectStore('attachments');
-			const attachmentsRequest = attachmentsStore.index('timestamp').openCursor(IDBKeyRange.upperBound(cutoffDate.getTime()));
-			attachmentsRequest.onsuccess = (e) => {
-				const cursor = e.target.result;
-				if (cursor) {
-					console.log('Deleting old attachment:', cursor.value.id);
-					cursor.delete();
-					cursor.continue();
-				}
-			};
-			// Clear sync queue
-			await tx.objectStore('SYNC_QUEUE').clear();
-			await tx.complete;
-			console.log('Database cleanup complete');
-			} catch (error) {
-			console.error('Cleanup error:', error);
-		}
-	}
-	setupPeriodicCleanup() {
-		if (localStorage.getItem('autoCleanEnabled') !== 'true') return;
-		// Clean every 15 days
-		const cleanupInterval = 15 * 24 * 60 * 60 * 1000;
-		setInterval(async () => {
-			if (navigator.onLine) {
-				await this.performSafeCleanup();
-				localStorage.setItem('lastCleanup', Date.now());
-			}
-		}, cleanupInterval);
-	}
-	setupMemoryEmergencyToggle() {
-		const optionDiv = document.createElement('div');
-		optionDiv.className = 'settings-periodic-option';
-		optionDiv.innerHTML = `
-		<div class="settings-toggle-container">
-        <label class="settings-toggle-switch">
-		<input type="checkbox" id="emergency-clean-toggle">
-		<span class="settings-toggle-slider"></span>
-        </label>
-        <span class="settings-toggle-label">
-		${translations[currentLanguage].emergencyCleanup || 'Auto-clean when storage full'}
-		<span class="settings-toggle-tooltip">
-		${translations[currentLanguage].emergencyCleanupTooltip || 
-		'Automatically cleans old data when storage reaches 90% capacity'}
-		</span>
-        </span>
-		</div>
-		`;
-		// Add to periodic tab
-		document.getElementById('periodic-tab').appendChild(optionDiv);
-		// Load saved preference
-		const toggle = optionDiv.querySelector('#emergency-clean-toggle');
-		toggle.checked = localStorage.getItem('emergencyCleanEnabled') === 'true';
-		toggle.addEventListener('change', (e) => {
-			localStorage.setItem('emergencyCleanEnabled', e.target.checked);
-		});
-	}
-	setupSyncToggles() {
-		// First ensure the current language has syncOptions
-		const langData = translations[currentLanguage];
-		if (!langData || !langData.syncOptions) {
-			console.error('Sync options not available for current language');
-			return;
-		}
-		const syncOptions = langData.syncOptions;
-		const syncSection = document.createElement('div');
-		syncSection.className = 'settings-sync-options-section';
-		syncSection.innerHTML = `
-		<h3>${translations[currentLanguage].syncTitle || 'Synchronization'}</h3>
-		<div class="settings-sync-option">
-		<label class="settings-sync-toggle">
-		<input type="checkbox" id="sync-storage">
-		<span class="settings-sync-slider"></span>
-		<span class="settings-sync-label">
-		${syncOptions.storage}
-		<span class="settings-tooltip">${syncOptions.storageTooltip}</span>
-		</span>
-		</label>
-		</div>
-		<div class="settings-sync-option">
-		<label class="settings-sync-toggle">
-		<input type="checkbox" id="sync-version">
-		<span class="settings-sync-slider"></span>
-		<span class="settings-sync-label">
-		${syncOptions.version}
-		<span class="settings-tooltip">${syncOptions.versionTooltip}</span>
-		</span>
-		</label>
-		</div>
-		<div class="settings-sync-option">
-		<label class="settings-sync-toggle">
-		<input type="checkbox" id="sync-calendar">
-		<span class="settings-sync-slider"></span>
-		<span class="settings-sync-label">
-		${syncOptions.calendar}
-		<span class="settings-tooltip">${syncOptions.calendarTooltip}</span>
-		</span>
-		</label>
-		</div>
-		`;
-		// Add to periodic tab or create new tab
-		document.getElementById('periodic-tab').appendChild(syncSection);
-		// Load saved preferences
-		document.getElementById('sync-storage').checked = localStorage.getItem('syncStorage') === 'true';
-		document.getElementById('sync-version').checked = localStorage.getItem('autoUpdate') === 'true';
-		document.getElementById('sync-calendar').checked = localStorage.getItem('syncCalendars') === 'true';
-		// Add event listeners
-		document.getElementById('sync-storage').addEventListener('change', (e) => {
-			localStorage.setItem('syncStorage', e.target.checked);
-		});
-		document.getElementById('sync-version').addEventListener('change', (e) => {
-			localStorage.setItem('autoUpdate', e.target.checked);
-		});
-		document.getElementById('sync-calendar').addEventListener('change', (e) => {
-			localStorage.setItem('syncCalendars', e.target.checked);
-			if (e.target.checked) this.syncCalendarSystems();
-		});
-	}
-	// calendar sync
-	syncCalendarSystems() {
-		if (localStorage.getItem('syncCalendars') !== 'true') return;
-		// calendar sync logic here
-		console.log("Calendar systems synchronization enabled");
-		// This would convert dates between systems when enabled
 	}
 }
 // Initialize settings manager when DOM is loaded

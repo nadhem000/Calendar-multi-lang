@@ -152,7 +152,10 @@ const translations = {
 		soundNone: "None",
 		memoryManagement: "Memory Management",
 		synchronization: "Synchronization",
-		storageUsed: "Storage Used"
+		storageUsed: "Storage Used",
+syncOptionsTitle: "Data Synchronization",
+updateOptionsTitle: "Update Settings",
+confirmCleanup: "Proceed with automatic cleanup?"
 	},
     ar: {
         title: "التقويم",
@@ -306,7 +309,11 @@ const translations = {
 		soundNone: "بلا",
 		memoryManagement: "إدارة الذاكرة",
 		synchronization: "المزامنة",
-		storageUsed: "التخزين المستخدم"
+		storageUsed: "التخزين المستخدم",
+syncOptionsTitle: "مزامنة البيانات",
+updateOptionsTitle: "إعدادات التحديث",
+confirmCleanup: "المتابعة بالتنظيف التلقائي؟",
+storageError: "خطأ أثناء التنظيف"
 	},
     fr: {
         title: "Calendrier",
@@ -460,7 +467,11 @@ const translations = {
 		soundNone: "Aucun",
 		memoryManagement: "Gestion de la mémoire",
 		synchronization: "Synchronisation",
-		storageUsed: "Stockage utilisé"
+		storageUsed: "Stockage utilisé",
+syncOptionsTitle: "Synchronisation des données",
+updateOptionsTitle: "Paramètres de mise à jour",
+confirmCleanup: "Procéder au nettoyage automatique ?",
+storageError: "Erreur lors du nettoyage"
 	}
 };
 
@@ -474,11 +485,11 @@ function changeLanguage(lang) {
     const systemSelect = document.getElementById('calendar-system');
     if (systemSelect) {
         systemSelect.innerHTML = Object.entries(langData.calendarSystems)
-		.map(([value, name]) => 
-			`<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-		).join('');
+        .map(([value, name]) => 
+            `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
+        ).join('');
         currentCalendarSystem = prevSystem;
-	}
+    }
     
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
@@ -487,20 +498,21 @@ function changeLanguage(lang) {
     document.getElementById('mechanics-icon').setAttribute('title', langData.icons.mechanics);
     document.getElementById('today-btn').innerHTML = `📅 ${langData.todayText}`;
     
-    // Update settings modal texts if it's open
+    
+    // Update settings modal if open
+    const settingsModal = document.getElementById('settings-modal');
+    const isSettingsOpen = settingsModal && settingsModal.style.display === 'block';
+    
     if (window.settingsManager) {
         window.settingsManager.updateLanguageTexts();
-        window.settingsManager.closeSettings(); // Force refresh
-        window.settingsManager.openSettings();
-	}
-    
+    }
     // Update weekdays in calendar header
     const weekdays = document.querySelectorAll('.weekdays div');
     if (weekdays.length === 7) {
         weekdays.forEach((day, index) => {
             day.textContent = langData.weekdays[index];
-		});
-	}
+        });
+    }
     
     // Update calendar immediately
     renderCalendar(langData);

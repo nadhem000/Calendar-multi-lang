@@ -1,0 +1,388 @@
+/* Memory Management Styles */
+.settings-memories-container {
+    margin-top: 15px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.settings-memories-option {
+    margin: 15px 0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.settings-memories-option:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.settings-memories-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+}
+
+.settings-memories-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.settings-memories-view {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.settings-memories-visualization {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.settings-memories-circle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.settings-memories-circle {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+.settings-memories-circle-bg {
+    fill: none;
+    stroke: #e9ecef;
+    stroke-width: 3;
+}
+
+.settings-memories-circle-fill {
+    fill: none;
+    stroke: #5b8bf7;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.settings-memories-percentage {
+    fill: #333;
+    font-size: 0.5em;
+    text-anchor: middle;
+    font-weight: bold;
+}
+
+.settings-memories-circle-label {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.settings-memories-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.settings-memories-legend-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.settings-memories-detail-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.settings-memories-detail-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s ease;
+}
+
+.settings-memories-detail-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.settings-memories-detail-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.settings-memories-detail-content {
+    flex: 1;
+}
+
+.settings-memories-detail-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.settings-memories-detail-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.settings-memories-clear-section {
+    margin-top: 20px;
+}
+
+.settings-memories-month-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+}
+
+.settings-memories-month-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.settings-memories-month-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.settings-memories-month-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.settings-memories-note-count {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.settings-memories-note-preview {
+    margin-top: 10px;
+}
+
+.settings-memories-note-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    position: relative;
+    border-left: 3px solid #5b8bf7;
+}
+
+.settings-memories-note-type {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.settings-memories-note-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-memories-delete-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc3545;
+    padding: 0 5px;
+}
+
+.settings-memories-delete-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 50%;
+}
+
+.settings-memories-show-all {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+    margin-top: 5px;
+    background: none;
+    border: none;
+    color: #5b8bf7;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.settings-memories-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.settings-memories-confirm-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.settings-memories-warning-icon {
+    color: #dc3545;
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.settings-memories-option-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.settings-memories-option-item:hover {
+    background: #f8f9fa;
+}
+
+.settings-memories-checkmark {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.settings-memories-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid #4CAF50;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input:checked ~ .settings-memories-checkmark:after {
+    display: block;
+}
+
+.settings-memories-confirm-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.settings-memories-cancel-btn {
+    padding: 8px 15px;
+    background: #f8f9fa;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings-memories-confirm-btn {
+    padding: 8px 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings-memories-confirm-btn:hover {
+    background: #c82333;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .settings-memories-legend {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-memories-detail-view {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-memories-detail-view {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* RTL Support */
+[dir="rtl"] .settings-memories-toggle,
+[dir="rtl"] .settings-memories-label {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .settings-memories-subtitle::before,
+[dir="rtl"] .settings-memories-title::before {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+[dir="rtl"] input:checked + .settings-memories-slider:before {
+    transform: translateX(-26px);
+}

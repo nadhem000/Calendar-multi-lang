@@ -4,19 +4,22 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="manifest" href="./manifest.json">
-		<meta http-equiv="Content-Security-Policy" 
-		content="default-src 'self' https://*.netlify.app;
-		script-src 'self' 'unsafe-inline';
-		style-src 'self' 'unsafe-inline';
-		img-src 'self' data: https:;
-		connect-src 'self' https://*.netlify.app;
-		form-action 'self';
-		base-uri 'self';
-		frame-src 'none';">
+     <meta http-equiv="Content-Security-Policy" 
+     content="default-src 'self' https://*.netlify.app;
+     script-src 'self' 'unsafe-inline';
+     style-src 'self' 'unsafe-inline';
+     img-src 'self' data: https:;
+     media-src 'self' https:;  <!-- Add this line for audio files -->
+     connect-src 'self' https://*.netlify.app;
+     form-action 'self';
+     base-uri 'self';
+     frame-src 'none';">
 		<title>Calendar</title>
 		<link rel="stylesheet" href="styles/main.css">
 		<link rel="stylesheet" href="styles/settings.css">
+		<link rel="stylesheet" href="styles/memories.css">
 		<link rel="stylesheet" href="styles/notifications.css">
+		<link rel="stylesheet" href="styles/synchronizations.css">
 		<!-- Font Awesome CDN removed -->
 	</head>
 	<body>
@@ -178,6 +181,8 @@
 		<script src="scripts/addons.js"></script>
 		<script src="scripts/settings.js"></script>
 <script src="scripts/notifications.js"></script>
+<script src="scripts/memories.js"></script>
+<script src="scripts/synchronizations.js"></script>
 		<script src="scripts/main.js"></script>
 	</body>
 </html>

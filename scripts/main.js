@@ -256,3 +256,13 @@ window.addEventListener('load', () => {
 		});
 	}, 0);
 });
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize notification checkboxes on first load
+    const updateCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(1)');
+    const dailyCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(2)');
+    
+    if (updateCheckbox && dailyCheckbox) {
+        updateCheckbox.checked = localStorage.getItem('notifyUpdates') === 'true';
+        dailyCheckbox.checked = localStorage.getItem('notifyDaily') === 'true';
+    }
+});

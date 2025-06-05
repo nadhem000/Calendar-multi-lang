@@ -7,68 +7,106 @@ class NotificationManager {
             this.setupNotificationClickHandler();
         });
 	}
-async setupPushNotifications() {
-    if ('Notification' in window && 'serviceWorker' in navigator) {
-        try {
-            // Wait for DOM to be ready
-            await new Promise(resolve => {
-                if (document.readyState === 'complete') {
-                    resolve();
-                } else {
-                    window.addEventListener('load', resolve);
-                }
-            });
 
-            // Check if elements exist before accessing them
-            const updateCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(1)');
-            const dailyCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(2)');
+    async setupPushNotifications() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        console.log('Notifications or Service Workers not supported');
+        return;
+    }
+
+    try {
+        // Ensure elements exist before accessing them
+        const updateCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(1)');
+        const dailyCheckbox = document.querySelector('.settings-notifications-checkbox:nth-of-type(2)');
+        const timeInput = document.querySelector('.settings-notifications-time');
+        const soundSelect = document.querySelector('.settings-notifications-select');
+        
+        // Load saved preferences
+        const updatesEnabled = localStorage.getItem('notifyUpdates') === 'true';
+        const dailyEnabled = localStorage.getItem('notifyDaily') === 'true';
+        const notificationTime = localStorage.getItem('notificationTime') || '09:00';
+        const notificationSound = localStorage.getItem('notificationSound') || 'default';
+        
+        // Set initial values if elements exist
+        if (updateCheckbox) updateCheckbox.checked = updatesEnabled;
+        if (dailyCheckbox) dailyCheckbox.checked = dailyEnabled;
+        if (timeInput) timeInput.value = notificationTime;
+        if (soundSelect) soundSelect.value = notificationSound;
+        
+        console.log(`Notification settings loaded:`, {
+            updatesEnabled,
+            dailyEnabled,
+            notificationTime,
+            notificationSound
+        });
+
+        // Only request permission if not already determined
+        if (Notification.permission === 'default') {
+            // Show a custom prompt first
+            const lang = translations[currentLanguage] || translations['en'];
+            const promptText = lang.enableNotifications || "Would you like to enable notifications?";
             
-            if (updateCheckbox && dailyCheckbox) {
-                // Load saved preferences
-                const updatesEnabled = localStorage.getItem('notifyUpdates') === 'true';
-                const dailyEnabled = localStorage.getItem('notifyDaily') === 'true';
+            if (confirm(promptText)) {
+                const permission = await Notification.requestPermission();
+                console.log('Notification permission:', permission);
                 
-                // Set initial toggle states
-                updateCheckbox.checked = updatesEnabled;
-                dailyCheckbox.checked = dailyEnabled;
-            }
-
-            // Only request permission if not already determined
-            if (Notification.permission === 'default') {
-                // Show a custom prompt first
-                if (confirm("Would you like to enable notifications?")) {
-                    const permission = await Notification.requestPermission();
-                    console.log('Notification permission:', permission);
+                // Update UI based on permission
+                if (permission === 'granted') {
+                    // Set to enabled if user confirmed
+                    localStorage.setItem('notifyUpdates', 'true');
+                    localStorage.setItem('notifyDaily', 'true');
+                    
+                    if (updateCheckbox) updateCheckbox.checked = true;
+                    if (dailyCheckbox) dailyCheckbox.checked = true;
                 }
-            } else if (Notification.permission === 'granted') {
-                const dailyEnabled = localStorage.getItem('notifyDaily') === 'true';
-                const updatesEnabled = localStorage.getItem('notifyUpdates') === 'true';
-                if (dailyEnabled) this.scheduleDailyNotifications();
-                if (updatesEnabled) this.setupNoteReminders();
             }
-        } catch (error) {
-            console.error('Error with notifications:', error);
+        } else if (Notification.permission === 'granted') {
+            // Enable scheduled notifications based on preferences
+            if (dailyEnabled) this.scheduleDailyNotifications();
+            if (updatesEnabled) this.setupNoteReminders();
         }
+    } catch (error) {
+        console.error('Error with notifications:', error);
+        showToast('Error initializing notifications');
     }
 }
     scheduleDailyNotifications() {
-        const now = new Date();
-        const firstNotification = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            9, 0, 0
-		);
-        if (now > firstNotification) {
-            firstNotification.setUTCDate(firstNotification.getDate() + 1);
-		}
-        const timeout = firstNotification.getTime() - now.getTime();
-        setTimeout(() => {
-            this.showDailyTipNotification();
-            setInterval(() => this.showDailyTipNotification(), 24 * 60 * 60 * 1000);
-		}, timeout);
+    // Clear any existing intervals
+    if (this.dailyNotificationInterval) {
+        clearInterval(this.dailyNotificationInterval);
+    }
+    
+    const notificationTime = localStorage.getItem('notificationTime') || '09:00';
+    const [hours, minutes] = notificationTime.split(':').map(Number);
+    
+    const now = new Date();
+    let firstNotification = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        hours,
+        minutes,
+        0
+    );
+    
+    // If we already passed the time today, schedule for tomorrow
+    if (now > firstNotification) {
+        firstNotification.setDate(firstNotification.getDate() + 1);
+    }
+    
+    const timeout = firstNotification.getTime() - now.getTime();
+    
+    setTimeout(() => {
+        this.showDailyTipNotification();
+        // Set interval for daily notifications
+        this.dailyNotificationInterval = setInterval(
+            () => this.showDailyTipNotification(),
+            24 * 60 * 60 * 1000 // 24 hours
+        );
+    }, timeout);
 	}
     showDailyTipNotification() {
+    this.playNotificationSound();
         if ('Notification' in window && window.iconTips && window.iconTips[currentLanguage]) {
             const categories = Object.keys(window.iconTips[currentLanguage]);
             const randomCategory = categories[Math.floor(Math.random() * categories.length)];
@@ -101,6 +139,7 @@ async setupPushNotifications() {
 		}, 24 * 60 * 60 * 1000);
 	}
     showUpdateNotification() {
+    this.playNotificationSound();
         if ('Notification' in window && Notification.permission === 'granted') {
             const notification = new Notification(window.translations[currentLanguage].updateAvailable, {
                 body: window.translations[currentLanguage].reloadPrompt,
@@ -135,6 +174,7 @@ async setupPushNotifications() {
     showTestNotification() {
         if ('Notification' in window) {
             if (Notification.permission === 'granted') {
+                 this.playNotificationSound();
                 new Notification("Test Notification", {
                     body: "This is a test notification from calendar app",
                     icon: './assets/icons/android/icon-192.png'
@@ -155,6 +195,32 @@ async setupPushNotifications() {
             showToast("Notifications not supported in this browser");
         }
     }
+
+     playNotificationSound() {
+         try {
+             const soundPref = localStorage.getItem('notificationSound') || 'default';
+             if (soundPref === 'none') return;
+             
+             const sounds = {
+                 'default': '/assets/sounds/background.mp3',
+                 'chime': '/assets/sounds/Violin_and_Piano_Harmony.mp3',
+                 'bell': '/assets/sounds/Ocean_Breeze.mp3'
+             };
+             
+             if (sounds[soundPref]) {
+                 const audio = new Audio(sounds[soundPref]);
+                 audio.play().catch(e => {
+                     console.log('Sound playback failed:', e);
+                     // Fallback to default if preferred sound fails
+                     if (soundPref !== 'default') {
+                         new Audio(sounds['default']).play().catch(console.error);
+                     }
+                 });
+             }
+         } catch (e) {
+             console.error('Error playing notification sound:', e);
+         }
+     }
 }
 // Initialize notification manager
 document.addEventListener('DOMContentLoaded', () => {
