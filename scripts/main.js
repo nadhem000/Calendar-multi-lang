@@ -181,19 +181,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = showLoading();
     
     // In the setTimeout callback:
-	setTimeout(() => {
-		try {
-			if (typeof initNotes === 'function') initNotes();
-			if (typeof renderCalendar === 'function') {
-				renderCalendar(translations[window.currentLanguage]);
-			}
-			} catch (error) {
-			console.error('Initialization error:', error);
-			showToast('Failed to initialize calendar');
-			} finally {
-			hideLoading(loadingOverlay);
-		}
-	}, 50);
+	// In main.js, modify the initialization:
+setTimeout(() => {
+    try {
+        if (typeof initNotes === 'function') initNotes();
+        if (typeof renderCalendar === 'function') {
+            renderCalendar(translations[window.currentLanguage]);
+        }
+        
+        // Initialize research manager after notes are loaded
+        window.researchManager = new ResearchManager();
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('Failed to initialize calendar');
+    } finally {
+        hideLoading(loadingOverlay);
+    }
+}, 50);
 });
 
 function showLoading() {
