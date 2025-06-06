@@ -165,17 +165,7 @@ const translations = {
 		searchEverything: "Search everything...",
 		search: "Search",
 		findDates: "Find Dates",
-		searchNotes: "Search Notes",
-  searchResults: "Search Results",
-  noteResults: "Note Results",
-  dateResults: "Date Results",
-  noResults: "No results found",
-  noResultsForDate: "No results for this date",
-  searchError: "Error performing search",
-  tip: "Tip",
-  generalResearchDesc: "Search across all notes, tips, and attachments.",
-  dateResearchDesc: "Find notes and events by specific date.",
-  noteResearchDesc: "Search within note content."
+		searchNotes: "Search Notes"
 	},
     ar: {
         title: "التقويم",
@@ -343,17 +333,7 @@ const translations = {
 		"searchEverything": "ابحث عن كل شيء...",
 		"search": "بحث",
 		"findDates": "ابحث عن التواريخ",
-		"searchNotes": "ابحث عن الملاحظات",
-  searchResults: "نتائج البحث",
-  noteResults: "نتائج الملاحظات",
-  dateResults: "نتائج التاريخ",
-  noResults: "لا توجد نتائج",
-  noResultsForDate: "لا توجد نتائج لهذا التاريخ",
-  searchError: "خطأ في البحث",
-  tip: "نصيحة",
-  generalResearchDesc: "ابحث في جميع الملاحظات والنصائح والمرفقات.",
-  dateResearchDesc: "ابحث عن الملاحظات والأحداث حسب تاريخ محدد.",
-  noteResearchDesc: "ابحث في محتوى الملاحظة."
+		"searchNotes": "ابحث عن الملاحظات"
 	},
     fr: {
         title: "Calendrier",
@@ -521,17 +501,7 @@ const translations = {
 		"searchEverything": "Rechercher tout...",
 		"search": "Chercher",
 		"findDates": "Trouver des Dates",
-		"searchNotes": "Rechercher des Notes",
-  searchResults: "Résultats de recherche",
-  noteResults: "Résultats de notes",
-  dateResults: "Résultats par date",
-  noResults: "Aucun résultat trouvé",
-  noResultsForDate: "Aucun résultat pour cette date",
-  searchError: "Erreur lors de la recherche",
-  tip: "Astuce",
-  generalResearchDesc: "Recherchez dans toutes les notes, astuces et pièces jointes.",
-  dateResearchDesc: "Trouvez des notes et événements par date spécifique.",
-  noteResearchDesc: "Recherchez dans le contenu des notes."
+		"searchNotes": "Rechercher des Notes"
 	}
 };
 
