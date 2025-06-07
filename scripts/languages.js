@@ -163,7 +163,8 @@ noResultsFound: "No results found",
   searchDate: "Search by Date",
   searchTime: "Search by Time",
   searchType: "Search by Type",
-  searchColor: "Search by Color"
+  searchColor: "Search by Color",
+previewText: "Sample Text - 123 ABC abc"
 	},
     ar: {
         title: "التقويم",
@@ -329,7 +330,8 @@ noResultsFound: "No results found",
   searchDate: "البحث حسب التاريخ",
   searchTime: "البحث حسب الوقت",
   searchType: "البحث حسب النوع",
-  searchColor: "البحث حسب اللون"
+  searchColor: "البحث حسب اللون",
+previewText: "عينة نصية 123 - أ ب ج"
 	},
     fr: {
         title: "Calendrier",
@@ -495,7 +497,8 @@ noResultsFound: "No results found",
   searchDate: "Recherche par date",
   searchTime: "Recherche par heure",
   searchType: "Recherche par type",
-  searchColor: "Recherche par couleur"
+  searchColor: "Recherche par couleur",
+previewText: "Exemple de texte - 123 ABC abc" 
 	}
 };
 

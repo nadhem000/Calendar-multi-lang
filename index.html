@@ -23,6 +23,7 @@
 		<link rel="stylesheet" href="styles/synchronizations.css">
 		<link rel="stylesheet" href="styles/research.css">
 		<link rel="stylesheet" href="styles/calendars.css">
+<link rel="stylesheet" href="styles/languages_settings.css">
 	</head>
 	<body>
 		<div class="container">
@@ -106,22 +107,49 @@
 				</div>
 				
 				<!-- Language Tab -->
-				<div id="language-tab" class="settings-tab-content active">
-					<h3>Language Settings</h3>
-					<div class="settings-language-container">
-						<div class="settings-language-item">
-							<label class="settings-language-label">
-								<span class="language-icon">🌐</span>
-								<span class="language-text">Application Language</span>
-								<select id="language-select-settings" class="settings-language-select">
-									<option value="en">English</option>
-									<option value="ar">العربية (Arabic)</option>
-									<option value="fr">Français (French)</option>
-								</select>
-							</label>
-						</div>
-					</div>
-				</div>
+<div id="language-tab" class="settings-tab-content active">
+    <h3>Language Settings</h3>
+    <div class="settings-language-container">
+        <div class="settings-language-item">
+            <label class="settings-language-label">
+                <span class="language-icon">🌐</span>
+                <span class="language-text">Application Language</span>
+                <select id="language-select-settings" class="settings-language-select">
+                    <option value="en">English</option>
+                    <option value="ar">العربية (Arabic)</option>
+                    <option value="fr">Français (French)</option>
+                </select>
+            </label>
+        </div>
+    </div>
+    
+    <!-- Add character settings section -->
+    <div class="settings-languages-character-section">
+        <h4>Character Appearance</h4>
+        
+        <div class="settings-languages-character-option">
+            <label class="settings-languages-character-label">Character Style</label>
+            <select id="language-character-style" class="settings-languages-character-select">
+                <option value="standard">Standard</option>
+                <option value="new-york-times">New York Times</option>
+                <option value="aharoni">Aharoni Bold</option>
+            </select>
+        </div>
+        
+        <div class="settings-languages-character-option">
+            <label class="settings-languages-character-label">Character Size</label>
+            <select id="language-character-size" class="settings-languages-character-select">
+                <option value="9">Small (9px)</option>
+                <option value="12">Medium (12px)</option>
+                <option value="14">Large (14px)</option>
+            </select>
+        </div>
+        
+        <div class="settings-languages-preview">
+            <p class="settings-languages-preview-text">Sample Text - 123 ABC abc</p>
+        </div>
+    </div>
+</div>
 				
 				<!-- Calendar Tab -->
 				<div id="calendar-tab" class="settings-tab-content">
@@ -250,6 +278,7 @@
 		<script src="scripts/memories.js"></script>
 		<script src="scripts/synchronizations.js"></script>
 		<script src="scripts/research.js"></script>
+<script src="scripts/languages_settings.js"></script>
 		<script src="scripts/main.js"></script>
 	</body>
 </html>

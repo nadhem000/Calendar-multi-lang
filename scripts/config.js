@@ -1,6 +1,6 @@
 
 const CACHE_CONFIG = {
-	name: 'calendar-cache-v6',
+	name: 'calendar-cache-v7',
 	assets: [
 		'./',
 		'./manifest.json',
@@ -12,6 +12,7 @@ const CACHE_CONFIG = {
 		'./styles/notifications.css',
 		'./styles/memories.css',
 		'./styles/synchronizations.css',
+		'./styles/languages_settings.css',
 		'./styles/settings.css',
 		'./styles/widget.css',
 		'./scripts/languages.js',
@@ -24,6 +25,7 @@ const CACHE_CONFIG = {
 		'./scripts/research.js',
 		'./scripts/memories.js',
 		'./scripts/synchronizations.js',
+		'./scripts/languages_settings.js',
 		'./scripts/app-manager.js',
 		'./scripts/settings.js',
 		'./api/widget-data',
