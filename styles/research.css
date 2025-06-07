@@ -62,3 +62,145 @@
 #research-note-view.hidden {
     display: none !important;
 }
+
+.settings-research-searchbox {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.settings-research-scopes {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+}
+
+.settings-research-scope-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.settings-research-scope-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.settings-research-scope-option:hover {
+    background-color: #f0f4f8;
+}
+
+.settings-research-results {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.settings-research-results-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.settings-research-result-item {
+    display: flex;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid #e1e5eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-research-result-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.settings-research-result-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.settings-research-result-content {
+    flex-grow: 1;
+}
+
+.settings-research-result-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.settings-research-result-preview {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.settings-research-result-meta {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.settings-research-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Different result types */
+.settings-research-result-note {
+    border-left: 4px solid #4a90e2;
+}
+
+.settings-research-result-tip {
+    border-left: 4px solid #50b83c;
+}
+
+.settings-research-result-info {
+    border-left: 4px solid #ffab00;
+}
+
+/* Style for highlighted date cell */
+
+.settings-research-result-date {
+    border-left: 4px solid #a777e3;
+}
+
+.settings-research-navigate-btn {
+    background-color: #6e8efb;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: 10px;
+    transition: background-color 0.2s;
+}
+
+.settings-research-navigate-btn:hover {
+    background-color: #5a7de3;
+}
+
+.settings-research-highlighted-note-date {
+    animation: pulse-highlight 2s ease-out;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+    border-radius: 4px;
+}
+
+@keyframes pulse-highlight {
+    0% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(74, 144, 226, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 144, 226, 0); }
+}

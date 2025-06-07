@@ -158,7 +158,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		});
 	}
-	
+	/* console.log('Initializing ResearchManager...'); */
+/* window.researchManager = new ResearchManager(); */
     // Initialize service worker
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
         navigator.serviceWorker.register('/sw.js').then(registration => {
