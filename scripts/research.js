@@ -1,7 +1,6 @@
 // research.js
 class ResearchManager {
     constructor() {
-        console.log('ResearchManager class loaded');
         this.initialized = false;
         this.initResearchTab();
         this.updateLanguageTexts();
@@ -13,23 +12,38 @@ class ResearchManager {
 	}
     // Unified view management
     showResearchView(type) {
-        // Hide all research views first
-        document.querySelectorAll('[id^="research-"]').forEach(view => {
+    console.log(`Attempting to show ${type} view`);
+    
+    // Hide all views first
+    ['general', 'date', 'note'].forEach(t => {
+        const view = document.getElementById(`settings-research-${t}-view`);
+        if (view) {
             view.classList.add('hidden');
-		});
-        // Show the requested view
+            view.innerHTML = ''; // Clear content
+        }
+    });
+
+    // Show requested view
+    const activeView = document.getElementById(`settings-research-${type}-view`);
+    if (activeView) {
+        activeView.classList.remove('hidden');
+        
+        // Force re-creation of content
         switch(type) {
             case 'general':
-			this.showGeneralResearch();
-			break;
+                this.showGeneralResearch();
+                break;
             case 'date':
-			this.showDateResearch();
-			break;
+                this.showDateResearch(); 
+                break;
             case 'note':
-			this.showNoteResearch();
-			break;
-		}
-	}
+                this.showNoteResearch();
+                break;
+        }
+        
+        console.log(`View ${type} displayed`, activeView);
+    }
+}
     setupScopeCheckboxes() {
         document.querySelector('input[name="search-scope"][value="all"]').addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -47,6 +61,17 @@ class ResearchManager {
 		});
 	}
 	initResearchTab() {
+console.log('Research buttons:', {
+    general: document.querySelector('.settings-research-general-btn'),
+    date: document.querySelector('.settings-research-date-btn'),
+    note: document.querySelector('.settings-research-note-btn')
+});
+
+console.log('Research views:', {
+    general: document.getElementById('settings-research-general-view'),
+    date: document.getElementById('settings-research-date-view'),
+    note: document.getElementById('settings-research-note-view')
+});
         if (this.initialized) return;
         this.initialized = true;
         console.log('Initializing research tab...');
@@ -80,19 +105,19 @@ class ResearchManager {
         if (dateBtn) dateBtn.textContent = lang.dateResearch || 'Date Research';
         if (noteBtn) noteBtn.textContent = lang.noteResearch || 'Note Research';
         // Update content if views are currently visible
-        if (document.getElementById('research-general-view')?.classList.contains('hidden') === false) {
+        if (document.getElementById('settings-research-general-view')?.classList.contains('hidden') === false) {
             this.showGeneralResearch();
 		}
-        if (document.getElementById('research-date-view')?.classList.contains('hidden') === false) {
+        if (document.getElementById('settings-research-date-view')?.classList.contains('hidden') === false) {
             this.showDateResearch();
 		}
-        if (document.getElementById('research-note-view')?.classList.contains('hidden') === false) {
+        if (document.getElementById('settings-research-note-view')?.classList.contains('hidden') === false) {
             this.showNoteResearch();
 		}
 	}
     showGeneralResearch() {
         const lang = translations[currentLanguage];
-        const view = document.getElementById('research-general-view');
+        const view = document.getElementById('settings-research-general-view');
         // Sanitize all text inputs
         const sanitized = {
             title: this.sanitizeInput(lang.generalResearch || 'Global Search'),
@@ -314,11 +339,11 @@ class ResearchManager {
         // Show the specific tip
         setTimeout(() => {
             showTipDetail(category, id);
-			}, 100);
+		}, 100);
 	}
 	showDateResearch() {
 		const lang = translations[currentLanguage];
-		const view = document.getElementById('research-date-view');
+		const view = document.getElementById('settings-research-date-view');
 		const sanitized = {
 			title: this.sanitizeInput(lang.dateResearch || 'Date Research'),
 			desc: this.sanitizeInput(lang.dateResearchDesc || 'Find and navigate to specific dates'),
@@ -440,7 +465,7 @@ class ResearchManager {
 	}
 	showNoteResearch() {
 		const lang = translations[currentLanguage];
-		const view = document.getElementById('research-note-view');
+		const view = document.getElementById('settings-research-note-view');
 		const sanitized = {
 			title: this.sanitizeInput(lang.noteResearch || 'Note Research'),
 			desc: this.sanitizeInput(lang.noteResearchDesc || 'Search through all your notes with advanced filters.'),
@@ -534,104 +559,101 @@ class ResearchManager {
 		const searchAttachments = searchAll || selectedScopes.includes('attachments');
 		const results = [];
 		const notes = JSON.parse(localStorage.getItem('calendarNotes') || '{}'); 
-			Object.entries(notes).forEach(([date, noteList]) => {
-				noteList.forEach((note, index) => {
-					let matches = false;
-					// Search in text content
-					if (searchTerm && note.text.toLowerCase().includes(searchTerm.toLowerCase())) {
-						matches = true;
-					}
-					// Search by date if selected
-					if (searchDate && date.includes(searchTerm)) {
-						matches = true;
-					}
-					// Search by time if selected
-					if (searchTime && note.time && note.time.includes(searchTerm)) {
-						matches = true;
-					}
-					// Search by type if selected
-					if (searchType && note.type && note.type.toLowerCase().includes(searchTerm.toLowerCase())) {
-						matches = true;
-					}
-					// Search by color if selected
-					if (searchColor && note.color && note.color.toLowerCase().includes(searchTerm.toLowerCase())) {
-						matches = true;
-					}
-					// Search attachments placeholder (would need actual attachment data)
-					if (searchAttachments && (note.attachments || []).length > 0) {
-						matches = true;
-					}
-					if (matches || (!searchTerm && selectedScopes.length > 0)) {
-						const noteType = noteTypes.find(t => t.type === note.type) || { icon: '📝', label: 'Note' };
-						const noteColor = noteColors.find(c => c.class === note.color) || { color: '#cccccc' };
-						results.push({
-							type: 'note',
-							date: date,
-							index: index,
-							text: note.text,
-							time: note.time || '',
-							noteType: noteType.label,
-							noteTypeIcon: noteType.icon,
-							noteColor: noteColor.color,
-							preview: note.text.substring(0, 50) + (note.text.length > 50 ? '...' : '')
-						});
-					}
-				});
+		Object.entries(notes).forEach(([date, noteList]) => {
+			noteList.forEach((note, index) => {
+				let matches = false;
+				// Search in text content
+				if (searchTerm && note.text.toLowerCase().includes(searchTerm.toLowerCase())) {
+					matches = true;
+				}
+				// Search by date if selected
+				if (searchDate && date.includes(searchTerm)) {
+					matches = true;
+				}
+				// Search by time if selected
+				if (searchTime && note.time && note.time.includes(searchTerm)) {
+					matches = true;
+				}
+				// Search by type if selected
+				if (searchType && note.type && note.type.toLowerCase().includes(searchTerm.toLowerCase())) {
+					matches = true;
+				}
+				// Search by color if selected
+				if (searchColor && note.color && note.color.toLowerCase().includes(searchTerm.toLowerCase())) {
+					matches = true;
+				}
+				// Search attachments placeholder (would need actual attachment data)
+				if (searchAttachments && (note.attachments || []).length > 0) {
+					matches = true;
+				}
+				if (matches || (!searchTerm && selectedScopes.length > 0)) {
+					const noteType = noteTypes.find(t => t.type === note.type) || { icon: '📝', label: 'Note' };
+					const noteColor = noteColors.find(c => c.class === note.color) || { color: '#cccccc' };
+					results.push({
+						type: 'note',
+						date: date,
+						index: index,
+						text: note.text,
+						time: note.time || '',
+						noteType: noteType.label,
+						noteTypeIcon: noteType.icon,
+						noteColor: noteColor.color,
+						preview: note.text.substring(0, 50) + (note.text.length > 50 ? '...' : '')
+					});
+				}
 			});
-			this.displayNoteSearchResults(results);
-		}
-		displayNoteSearchResults(results) {
-			const resultsContainer = document.querySelector('#note-search-results .settings-research-results-list');
-			const lang = translations[currentLanguage];
-			if (results.length === 0) {
-				resultsContainer.innerHTML = `
-				<div class="settings-research-no-results">
-                ${lang.noResultsFound || 'No results found'}
-				</div>`;
-				document.getElementById('note-search-results').classList.remove('hidden');
-				return;
-			}
-			let html = '';
-			results.forEach(result => {
-				html += `
-				<div class="settings-research-result-item settings-research-result-note" 
-				data-date="${result.date}" data-index="${result.index}">
-				<div class="settings-research-result-icon" style="color: ${result.noteColor}">
-                ${result.noteTypeIcon}
-				</div>
-				<div class="settings-research-result-content">
-                <div class="settings-research-result-title">
-				${result.text.substring(0, 30)}${result.text.length > 30 ? '...' : ''}
-                </div>
-                <div class="settings-research-result-preview">
-				${result.preview}
-                </div>
-                <div class="settings-research-result-meta">
-				${result.noteType} • ${result.date} ${result.time ? '• ' + result.time : ''}
-                </div>
-				</div>
-				</div>`;
-			});
-			resultsContainer.innerHTML = html;
-			document.getElementById('note-search-results').classList.remove('hidden');
-			// Add click handlers for note results
-			document.querySelectorAll('.settings-research-result-note').forEach(item => {
-				item.addEventListener('click', () => {
-					const date = item.dataset.date;
-					const index = item.dataset.index;
-					this.navigateToNote(date, index);
-				});
-			});
-		}
+		});
+		this.displayNoteSearchResults(results);
 	}
-	// Initialize research manager when DOM is loaded
-	document.addEventListener('DOMContentLoaded', () => {
-		if (!window.researchManager) {
-			console.log('Initializing ResearchManager...');
-			window.researchManager = new ResearchManager();
-			// Language change listener
-			document.querySelector('#language-select-settings')?.addEventListener('change', () => {
-				window.researchManager?.updateLanguageTexts();
-			});
+	displayNoteSearchResults(results) {
+		const resultsContainer = document.querySelector('#note-search-results .settings-research-results-list');
+		const lang = translations[currentLanguage];
+		if (results.length === 0) {
+			resultsContainer.innerHTML = `
+			<div class="settings-research-no-results">
+			${lang.noResultsFound || 'No results found'}
+			</div>`;
+			document.getElementById('note-search-results').classList.remove('hidden');
+			return;
 		}
-	});	
+		let html = '';
+		results.forEach(result => {
+			html += `
+			<div class="settings-research-result-item settings-research-result-note" 
+			data-date="${result.date}" data-index="${result.index}">
+			<div class="settings-research-result-icon" style="color: ${result.noteColor}">
+			${result.noteTypeIcon}
+			</div>
+			<div class="settings-research-result-content">
+			<div class="settings-research-result-title">
+			${result.text.substring(0, 30)}${result.text.length > 30 ? '...' : ''}
+			</div>
+			<div class="settings-research-result-preview">
+			${result.preview}
+			</div>
+			<div class="settings-research-result-meta">
+			${result.noteType} • ${result.date} ${result.time ? '• ' + result.time : ''}
+			</div>
+			</div>
+			</div>`;
+		});
+		resultsContainer.innerHTML = html;
+		document.getElementById('note-search-results').classList.remove('hidden');
+		// Add click handlers for note results
+		document.querySelectorAll('.settings-research-result-note').forEach(item => {
+			item.addEventListener('click', () => {
+				const date = item.dataset.date;
+				const index = item.dataset.index;
+				this.navigateToNote(date, index);
+			});
+		});
+	}
+}
+document.addEventListener('DOMContentLoaded', () => {
+// Replace the initialization at bottom with:
+if (!window.researchManagerInitialized) {
+    window.researchManager = new ResearchManager();
+    window.researchManagerInitialized = true;
+    console.log('ResearchManager initialized once');
+}
+});
