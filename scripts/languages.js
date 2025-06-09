@@ -193,7 +193,14 @@ const translations = {
 			deleteNotesOptions: "Delete Notes Options",
 			deleteSingle: "Delete single note",
 			deleteAll: "Delete all notes",
-			confirmDelete: "Confirm Delete"
+			confirmDelete: "Confirm Delete",
+			editSpecialNote: "Edit Special Note",
+			selectNoteToDelete: "Select note to delete",
+			confirmDeleteSingle: "Are you sure you want to delete this note?",
+			confirmDeleteAll: "Are you sure you want to delete ALL special notes?",
+            selectAll: "Select All",
+            noNotesSelected: "Please select at least one note to delete",
+            confirmDeleteSelected: "Are you sure you want to delete {0} selected notes?"
 		}
 	},
     ar: {
@@ -390,7 +397,14 @@ const translations = {
 			deleteNotesOptions: "خيارات حذف الملاحظات",
 			deleteSingle: "حذف ملاحظة واحدة",
 			deleteAll: "حذف جميع الملاحظات",
-			confirmDelete: "تأكيد الحذف"
+			confirmDelete: "تأكيد الحذف",
+			editSpecialNote: "تعديل ملاحظة خاصة",
+			selectNoteToDelete: "حدد الملاحظة للحذف",
+			confirmDeleteSingle: "هل أنت متأكد أنك تريد حذف هذه الملاحظة؟",
+			confirmDeleteAll: "هل أنت متأكد أنك تريد حذف كل الملاحظات الخاصة؟",
+            selectAll: "اختر الكل",
+            noNotesSelected: "الرجاء اختيار ملاحظة واحدة على الأقل للحذف",
+            confirmDeleteSelected: "هل أنت متأكد أنك تريد حذف {0} ملاحظة محددة؟"
 		}
 	},
     fr: {
@@ -587,7 +601,14 @@ const translations = {
 			deleteNotesOptions: "Options de suppression",
 			deleteSingle: "Supprimer une note",
 			deleteAll: "Supprimer toutes les notes",
-			confirmDelete: "Confirmer la suppression"
+			confirmDelete: "Confirmer la suppression",
+			editSpecialNote: "Modifier une note spéciale",
+			selectNoteToDelete: "Sélectionner la note à supprimer",
+			confirmDeleteSingle: "Êtes-vous sûr de vouloir supprimer cette note ?",
+			confirmDeleteAll: "Êtes-vous sûr de vouloir supprimer TOUTES les notes spéciales ?",
+            selectAll: "Tout sélectionner",
+            noNotesSelected: "Veuillez sélectionner au moins une note à supprimer",
+            confirmDeleteSelected: "Êtes-vous sûr de vouloir supprimer les {0} notes sélectionnées ?"
 		}
 	}
 };

@@ -144,7 +144,7 @@
 .notes-specials-note-item {
   display: flex;
   align-items: center;
-  padding: 10px;
+    padding: 8px 10px;
   border-bottom: 1px solid #eee;
 }
 
@@ -156,6 +156,7 @@
   width: 100px;
   color: #666;
   font-size: 14px;
+    margin-right: 10px;
 }
 
 .notes-specials-note-content {
@@ -238,4 +239,124 @@
   border-style: solid;
   border-color: #333 transparent transparent transparent;
   z-index: 100;
+}
+
+.notes-specials-time-input {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notes-specials-time-input label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.notes-specials-time-input input[type="time"] {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.notes-specials-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1003;
+}
+
+.notes-specials-edit-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notes-specials-edit-input {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  min-height: 100px;
+}
+
+.notes-specials-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.notes-specials-save-edit {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.notes-specials-cancel-edit {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.notes-specials-delete-list {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.notes-specials-delete-list h5 {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.notes-specials-delete-note {
+    padding: 4px 8px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notes-specials-delete-note:hover {
+    background-color: #d32f2f;
+}
+/* Checkbox styles */
+.notes-specials-note-checkbox {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.notes-specials-note-item.select-all {
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 5px;
+}
+
+.notes-specials-note-item.select-all label {
+    cursor: pointer;
+    font-weight: bold;
 }
