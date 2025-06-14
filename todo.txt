@@ -353,3 +353,17 @@ Music by <a href="https://pixabay.com/users/trtasfiq-43093431/?utm_source=link-a
 Ocean Breeze beat by JTWAYNE
 JTWAYNE
 Music by <a href="https://pixabay.com/users/jtwayne-40103628/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=213318">JT WAYNE</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=213318">Pixabay</a>
+
+
+
+
+	name: 'calendar-cache-v9',
+const WIDGET_CACHE_NAME = 'widget-data-cache-v9';
+		const request = indexedDB.open('CalendarAttachments', 9); // Match version number
+  const cache = await caches.open('large-assets-v9');
+		this.dbVersion = 7;  // Consistent version
+        window.location.hostname === '127.0.0.1';
+const WIDGET_CACHE_NAME = 'widget-data-cache-v9';
+
+
+
