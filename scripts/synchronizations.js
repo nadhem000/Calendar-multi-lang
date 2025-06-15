@@ -1,37 +1,41 @@
 // synchronizations.js
 class SynchronizationManager {
     constructor() {
+        // Initialize manager state
         this.initialized = false;
         this.cleanupInterval = null;
     }
 
     initialize() {
+        // Initialize only once
         if (this.initialized) return;
         this.renderSyncSection();
         this.initialized = true;
     }
 
     renderSyncSection() {
+        // Get reference to settings tab
         const periodicTab = document.getElementById('periodic-tab');
         if (!periodicTab) return;
 
-        // Clear any existing content
+        // Clear existing content
         periodicTab.innerHTML = '';
         
-        // Create container
+        // Create main container
         const syncContainer = document.createElement('div');
         syncContainer.className = 'settings-synchronization-container';
         periodicTab.appendChild(syncContainer);
 
-        // Build sections
+        // Build settings sections
         syncContainer.appendChild(this.createSyncOptionsSection());
         syncContainer.appendChild(this.createCleanupOptionsSection());
 
-        // Setup event listeners
+        // Setup all event handlers
         this.setupEventListeners();
     }
 
     createSyncOptionsSection() {
+        // Load translations with English fallback
         const langData = translations[currentLanguage] || translations['en'];
         const syncOptions = langData.syncOptions || {};
 
@@ -62,7 +66,7 @@ class SynchronizationManager {
                         <span class="settings-synchronization-label">
                             ${syncOptions.calendar || 'Sync Calendars'}
                             <span class="settings-synchronization-tooltip">
-                                ${syncOptions.calendarTooltip || 'Keep Gregorian and Hijri dates synchronized'}
+                                ${syncOptions.calendarTooltip || 'Keep Gregorian and other systems synchronized'}
                             </span>
                         </span>
                     </label>
@@ -91,6 +95,7 @@ class SynchronizationManager {
     }
 
     createCleanupOptionsSection() {
+        // Load translations with English fallback
         const langData = translations[currentLanguage] || translations['en'];
 
         const section = document.createElement('div');
@@ -131,7 +136,7 @@ class SynchronizationManager {
     }
 
     setupEventListeners() {
-        // Sync storage toggle
+        // Handle storage sync toggle
         const syncStorage = document.getElementById('sync-storage');
         if (syncStorage) {
             syncStorage.checked = localStorage.getItem('syncStorage') === 'true';
@@ -140,7 +145,7 @@ class SynchronizationManager {
             });
         }
 
-        // Calendar sync toggle
+        // Handle calendar sync toggle
         const syncCalendar = document.getElementById('sync-calendar');
         if (syncCalendar) {
             syncCalendar.checked = localStorage.getItem('syncCalendars') === 'true';
@@ -150,7 +155,7 @@ class SynchronizationManager {
             });
         }
 
-        // Auto-update toggle
+        // Handle auto-update toggle
         const syncVersion = document.getElementById('sync-version');
         if (syncVersion) {
             syncVersion.checked = localStorage.getItem('autoUpdate') === 'true';
@@ -159,7 +164,7 @@ class SynchronizationManager {
             });
         }
 
-        // Auto-clean toggle
+        // Handle auto-clean toggle
         const autoClean = document.getElementById('auto-clean-toggle');
         if (autoClean) {
             autoClean.checked = localStorage.getItem('autoCleanEnabled') === 'true';
@@ -169,7 +174,7 @@ class SynchronizationManager {
             });
         }
 
-        // Emergency clean toggle
+        // Handle emergency clean toggle
         const emergencyClean = document.getElementById('emergency-clean-toggle');
         if (emergencyClean) {
             emergencyClean.checked = localStorage.getItem('emergencyCleanEnabled') === 'true';
@@ -180,21 +185,21 @@ class SynchronizationManager {
     }
 
     updateLanguageTexts() {
-        // Only re-render if periodic tab exists and is visible
+        // Only update if settings tab is active
         const periodicTab = document.getElementById('periodic-tab');
         if (periodicTab && periodicTab.classList.contains('active')) {
             this.renderSyncSection();
         }
     }
 
-
-
     async performSafeCleanup() {
+        // Check if cleanup is enabled
         if (localStorage.getItem('autoCleanEnabled') !== 'true') {
             console.log('Cleanup aborted - not enabled in settings');
             return;
         }
 
+        // Confirm with user
         const lang = translations[currentLanguage] || translations['en'];
         if (!confirm(lang.confirmCleanup || "Proceed with automatic cleanup?")) {
             console.log('Cleanup canceled by user');
@@ -203,7 +208,7 @@ class SynchronizationManager {
 
         const loading = showLoading();
         try {
-            // 1. Clear notes older than 6 months
+            // Clean notes older than 6 months
             const sixMonthsAgo = new Date();
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
             
@@ -214,7 +219,7 @@ class SynchronizationManager {
                 }
             });
 
-            // 2. Clear old IndexedDB attachments (30+ days old)
+            // Clean old attachments (30+ days)
             const db = await window.appManager.openDB();
             const tx = db.transaction('attachments', 'readwrite');
             const store = tx.objectStore('attachments');
@@ -238,14 +243,15 @@ class SynchronizationManager {
     }
 
     setupPeriodicCleanup() {
+        // Skip if not enabled
         if (localStorage.getItem('autoCleanEnabled') !== 'true') return;
 
-        // Clear any existing interval
+        // Clear existing interval
         if (this.cleanupInterval) {
             clearInterval(this.cleanupInterval);
         }
 
-        // Set up new interval (15 days)
+        // Setup new 15-day interval
         this.cleanupInterval = setInterval(async () => {
             if (navigator.onLine) {
                 await this.performSafeCleanup();
@@ -255,20 +261,19 @@ class SynchronizationManager {
     }
 
     syncCalendarSystems() {
+        // Skip if not enabled
         if (localStorage.getItem('syncCalendars') !== 'true') return;
         
-        // Actual calendar sync implementation would go here
         console.log("Calendar systems synchronization enabled");
         
-        // This would typically:
-        // 1. Convert dates between calendar systems
+        // Implementation would:
+        // 1. Convert between calendar systems
         // 2. Update UI elements
-        // 3. Sync with backend if needed
+        // 3. Sync with backend
     }
 }
 
-// Initialize when DOM is loaded
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     window.synchronizationManager = new SynchronizationManager();
-    // Don't initialize here - will be initialized when settings are opened
 });

@@ -1,17 +1,20 @@
-const WIDGET_CACHE_NAME = 'widget-data-cache-v8';
+// widget.js
+const WIDGET_CACHE_NAME = 'widget-data-cache-v9';
 
-// Initialize widget with offline support
+// Main widget initialization function
 function initWidget() {
+  // Initial data load
   updateWidgetData();
-  setInterval(updateWidgetData, 3600000); // Still update hourly when online
+  // Set up hourly updates
+  setInterval(updateWidgetData, 3600000);
 }
 
+// Fetch and display widget data
 async function updateWidgetData() {
   try {
-    const today = new Date().toISOString().split('T')[0];
     const widgetContainer = document.getElementById('widget-container');
     
-    // Try network first
+    // Network-first strategy
     const networkData = await tryNetworkFetch();
     if (networkData) {
       renderWidget(networkData);
@@ -19,15 +22,15 @@ async function updateWidgetData() {
       return;
     }
 
-    // Fallback to cache
+    // Cache fallback strategy
     const cachedData = await tryCacheFetch();
     if (cachedData) {
       renderWidget(cachedData);
-      showOfflineIndicator(false); // Show subtle offline indicator
+      showOfflineIndicator(false);
       return;
     }
 
-    // No cached data available
+    // No data available case
     showOfflineIndicator(true);
     
   } catch (error) {
@@ -36,6 +39,7 @@ async function updateWidgetData() {
   }
 }
 
+// Attempt to fetch data from network
 async function tryNetworkFetch() {
   try {
     const response = await fetch(`/api/widget-data?t=${Date.now()}`);
@@ -46,6 +50,7 @@ async function tryNetworkFetch() {
   }
 }
 
+// Attempt to fetch data from cache
 async function tryCacheFetch() {
   try {
     const cache = await caches.open(WIDGET_CACHE_NAME);
@@ -56,6 +61,7 @@ async function tryCacheFetch() {
   }
 }
 
+// Cache widget data for offline use
 async function cacheWidgetData(data) {
   try {
     const cache = await caches.open(WIDGET_CACHE_NAME);
@@ -68,30 +74,31 @@ async function cacheWidgetData(data) {
   }
 }
 
+// Render widget UI with provided data
 function renderWidget(data) {
-  // Update date
+  // Display current date
   document.getElementById('current-date').textContent = 
     new Date().toLocaleDateString(currentLanguage, { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric',
-      timeZone: 'UTC' // Add explicit timezone
+      timeZone: 'UTC'
     });
 
-  // Update daily tip
+  // Display daily tip with English fallback
   const tipContainer = document.getElementById('tip-content');
   if (data.tip) {
     tipContainer.innerHTML = `
       <p><strong>${sanitizeHTML(data.tip.name)}</strong></p>
       <p>${sanitizeHTML(data.tip.description)}</p>
-      <small>⏰ ${sanitizeHTML(translations[currentLanguage].delai)}: ${sanitizeHTML(data.tip.delai)}</small>
+      <small>⏰ ${sanitizeHTML((translations[currentLanguage] || translations['en']).delai)}: ${sanitizeHTML(data.tip.delai)}</small>
     `;
   } else {
-    tipContainer.textContent = translations[currentLanguage].noTipToday;
+    tipContainer.textContent = (translations[currentLanguage] || translations['en']).noTipToday;
   }
 
-  // Update notes
+  // Display notes with English fallback
   const notesContainer = document.getElementById('notes-list');
   if (data.notes?.length > 0) {
     notesContainer.innerHTML = data.notes.map(note => `
@@ -100,16 +107,19 @@ function renderWidget(data) {
       </div>
     `).join('');
   } else {
-    notesContainer.textContent = translations[currentLanguage].noNotesToday;
+    notesContainer.textContent = (translations[currentLanguage] || translations['en']).noNotesToday;
   }
 }
 
+// Show offline status indicator
 function showOfflineIndicator(showFullMessage) {
   const widgetContainer = document.getElementById('widget-container');
+  const lang = translations[currentLanguage] || translations['en'];
+  
   if (showFullMessage) {
     widgetContainer.innerHTML = `
       <div class="offline-warning">
-        ${translations[currentLanguage]?.offlineMessage || 'Offline - data unavailable'}
+        ${lang?.offlineMessage || 'Offline - data unavailable'}
       </div>
     `;
   } else {
@@ -117,10 +127,11 @@ function showOfflineIndicator(showFullMessage) {
     if (!existingIndicator) {
       const indicator = document.createElement('div');
       indicator.className = 'offline-badge';
-      indicator.textContent = translations[currentLanguage]?.offlineBadge || 'Offline';
+      indicator.textContent = lang?.offlineBadge || 'Offline';
       widgetContainer.prepend(indicator);
     }
   }
 }
 
+// Initialize widget when DOM is ready
 document.addEventListener('DOMContentLoaded', initWidget);

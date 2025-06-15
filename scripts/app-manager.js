@@ -5,7 +5,7 @@ class AppManager {
 		this.BACKGROUND_SYNC_TAG = 'background-sync';
 		this.PERIODIC_SYNC_TAG = 'periodic-sync';
 		this.dbName = 'CalendarAttachments';
-		this.dbVersion = 7;  // Consistent version
+		this.dbVersion = 9;  // Consistent version
 	}
 	async init() {
 		await this.registerServiceWorker();

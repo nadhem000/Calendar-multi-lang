@@ -1,6 +1,13 @@
 // Special notes business logic
 
-// Generate dates based on pattern
+/**
+ * Generates dates based on a pattern and options
+ * @param {string} startDate - The starting date (YYYY-MM-DD format)
+ * @param {string} pattern - The repeat pattern (daily, weekly, monthly, etc.)
+ * @param {string} weekendsOption - How to handle weekends (none, saturday, sunday, both)
+ * @param {string|number} duration - The duration limit (years or 'custom')
+ * @return {Array} Array of generated dates in YYYY-MM-DD format
+ */
 window.generateDates = function(startDate, pattern, weekendsOption, duration) {
     const dates = [];
     const start = new Date(startDate);
@@ -19,7 +26,7 @@ window.generateDates = function(startDate, pattern, weekendsOption, duration) {
         let adjustedDate = new Date(current);
         let needsAdjustment = false;
 
-        // Handle weekend exclusion
+        // Handle weekend exclusion based on option
         switch (weekendsOption) {
             case 'none':
                 if (day === 0 || day === 6) { // Sunday or Saturday

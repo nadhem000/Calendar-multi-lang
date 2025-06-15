@@ -201,6 +201,66 @@ const translations = {
             selectAll: "Select All",
             noNotesSelected: "Please select at least one note to delete",
             confirmDeleteSelected: "Are you sure you want to delete {0} selected notes?"
+		},
+        hijriConverter: {
+            title: "Hijri Date Converter",
+			hijriConverterTooltip: "Convert between Gregorian and Hijri dates",
+			underDevelopment: "Under development",
+            gregorianToHijri: "Gregorian to Hijri",
+            hijriToGregorian: "Hijri to Gregorian",
+            year: "Year",
+            month: "Month",
+            day: "Day",
+            convert: "Convert",
+            hijriDate: "Hijri Date",
+            gregorianDate: "Gregorian Date",
+            weekday: "Weekday",
+            leapYear: "Leap Year",
+            yes: "Yes",
+            no: "No",
+            hijriCalendar: "Hijri Calendar (Current Month)",
+            gregorianCalendar: "Gregorian Calendar (Current Month)",
+            invalidDate: "Invalid date",
+            yearTooltip: "Enter the year in Gregorian calendar",
+            monthTooltip: "Select the month",
+            dayTooltip: "Enter the day of month",
+            yearInputTooltip: "Enter year between 1 and 9999",
+            convertTooltip: "Click to convert the date"
+		},
+		importExport: {
+			exportData: "Export Data",
+			importData: "Import Data",
+			syncStatus: "Sync Status",
+			exportDescription: "Export your calendar data to a file",
+			importDescription: "Import calendar data from a file",
+			exportAs: "Export as",
+			exporting: "Exporting",
+			importing: "Importing",
+			exportCompleted: "Export completed successfully!",
+			exportFailed: "Export failed",
+			importComplete: "Import complete: {importedCount} notes imported, {skippedCount} skipped",
+			importFailed: "Import failed",
+			invalidFileFormat: "Invalid file format. Expected JSON data.",
+			invalidDataFormat: "Invalid data format. Expected an object with date keys.",
+			failedToImportNote: "Failed to import note:",
+			calendarNotesExport: "Calendar Notes Export",
+			generated: "Generated",
+			totalDates: "Total Dates",
+			totalNotes: "Total Notes",
+			notesByDate: "Notes by Date",
+			notesCount: "Notes Count",
+			note: "Note",
+			content: "Content",
+			overwriteExisting: "Overwrite existing data",
+			mergeExisting: "Merge with existing data",
+			preparingExport: "Preparing export",
+			// Tooltips
+			exportJsonTooltip: "Export all notes in JSON format (recommended for backups)",
+			exportCsvTooltip: "Export notes in CSV format (compatible with spreadsheets)",
+			exportTxtTooltip: "Export notes in plain text format (human readable)",
+			importTooltip: "Import notes from a previously exported file",
+			overwriteTooltip: "Completely replace existing data with imported data",
+			mergeTooltip: "Combine imported data with existing notes"
 		}
 	},
     ar: {
@@ -405,6 +465,66 @@ const translations = {
             selectAll: "اختر الكل",
             noNotesSelected: "الرجاء اختيار ملاحظة واحدة على الأقل للحذف",
             confirmDeleteSelected: "هل أنت متأكد أنك تريد حذف {0} ملاحظة محددة؟"
+		},
+        hijriConverter: {
+            title: "محول التاريخ الهجري",
+			hijriConverterTooltip: "تحويل بين التواريخ الميلادية والهجرية",
+			underDevelopment: "قيد التطوير",
+            gregorianToHijri: "الميلادي إلى الهجري",
+            hijriToGregorian: "الهجري إلى الميلادي",
+            year: "السنة",
+            month: "الشهر",
+            day: "اليوم",
+            convert: "تحويل",
+            hijriDate: "التاريخ الهجري",
+            gregorianDate: "التاريخ الميلادي",
+            weekday: "اليوم",
+            leapYear: "سنة كبيسة",
+            yes: "نعم",
+            no: "لا",
+            hijriCalendar: "التقويم الهجري (الشهر الحالي)",
+            gregorianCalendar: "التقويم الميلادي (الشهر الحالي)",
+            invalidDate: "تاريخ غير صحيح",
+            yearTooltip: "أدخل السنة في التقويم الميلادي",
+            monthTooltip: "اختر الشهر",
+            dayTooltip: "أدخل يوم الشهر",
+            yearInputTooltip: "أدخل السنة بين 1 و 9999",
+            convertTooltip: "انقر لتحويل التاريخ"
+		},
+		importExport: {
+			exportData: "تصدير البيانات",
+			importData: "استيراد البيانات",
+			syncStatus: "حالة المزامنة",
+			exportDescription: "قم بتصدير بيانات التقويم إلى ملف",
+			importDescription: "استيراد بيانات التقويم من ملف",
+			exportAs: "تصدير كـ",
+			exporting: "جاري التصدير",
+			importing: "جاري الاستيراد",
+			exportCompleted: "تم التصدير بنجاح!",
+			exportFailed: "فشل التصدير",
+			importComplete: "اكتمل الاستيراد: تم استيراد {importedCount} ملاحظة، تخطي {skippedCount}",
+			importFailed: "فشل الاستيراد",
+			invalidFileFormat: "تنسيق ملف غير صالح. يتوقع بيانات JSON.",
+			invalidDataFormat: "تنسيق بيانات غير صالح. يتوقع كائنًا بمفاتيح تاريخ.",
+			failedToImportNote: "فشل استيراد الملاحظة:",
+			calendarNotesExport: "تصدير ملاحظات التقويم",
+			generated: "تم الإنشاء",
+			totalDates: "إجمالي التواريخ",
+			totalNotes: "إجمالي الملاحظات",
+			notesByDate: "الملاحظات حسب التاريخ",
+			notesCount: "عدد الملاحظات",
+			note: "ملاحظة",
+			content: "المحتوى",
+			overwriteExisting: "الكتابة فوق البيانات الموجودة",
+			mergeExisting: "دمج مع البيانات الموجودة",
+			preparingExport: "جارٍ تجهيز التصدير",
+			// Tooltips
+			exportJsonTooltip: "تصدير جميع الملاحظات بتنسيق JSON (مُوصى به للنسخ الاحتياطي)",
+			exportCsvTooltip: "تصدير الملاحظات بتنسيق CSV (متوافق مع جداول البيانات)",
+			exportTxtTooltip: "تصدير الملاحظات بتنسيق نص عادي (قابل للقراءة البشرية)",
+			importTooltip: "استيراد الملاحظات من ملف مُصدّر مسبقًا",
+			overwriteTooltip: "استبدال البيانات الموجودة تمامًا بالبيانات المستوردة",
+			mergeTooltip: "دمج البيانات المستوردة مع الملاحظات الموجودة"
 		}
 	},
     fr: {
@@ -609,6 +729,66 @@ const translations = {
             selectAll: "Tout sélectionner",
             noNotesSelected: "Veuillez sélectionner au moins une note à supprimer",
             confirmDeleteSelected: "Êtes-vous sûr de vouloir supprimer les {0} notes sélectionnées ?"
+		},
+        hijriConverter: {
+            title: "Convertisseur de date Hijri",
+			hijriConverterTooltip: "Convertir entre les dates grégoriennes et hijri",
+			underDevelopment: "En développement",
+            gregorianToHijri: "Grégorien vers Hijri",
+            hijriToGregorian: "Hijri vers Grégorien",
+            year: "Année",
+            month: "Mois",
+            day: "Jour",
+            convert: "Convertir",
+            hijriDate: "Date Hijri",
+            gregorianDate: "Date Grégorienne",
+            weekday: "Jour de la semaine",
+            leapYear: "Année bissextile",
+            yes: "Oui",
+            no: "Non",
+            hijriCalendar: "Calendrier Hijri (Mois en cours)",
+            gregorianCalendar: "Calendrier Grégorien (Mois en cours)",
+            invalidDate: "Date invalide",
+            yearTooltip: "Entrez l'année dans le calendrier grégorien",
+            monthTooltip: "Sélectionnez le mois",
+            dayTooltip: "Entrez le jour du mois",
+            yearInputTooltip: "Entrez une année entre 1 et 9999",
+            convertTooltip: "Cliquez pour convertir la date"
+		},
+		importExport: {
+			exportData: "Exporter les données",
+			importData: "Importer des données",
+			syncStatus: "État de la synchronisation",
+			exportDescription: "Exportez vos données de calendrier dans un fichier",
+			importDescription: "Importez des données de calendrier à partir d'un fichier",
+			exportAs: "Exporter en tant que",
+			exporting: "Export en cours",
+			importing: "Import en cours",
+			exportCompleted: "Export terminé avec succès !",
+			exportFailed: "Échec de l'export",
+			importComplete: "Import terminé : {importedCount} notes importées, {skippedCount} ignorées",
+			importFailed: "Échec de l'import",
+			invalidFileFormat: "Format de fichier invalide. Données JSON attendues.",
+			invalidDataFormat: "Format de données invalide. Un objet avec des clés de date est attendu.",
+			failedToImportNote: "Échec de l'import de la note :",
+			calendarNotesExport: "Export des notes de calendrier",
+			generated: "Généré",
+			totalDates: "Total des dates",
+			totalNotes: "Total des notes",
+			notesByDate: "Notes par date",
+			notesCount: "Nombre de notes",
+			note: "Note",
+			content: "Contenu",
+			overwriteExisting: "Remplacer les données existantes",
+			mergeExisting: "Fusionner avec les données existantes",
+			preparingExport: "Préparation de l'export",
+			// Tooltips
+			exportJsonTooltip: "Exporter toutes les notes au format JSON (recommandé pour les sauvegardes)",
+			exportCsvTooltip: "Exporter les notes au format CSV (compatible avec les tableurs)",
+			exportTxtTooltip: "Exporter les notes au format texte brut (lisible par l'homme)",
+			importTooltip: "Importer des notes à partir d'un fichier précédemment exporté",
+			overwriteTooltip: "Remplacer complètement les données existantes par les données importées",
+			mergeTooltip: "Combiner les données importées avec les notes existantes"
 		}
 	}
 };
@@ -625,9 +805,9 @@ function changeLanguage(lang) {
         systemSelect.innerHTML = Object.entries(langData.calendarSystems)
         .map(([value, name]) => 
             `<option value="${value}" ${value === prevSystem ? 'selected' : ''}>${name}</option>`
-		).join('');
+        ).join('');
         currentCalendarSystem = prevSystem;
-	}
+    }
     
     // Update all text elements
     document.querySelector('.title').textContent = langData.title;
@@ -636,21 +816,26 @@ function changeLanguage(lang) {
     document.getElementById('mechanics-icon').setAttribute('title', langData.icons.mechanics);
     document.getElementById('today-btn').innerHTML = `📅 ${langData.todayText}`;
     
-    
     // Update settings modal if open
     const settingsModal = document.getElementById('settings-modal');
     const isSettingsOpen = settingsModal && settingsModal.style.display === 'block';
     
     if (window.settingsManager) {
         window.settingsManager.updateLanguageTexts();
-	}
+    }
+    
     // Update weekdays in calendar header
     const weekdays = document.querySelectorAll('.weekdays div');
     if (weekdays.length === 7) {
         weekdays.forEach((day, index) => {
             day.textContent = langData.weekdays[index];
-		});
-	}
+        });
+    }
+    
+    // Update export/import UI immediately
+    if (typeof updateExportImportUI === 'function') {
+        updateExportImportUI();
+    }
     
     // Update calendar immediately
     renderCalendar(langData);

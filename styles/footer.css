@@ -1,0 +1,40 @@
+.footer-main-square {
+    width: 270px; /* Slightly wider */
+    height: 70px; /* Slightly taller */
+    background-color: white;
+    margin: -10px auto 0; /* Negative margin to pull it closer */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid #eee; /* Fixed invalid negative border value */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    font-size: 11px; /* Slightly larger font */
+    text-align: center;
+    line-height: 1.2;
+    position: relative; /* Needed for proper positioning */
+    top: -30px; /* Pull it up closer to the calendar */
+}
+
+.footer-main-square div {
+    margin: 2px 0; /* Slightly more spacing between lines */
+}
+
+.footer-main-version-info {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 12px; /* Slightly larger */
+}
+
+.footer-main-downloads-info {
+    font-size: 10px; /* Slightly larger */
+    color: #7f8c8d;
+}
+
+.footer-main-developer-info {
+    font-size: 10px; /* Slightly larger */
+    color: #3498db;
+    font-style: italic;
+}

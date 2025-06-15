@@ -18,7 +18,11 @@ window.noteTypes = [
     {icon: '📅', type: 'event', label: 'Event'}
 ];
 
-// Get stable date key (YYYY-MM-DD format)
+/**
+ * Gets a stable date key in YYYY-MM-DD format
+ * @param {Date} date - The date to convert
+ * @return {string} Formatted date string
+ */
 window.getStableDateKey = function(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -26,7 +30,11 @@ window.getStableDateKey = function(date) {
     return `${year}-${month}-${day}`;
 };
 
-// Normalize date key (handles various input formats)
+/**
+ * Normalizes various date inputs to a stable YYYY-MM-DD format
+ * @param {Date|string} dateInput - The date input to normalize
+ * @return {string} Normalized date string
+ */
 window.normalizeDateKey = function(dateInput) {
     if (dateInput instanceof Date) {
         return getStableDateKey(dateInput);
@@ -53,7 +61,11 @@ window.normalizeDateKey = function(dateInput) {
     return getStableDateKey(new Date());
 };
 
-// HTML sanitizer
+/**
+ * Sanitizes HTML strings to prevent XSS
+ * @param {string} str - The string to sanitize
+ * @return {string} Sanitized string
+ */
 window.sanitizeHTML = function(str) {
     if (!str) return '';
     return str.toString()

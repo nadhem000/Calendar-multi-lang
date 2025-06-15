@@ -44,6 +44,7 @@ header {
 .main-content {
     display: flex;
     gap: 20px;
+    padding-bottom: 70px;
 }
 .sidebar {
     width: 80px;
@@ -158,6 +159,7 @@ header {
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
+    padding-bottom: 70px;
 	}
     .icon {
         font-size: 1.3rem;

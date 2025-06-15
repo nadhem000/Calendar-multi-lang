@@ -1,6 +1,8 @@
-
+// scripts/config.js
+const APP_VERSION = '9';
 const CACHE_CONFIG = {
-	name: 'calendar-cache-v8',
+    name: `calendar-cache-v${APP_VERSION.split('.').join('')}`, // uses the version
+	
 	assets: [
 		'./',
 		'./manifest.json',
@@ -15,7 +17,9 @@ const CACHE_CONFIG = {
 		'./styles/languages_settings.css',
 		'./styles/notes_specials.css',
 		'./styles/settings.css',
+		'./styles/footer.css',
 		'./styles/widget.css',
+		'./styles/export_import.css',
 		'./scripts/languages.js',
 		'./scripts/converter.js',
 		'./scripts/calendar.js',
@@ -32,6 +36,8 @@ const CACHE_CONFIG = {
 		'./scripts/notes_specials.js',
 		'./scripts/app-manager.js',
 		'./scripts/settings.js',
+		'./scripts/footer.js',
+		'./scripts/export_import.js',
 		'./api/widget-data',
 		'./assets/icons/ios/icon-192.png',
 		'./assets/icons/android/icon-192.png',
@@ -46,10 +52,15 @@ const CACHE_CONFIG = {
 		'./assets/sounds/Ocean_Breeze.mp3'
 	],
 	strategies: {
+		// Network-first strategy for dynamic content
 		networkFirst: ['/api/notes', '/api/widget-data'],
+		// Cache-first strategy for static assets  
 		cacheFirst: ['/styles/', '/scripts/', '/assets/']
 	}
 };
+// Make the version available globally
+window.APP_VERSION = APP_VERSION;
+window.CACHE_CONFIG = CACHE_CONFIG;
 
 /* // Export the config if using modules
 	if (typeof module !== 'undefined' && module.exports) {

@@ -28,6 +28,7 @@
 		<link rel="stylesheet" href="styles/notes_specials.css">
 		<link rel="stylesheet" href="styles/hijri-converter.css">
 		<link rel="stylesheet" href="styles/footer.css">
+		<link rel="stylesheet" href="styles/export_import.css">
 	</head>
 	<body>
 		<div class="container">
@@ -89,9 +90,9 @@
 				</main>
 			</div>
 			<div class="footer-main-square">
-			<div class="footer-main-version-info" id="version-display">Version: 0.0.9</div>
-			<div class="footer-main-downloads-info" id="downloads-display">Downloads: Under Developement...</div>
-			<div class="footer-main-developer-info">Developer: Mejri Ziad</div>
+				<div class="footer-main-version-info" id="version-display">Version: 0.0.9</div>
+				<div class="footer-main-downloads-info" id="downloads-display">Downloads: Under Developement...</div>
+				<div class="footer-main-developer-info">Developer: Mejri Ziad</div>
 			</div>
 		</div>
 		<div id="tips-modal" class="tips-modal">
@@ -116,6 +117,7 @@
 					<button class="settings-tab-btn" data-tab="notifications">Notifications</button>
 					<button class="settings-tab-btn" data-tab="memory">Memory</button>
 					<button class="settings-tab-btn" data-tab="periodic">Periodic Activities</button>
+					<button class="settings-tab-btn" data-tab="export-import">Export/Import</button>
 				</div>
 				
 				<!-- Language Tab -->
@@ -276,6 +278,56 @@
 					<h3>Periodic Activities</h3>
 					<!-- The auto-clean toggle will be moved here by JavaScript -->
 				</div>
+				<!-- Export/Import Tab -->
+				<div id="export-import-tab" class="settings-tab-content">
+					<h3>Export/Import Data</h3>
+					
+					<div class="settings-export-import-container">
+						<div class="settings-export-import-item">
+							<h4>Export Data</h4>
+							<p class="settings-export-import-description">Export your calendar data to a file</p>
+							<button id="export-json-btn" class="settings-export-import-btn">
+								<span class="export-import-icon">⬇️</span> Export as JSON
+							</button>
+							<button id="export-csv-btn" class="settings-export-import-btn">
+								<span class="export-import-icon">⬇️</span> Export as CSV
+							</button>
+							<button id="export-txt-btn" class="settings-export-import-btn">
+								<span class="export-import-icon">⬇️</span> Export as TXT
+							</button>
+						</div>
+						
+						<div class="settings-export-import-item">
+							<h4>Import Data</h4>
+							<p class="settings-export-import-description">Import calendar data from a file</p>
+							<input type="file" id="import-file" class="settings-export-import-file" accept=".json,.csv">
+							<button id="import-btn" class="settings-export-import-btn" disabled>
+								<span class="export-import-icon">⬆️</span> Import Data
+							</button>
+							<div class="settings-export-import-options">
+								<label class="settings-export-import-label">
+									<input type="checkbox" id="import-overwrite" class="settings-export-import-checkbox">
+									Overwrite existing data
+								</label>
+								<label class="settings-export-import-label">
+									<input type="checkbox" id="import-merge" class="settings-export-import-checkbox" checked>
+									Merge with existing data
+								</label>
+							</div>
+						</div>
+						
+						<div class="settings-export-import-item">
+							<h4>Sync Status</h4>
+							<div id="export-import-status" class="settings-export-import-status">
+								Ready for export/import operations
+							</div>
+							<div id="export-import-progress" class="settings-export-import-progress hidden">
+								<div class="settings-export-import-progress-bar"></div>
+								<span class="settings-export-import-progress-text">0%</span>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<!-- Fixed Footer -->
@@ -304,8 +356,9 @@
 		<script src="scripts/settings.js"></script>
 		<script src="scripts/hijri-converter.js"></script>
 		<script src="scripts/calendar_settings.js"></script>
-<script src="scripts/analytics.js"></script>
+		<script src="scripts/analytics.js"></script>
 		<script src="scripts/footer.js"></script>
+		<script src="scripts/export_import.js"></script>
 		<script src="scripts/main.js"></script>
 	</body>
 </html>

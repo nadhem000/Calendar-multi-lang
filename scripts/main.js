@@ -1,6 +1,7 @@
 // Initialize the page
 window.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
 window.currentCalendarSystem = localStorage.getItem('calendarSystem') || 'gregorian';
+
 // Utility functions
 function updateTodayButton() {
     const today = new Date();

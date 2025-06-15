@@ -1,10 +1,10 @@
-// notes_specials.js
+// Special notes functionality
 function getTranslation(key, fallback) {
     try {
         const keys = key.split('.');
         let result = translations[currentLanguage];
         for (const k of keys) {
-            result = result[k];
+            result = result?.[k];
             if (result === undefined) break;
         }
         return result !== undefined ? result : fallback;
@@ -12,11 +12,15 @@ function getTranslation(key, fallback) {
         return fallback;
     }
 }
+
+/**
+ * Shows the modal for special notes operations
+ */
 function showSpecialNotesModal() {
     const modal = document.createElement('div');
     modal.className = 'notes-specials-options-modal';
     
-    // Get translations
+    // Get all translations with English fallbacks
     const generalizeText = getTranslation('Notesspecials.generalize', 'Generalize Note');
     const generalizeTooltip = getTranslation('Notesspecials.generalizeTooltip', 'Create repeating notes based on patterns');
     const editSpecialText = getTranslation('Notesspecials.editSpecial', 'Edit Special Note');
@@ -51,6 +55,7 @@ function showSpecialNotesModal() {
     const noteSettingsText = getTranslation('noteSettings', 'Note Settings');
     const timeText = getTranslation('time', 'Time');
 
+    // Build modal HTML with all options
     modal.innerHTML = `
         <div class="notes-specials-options-content">
             <h3>${window.sanitizeHTML(getTranslation('Notesspecials.specialNotes', 'Special Notes'))}</h3>
@@ -65,6 +70,7 @@ function showSpecialNotesModal() {
                     ${window.sanitizeHTML(deleteNotesText)}
                 </button>
             </div>
+            <!-- Generalize options panel -->
             <div class="notes-specials-generalize-options hidden">
                 <h4>${window.sanitizeHTML(generalizeOptions)}</h4>
                 <fieldset class="note-controls">
@@ -103,13 +109,13 @@ function showSpecialNotesModal() {
                     <div>
                         <label for="notes-specials-pattern-select" title="${window.sanitizeHTML(repeatPattern)}">
                             ${window.sanitizeHTML(repeatPattern)}
-<select id="notes-specials-pattern-select" name="repeat-pattern" class="notes-specials-pattern-select">
-    <option value="daily">${window.sanitizeHTML(dailyText)}</option>
-    <option value="weekly">${window.sanitizeHTML(weeklyText)}</option>
-    <option value="monthly">${window.sanitizeHTML(monthlyText)}</option>
-    <option value="three_months">${window.sanitizeHTML('Every 3 Months')}</option>
-    <option value="yearly">${window.sanitizeHTML(yearlyText)}</option>
-</select>
+                            <select id="notes-specials-pattern-select" name="repeat-pattern" class="notes-specials-pattern-select">
+                                <option value="daily">${window.sanitizeHTML(dailyText)}</option>
+                                <option value="weekly">${window.sanitizeHTML(weeklyText)}</option>
+                                <option value="monthly">${window.sanitizeHTML(monthlyText)}</option>
+                                <option value="three_months">${window.sanitizeHTML('Every 3 Months')}</option>
+                                <option value="yearly">${window.sanitizeHTML(yearlyText)}</option>
+                            </select>
                         </label>
                     </div>
                     <div>
@@ -141,6 +147,7 @@ function showSpecialNotesModal() {
                     <button class="notes-specials-cancel" title="${window.sanitizeHTML(closeText)}">${window.sanitizeHTML(closeText)}</button>
                 </div>
             </div>
+            <!-- Edit options panel -->
             <div class="notes-specials-edit-options hidden">
                 <h4>${window.sanitizeHTML(editSpecialNotes)}</h4>
                 <div class="notes-specials-notes-list">
@@ -150,6 +157,7 @@ function showSpecialNotesModal() {
                     <button class="notes-specials-close-edit" title="${window.sanitizeHTML(closeText)}">${window.sanitizeHTML(closeText)}</button>
                 </div>
             </div>
+            <!-- Delete options panel -->
             <div class="notes-specials-delete-options hidden">
                 <h4>${window.sanitizeHTML(deleteNotesOptions)}</h4>
                 <div class="notes-specials-delete-choices">
@@ -171,11 +179,42 @@ function showSpecialNotesModal() {
         </div>
     `;
 
-    // Event listeners
+    // Close modal handlers
     modal.querySelector('.notes-specials-options-close').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
-    // Button handlers
+    // Initialize UI selections
+    const firstColor = modal.querySelector('.color-option');
+    if (firstColor) firstColor.classList.add('selected');
+    const firstType = modal.querySelector('.note-type');
+    if (firstType) firstType.classList.add('selected');
+    
+    // Set up color picker interaction
+    modal.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            modal.querySelectorAll('.color-option').forEach(opt => 
+                opt.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+    
+    // Set up type selector interaction
+    modal.querySelectorAll('.note-type').forEach(type => {
+        type.addEventListener('click', function() {
+            modal.querySelectorAll('.note-type').forEach(t => 
+                t.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            // Auto-insert type text if empty
+            const textarea = modal.querySelector('.notes-specials-options-input');
+            if (!textarea.value.trim()) {
+                const typeData = window.noteTypes.find(t => t.type === this.value);
+                textarea.value = `${typeData.icon} ${typeData.label}`;
+            }
+        });
+    });
+
+    // Generalize button handler
     modal.querySelector('.notes-specials-generalize').addEventListener('click', () => {
         modal.querySelectorAll('.notes-specials-generalize-options, .notes-specials-edit-options, .notes-specials-delete-options')
             .forEach(div => div.classList.add('hidden'));
@@ -186,36 +225,8 @@ function showSpecialNotesModal() {
         const dateStr = today.toISOString().split('T')[0];
         modal.querySelector('#notes-specials-date-input').value = dateStr;
     });
-	// Initialize selections
-const firstColor = modal.querySelector('.color-option');
-if (firstColor) firstColor.classList.add('selected');
-const firstType = modal.querySelector('.note-type');
-if (firstType) firstType.classList.add('selected');
-// Color picker interaction - same as regular notes
-modal.querySelectorAll('.color-option').forEach(option => {
-    option.addEventListener('click', function() {
-        modal.querySelectorAll('.color-option').forEach(opt => 
-            opt.classList.remove('selected'));
-        this.classList.add('selected');
-    });
-});
 
-// Type selector interaction - same as regular notes
-modal.querySelectorAll('.note-type').forEach(type => {
-    type.addEventListener('click', function() {
-        modal.querySelectorAll('.note-type').forEach(t => 
-            t.classList.remove('selected'));
-        this.classList.add('selected');
-        
-        // Auto-insert type text if empty
-        const textarea = modal.querySelector('.notes-specials-options-input');
-        if (!textarea.value.trim()) {
-            const typeData = window.noteTypes.find(t => t.type === this.value);
-            textarea.value = `${typeData.icon} ${typeData.label}`;
-        }
-    });
-});
-
+    // Edit button handler
     modal.querySelector('.notes-specials-edit').addEventListener('click', () => {
         modal.querySelectorAll('.notes-specials-generalize-options, .notes-specials-edit-options, .notes-specials-delete-options')
             .forEach(div => div.classList.add('hidden'));
@@ -234,7 +245,8 @@ modal.querySelectorAll('.note-type').forEach(type => {
                         date: date,
                         content: note.text,
                         color: note.color,
-                        type: note.type
+                        type: note.type,
+                        time: note.time
                     });
                 }
             });
@@ -245,76 +257,78 @@ modal.querySelectorAll('.note-type').forEach(type => {
             return;
         }
         
+        // Create note items for each special note
         specialNotes.forEach(note => {
-    const noteItem = document.createElement('div');
-    noteItem.className = 'notes-specials-note-item';
-    noteItem.innerHTML = `
-        <span class="notes-specials-note-date">${note.date}</span>
-        <span class="notes-specials-note-content">${window.sanitizeHTML(note.content)}</span>
-        <button class="notes-specials-edit-note" title="${window.sanitizeHTML(editText)}">
-            ${window.sanitizeHTML(editText)}
-        </button>
-    `;
-    // Add click handler for the edit button
-    noteItem.querySelector('.notes-specials-edit-note').addEventListener('click', () => {
-        showEditSpecialNoteModal({
-            date: note.date,
-            content: note.content,
-            color: note.color,
-            type: note.type,
-            time: note.time
+            const noteItem = document.createElement('div');
+            noteItem.className = 'notes-specials-note-item';
+            noteItem.innerHTML = `
+                <span class="notes-specials-note-date">${note.date}</span>
+                <span class="notes-specials-note-content">${window.sanitizeHTML(note.content)}</span>
+                <button class="notes-specials-edit-note" title="${window.sanitizeHTML(editText)}">
+                    ${window.sanitizeHTML(editText)}
+                </button>
+            `;
+            // Add click handler for the edit button
+            noteItem.querySelector('.notes-specials-edit-note').addEventListener('click', () => {
+                showEditSpecialNoteModal({
+                    date: note.date,
+                    content: note.content,
+                    color: note.color,
+                    type: note.type,
+                    time: note.time
+                });
+            });
+            notesList.appendChild(noteItem);
         });
     });
-    notesList.appendChild(noteItem);
-});
-    });
 
+    // Delete button handler
     modal.querySelector('.notes-specials-delete').addEventListener('click', () => {
-    modal.querySelectorAll('.notes-specials-generalize-options, .notes-specials-edit-options, .notes-specials-delete-options')
-        .forEach(div => div.classList.add('hidden'));
-    modal.querySelector('.notes-specials-delete-options').classList.remove('hidden');
-    
-    // Populate notes list for single deletion
-    const deleteChoices = modal.querySelector('.notes-specials-delete-choices');
-    deleteChoices.innerHTML = `
-        <label title="${window.sanitizeHTML(deleteSingle)}">
-            <input type="radio" id="delete-option-single" name="delete-option" value="single" checked>
-            ${window.sanitizeHTML(deleteSingle)}
-        </label>
-        <label title="${window.sanitizeHTML(deleteAll)}">
-            <input type="radio" id="delete-option-all" name="delete-option" value="all">
-            ${window.sanitizeHTML(deleteAll)}
-        </label>
-        <div class="notes-specials-delete-list hidden">
-            <h5>${window.sanitizeHTML(getTranslation('Notesspecials.selectNoteToDelete', 'Select note to delete'))}</h5>
-            <div class="notes-specials-notes-list">
-                <!-- Notes will be populated here -->
+        modal.querySelectorAll('.notes-specials-generalize-options, .notes-specials-edit-options, .notes-specials-delete-options')
+            .forEach(div => div.classList.add('hidden'));
+        modal.querySelector('.notes-specials-delete-options').classList.remove('hidden');
+        
+        // Populate delete options
+        const deleteChoices = modal.querySelector('.notes-specials-delete-choices');
+        deleteChoices.innerHTML = `
+            <label title="${window.sanitizeHTML(deleteSingle)}">
+                <input type="radio" id="delete-option-single" name="delete-option" value="single" checked>
+                ${window.sanitizeHTML(deleteSingle)}
+            </label>
+            <label title="${window.sanitizeHTML(deleteAll)}">
+                <input type="radio" id="delete-option-all" name="delete-option" value="all">
+                ${window.sanitizeHTML(deleteAll)}
+            </label>
+            <div class="notes-specials-delete-list hidden">
+                <h5>${window.sanitizeHTML(getTranslation('Notesspecials.selectNoteToDelete', 'Select note to delete'))}</h5>
+                <div class="notes-specials-notes-list">
+                    <!-- Notes will be populated here -->
+                </div>
             </div>
-        </div>
-    `;
-    
-    // Add event listener for radio buttons
-    deleteChoices.querySelectorAll('input[name="delete-option"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            const deleteList = deleteChoices.querySelector('.notes-specials-delete-list');
-            if (e.target.value === 'single') {
-                deleteList.classList.remove('hidden');
-                populateDeleteNotesList(deleteList.querySelector('.notes-specials-notes-list'));
-            } else {
-                deleteList.classList.add('hidden');
-            }
+        `;
+        
+        // Set up delete option selection
+        deleteChoices.querySelectorAll('input[name="delete-option"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const deleteList = deleteChoices.querySelector('.notes-specials-delete-list');
+                if (e.target.value === 'single') {
+                    deleteList.classList.remove('hidden');
+                    populateDeleteNotesList(deleteList.querySelector('.notes-specials-notes-list'));
+                } else {
+                    deleteList.classList.add('hidden');
+                }
+            });
         });
+        
+        // Initially populate if single is selected
+        if (deleteChoices.querySelector('#delete-option-single').checked) {
+            const deleteList = deleteChoices.querySelector('.notes-specials-delete-list');
+            deleteList.classList.remove('hidden');
+            populateDeleteNotesList(deleteList.querySelector('.notes-specials-notes-list'));
+        }
     });
-    
-    // Initially populate if single is selected
-    if (deleteChoices.querySelector('#delete-option-single').checked) {
-        const deleteList = deleteChoices.querySelector('.notes-specials-delete-list');
-        deleteList.classList.remove('hidden');
-        populateDeleteNotesList(deleteList.querySelector('.notes-specials-notes-list'));
-    }
-});
 
-    // Cancel/close handlers
+    // Cancel/close handlers for panels
     modal.querySelector('.notes-specials-cancel').addEventListener('click', () => {
         modal.querySelector('.notes-specials-generalize-options').classList.add('hidden');
     });
@@ -329,103 +343,108 @@ modal.querySelectorAll('.note-type').forEach(type => {
 
     // Confirm handler for creating notes
     modal.querySelector('.notes-specials-confirm').addEventListener('click', () => {
-    const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
-    const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
-    const noteText = modal.querySelector('#notes-specials-options-input').value.trim();
-    const noteTime = modal.querySelector('#note-time-special').value;
-    const firstNoteDate = modal.querySelector('#notes-specials-date-input').value;
-    const repeatPattern = modal.querySelector('#notes-specials-pattern-select').value;
-    const includeWeekends = modal.querySelector('#notes-specials-weekends-select').value;
-    const durationLimit = modal.querySelector('#notes-specials-duration-select').value;
+        const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
+        const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
+        const noteText = modal.querySelector('#notes-specials-options-input').value.trim();
+        const noteTime = modal.querySelector('#note-time-special').value;
+        const firstNoteDate = modal.querySelector('#notes-specials-date-input').value;
+        const repeatPattern = modal.querySelector('#notes-specials-pattern-select').value;
+        const includeWeekends = modal.querySelector('#notes-specials-weekends-select').value;
+        const durationLimit = modal.querySelector('#notes-specials-duration-select').value;
 
-    if (!noteText) {
-        alert(getTranslation('validationError', 'Please enter note text'));
-        return;
-    }
-
-    if (!firstNoteDate) {
-        alert(getTranslation('validationDateError', 'Please select a start date'));
-        return;
-    }
-
-    const dates = window.generateDates(firstNoteDate, repeatPattern, includeWeekends, durationLimit);
-    
-    dates.forEach(date => {
-        const dateKey = window.normalizeDateKey(new Date(date));
-        if (!window.notes[dateKey]) {
-            window.notes[dateKey] = [];
-        }
-        
-        window.notes[dateKey].push({
-    date: dateKey,
-    color: selectedColor,
-    type: selectedType,
-    text: noteText,
-    time: noteTime,
-    language: currentLanguage,
-    special: true,  // This marks it as a special note
-    pattern: repeatPattern,
-    originalDate: firstNoteDate
-});
-    });
-
-    saveNotes();
-    modal.remove();
-});
-
-    // Confirm handler for deleting notes
-    // Confirm handler for deleting notes
-modal.querySelector('.notes-specials-confirm-delete').addEventListener('click', () => {
-    const deleteOption = modal.querySelector('input[name="delete-option"]:checked')?.value;
-    
-    if (deleteOption === 'all') {
-        if (confirm(getTranslation('Notesspecials.confirmDeleteAll', 'Are you sure you want to delete ALL special notes?'))) {
-            // Delete all special notes
-            for (const date in window.notes) {
-                window.notes[date] = window.notes[date].filter(note => !note.special);
-                if (window.notes[date].length === 0) {
-                    delete window.notes[date];
-                }
-            }
-            saveNotes();
-            modal.remove();
-        }
-    } else if (deleteOption === 'single') {
-        // Changed this line to look in the delete-list container
-        const container = modal.querySelector('.notes-specials-delete-list .notes-specials-notes-list');
-        const checkedBoxes = container.querySelectorAll('.notes-specials-note-checkbox:checked:not(#select-all-notes)');
-        
-        if (checkedBoxes.length === 0) {
-            alert(getTranslation('Notesspecials.noNotesSelected', 'Please select at least one note to delete'));
+        if (!noteText) {
+            alert(getTranslation('validationError', 'Please enter note text'));
             return;
         }
+
+        if (!firstNoteDate) {
+            alert(getTranslation('validationDateError', 'Please select a start date'));
+            return;
+        }
+
+        // Generate dates based on pattern
+        const dates = window.generateDates(firstNoteDate, repeatPattern, includeWeekends, durationLimit);
         
-        if (confirm(getTranslation('Notesspecials.confirmDeleteSelected', `Are you sure you want to delete ${checkedBoxes.length} selected notes?`))) {
-            // Delete selected notes
-            checkedBoxes.forEach(checkbox => {
-                const date = checkbox.dataset.date;
-                const index = parseInt(checkbox.dataset.index);
-                
-                if (window.notes[date] && window.notes[date][index]) {
-                    window.notes[date].splice(index, 1);
-                    
+        // Create notes for each generated date
+        dates.forEach(date => {
+            const dateKey = window.normalizeDateKey(new Date(date));
+            if (!window.notes[dateKey]) {
+                window.notes[dateKey] = [];
+            }
+            
+            window.notes[dateKey].push({
+                date: dateKey,
+                color: selectedColor,
+                type: selectedType,
+                text: noteText,
+                time: noteTime,
+                language: currentLanguage,
+                special: true,
+                pattern: repeatPattern,
+                originalDate: firstNoteDate,
+                currentCalendarSystem: localStorage.getItem('calendarSystem') || 'gregorian'
+            });
+        });
+
+        saveNotes();
+        modal.remove();
+    });
+
+    // Confirm handler for deleting notes
+    modal.querySelector('.notes-specials-confirm-delete').addEventListener('click', () => {
+        const deleteOption = modal.querySelector('input[name="delete-option"]:checked')?.value;
+        
+        if (deleteOption === 'all') {
+            if (confirm(getTranslation('Notesspecials.confirmDeleteAll', 'Are you sure you want to delete ALL special notes?'))) {
+                // Delete all special notes
+                for (const date in window.notes) {
+                    window.notes[date] = window.notes[date].filter(note => !note.special);
                     if (window.notes[date].length === 0) {
                         delete window.notes[date];
                     }
                 }
-            });
+                saveNotes();
+                modal.remove();
+            }
+        } else if (deleteOption === 'single') {
+            const container = modal.querySelector('.notes-specials-delete-list .notes-specials-notes-list');
+            const checkedBoxes = container.querySelectorAll('.notes-specials-note-checkbox:checked:not(#select-all-notes)');
             
-            saveNotes();
+            if (checkedBoxes.length === 0) {
+                alert(getTranslation('Notesspecials.noNotesSelected', 'Please select at least one note to delete'));
+                return;
+            }
             
-            // Refresh the list
-            populateDeleteNotesList(container);
+            if (confirm(getTranslation('Notesspecials.confirmDeleteSelected', `Are you sure you want to delete ${checkedBoxes.length} selected notes?`))) {
+                // Delete selected notes
+                checkedBoxes.forEach(checkbox => {
+                    const date = checkbox.dataset.date;
+                    const index = parseInt(checkbox.dataset.index);
+                    
+                    if (window.notes[date] && window.notes[date][index]) {
+                        window.notes[date].splice(index, 1);
+                        
+                        if (window.notes[date].length === 0) {
+                            delete window.notes[date];
+                        }
+                    }
+                });
+                
+                saveNotes();
+                
+                // Refresh the list
+                populateDeleteNotesList(container);
+            }
         }
-    }
-});
+    });
 
     document.body.appendChild(modal);
 }
 
+/**
+ * Shows modal for editing a special note
+ * @param {object} noteData - The note data to edit
+ */
 function showEditSpecialNoteModal(noteData) {
     const modal = document.createElement('div');
     modal.className = 'notes-specials-edit-modal';
@@ -466,7 +485,8 @@ function showEditSpecialNoteModal(noteData) {
             </div>
         </div>
     `;
-    // Color picker interaction
+    
+    // Set up color picker interaction
     modal.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function() {
             modal.querySelectorAll('.color-option').forEach(opt => 
@@ -474,7 +494,8 @@ function showEditSpecialNoteModal(noteData) {
             this.classList.add('selected');
         });
     });
-    // Type selector interaction
+    
+    // Set up type selector interaction
     modal.querySelectorAll('.note-type').forEach(type => {
         type.addEventListener('click', function() {
             modal.querySelectorAll('.note-type').forEach(t => 
@@ -482,16 +503,19 @@ function showEditSpecialNoteModal(noteData) {
             this.classList.add('selected');
         });
     });
+    
     // Save handler
     modal.querySelector('.notes-specials-save-edit').addEventListener('click', () => {
         const selectedColor = modal.querySelector('input[name="edit-note-color"]:checked')?.value || 'note-color-gray';
         const selectedType = modal.querySelector('input[name="edit-note-type"]:checked')?.value || 'note';
         const noteText = modal.querySelector('.notes-specials-edit-input').value.trim();
         const noteTime = modal.querySelector('#edit-note-time').value;
+        
         if (!noteText) {
             alert(getTranslation('validationError', 'Please enter note text'));
             return;
         }
+        
         // Update the note in the main notes object
         for (const date in window.notes) {
             window.notes[date].forEach(note => {
@@ -503,16 +527,24 @@ function showEditSpecialNoteModal(noteData) {
                 }
             });
         }
+        
         saveNotes();
         modal.remove();
         // Refresh the edit view
-        document.querySelector('.notes-specials-edit').click();
+        document.querySelector('.notes-specials-edit')?.click();
     });
+    
     // Close handler
     modal.querySelector('.notes-specials-cancel-edit').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    
     document.body.appendChild(modal);
 }
+
+/**
+ * Populates the delete notes list with special notes
+ * @param {HTMLElement} container - The container to populate
+ */
 function populateDeleteNotesList(container) {
     container.innerHTML = '';
     
@@ -539,7 +571,7 @@ function populateDeleteNotesList(container) {
         return;
     }
     
-    // Create a select all checkbox
+    // Create select all checkbox
     const selectAllItem = document.createElement('div');
     selectAllItem.className = 'notes-specials-note-item select-all';
     selectAllItem.innerHTML = `
@@ -548,13 +580,14 @@ function populateDeleteNotesList(container) {
     `;
     container.appendChild(selectAllItem);
     
-    // Add click handler for select all
+    // Set up select all functionality
     selectAllItem.querySelector('#select-all-notes').addEventListener('change', function() {
         container.querySelectorAll('.notes-specials-note-checkbox:not(#select-all-notes)').forEach(checkbox => {
             checkbox.checked = this.checked;
         });
     });
     
+    // Create note items
     specialNotes.forEach(note => {
         const noteItem = document.createElement('div');
         noteItem.className = 'notes-specials-note-item';
@@ -568,7 +601,8 @@ function populateDeleteNotesList(container) {
         container.appendChild(noteItem);
     });
 }
-// Initialize the special notes icon
+
+// Initialize special notes functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const notesSpecialsIcon = document.getElementById('notes-specials-icon');
     if (notesSpecialsIcon) {

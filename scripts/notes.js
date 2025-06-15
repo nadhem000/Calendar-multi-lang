@@ -1,6 +1,11 @@
 // Notes functionality
 window.notes = {};
 
+/**
+ * Opens a modal for adding/editing notes on a specific date
+ * @param {Date} date - The date for the note
+ * @param {HTMLElement} dayElement - The calendar day element
+ */
 function openNoteModal(date, dayElement) {
     // Remove any existing modals first
     document.querySelectorAll('.note-modal').forEach(modal => modal.remove());
@@ -10,14 +15,15 @@ function openNoteModal(date, dayElement) {
     const dateKey = window.normalizeDateKey(date);
     const existingNotes = window.notes[dateKey] || [];
     
+    // Build modal HTML with fallback English translations
     modal.innerHTML = `
         <div class="note-modal-content">
             <div class="note-header">
                 <h3>${formatNoteDate(date)}</h3>
-                <span class="close-modal" title="${translations[currentLanguage].close}">&times;</span>
+                <span class="close-modal" title="${translations[currentLanguage]?.close || 'Close'}">&times;</span>
             </div>
             <fieldset class="note-controls">
-                <legend>${translations[currentLanguage].noteSettings || 'Note Settings'}</legend>
+                <legend>${translations[currentLanguage]?.noteSettings || 'Note Settings'}</legend>
                 <div class="color-picker">
                     ${window.noteColors.map((color, index) => `
                         <label class="color-option" 
@@ -38,16 +44,16 @@ function openNoteModal(date, dayElement) {
                     `).join('')}
                 </div>
                 <div class="time-input">
-                    <label for="note-time-${dateKey}">${translations[currentLanguage].time || 'Time'}:</label>
+                    <label for="note-time-${dateKey}">${translations[currentLanguage]?.time || 'Time'}:</label>
                     <input type="time" id="note-time-${dateKey}" name="note-time" 
                         value="${existingNotes[0]?.time || ''}">
                 </div>
             </fieldset>
-            <label for="note-input" class="sr-only">${translations[currentLanguage].noteLabel || 'Note Content'}</label>
+            <label for="note-input" class="sr-only">${translations[currentLanguage]?.noteLabel || 'Note Content'}</label>
             <textarea id="note-input" name="note" class="note-text" 
-                placeholder="${translations[currentLanguage].notePlaceholder}"></textarea>
+                placeholder="${translations[currentLanguage]?.notePlaceholder || 'Add your note here...'}"></textarea>
             <div class="existing-notes">
-                <h4>${translations[currentLanguage].existingNotes || 'Existing Notes'}:</h4>
+                <h4>${translations[currentLanguage]?.existingNotes || 'Existing Notes'}:</h4>
                 <div class="notes-list">
                     ${(window.notes[dateKey] || [])
                         .sort((a, b) => (a.time || '23:59') > (b.time || '23:59') ? 1 : -1)
@@ -63,38 +69,28 @@ function openNoteModal(date, dayElement) {
                                     ${window.sanitizeHTML(note.text)}
                                     <div class="note-language">${note.language.toUpperCase()}</div>
                                 </div>
-                                <button class="edit-note" data-index="${index}" title="${translations[currentLanguage].edit || 'Edit'}">✎</button>
-                                <button class="delete-note" data-index="${index}" title="${translations[currentLanguage].delete}">✕</button>
+                                <button class="edit-note" data-index="${index}" title="${translations[currentLanguage]?.edit || 'Edit'}">✎</button>
+                                <button class="delete-note" data-index="${index}" title="${translations[currentLanguage]?.delete || 'Delete'}">✕</button>
                             </div>
                         `).join('')}
                 </div>
             </div>
             <div class="note-buttons">
-                <button type="submit" class="save-note">${translations[currentLanguage].save}</button>
-                <button type="button" class="close-note">${translations[currentLanguage].close}</button>
-            </div>
-            <div class="attachments">
-                ${(window.notes[dateKey] || []).map((note, index) => `
-                    ${(note.attachments || []).map(attach => `
-                        ${attach.type === 'image' ? 
-                            `<img src="${window.sanitizeHTML(attach.url)}" class="attachment-preview" onerror="this.style.display='none'">` : 
-                            `<div class="text-attachment">📄 ${window.sanitizeHTML(attach.content.substring(0, 20))}...</div>`
-                        }
-                    `).join('')}
-                `).join('')}
+                <button type="submit" class="save-note">${translations[currentLanguage]?.save || 'Save'}</button>
+                <button type="button" class="close-note">${translations[currentLanguage]?.close || 'Close'}</button>
             </div>
         </div>
     `;
     
     document.body.appendChild(modal);
     
-    // Initialize selections
+    // Initialize UI selections
     const firstColor = modal.querySelector('.color-option');
     if (firstColor) firstColor.classList.add('selected');
     const firstType = modal.querySelector('.note-type');
     if (firstType) firstType.classList.add('selected');
     
-    // Color picker interaction
+    // Set up color picker interaction
     modal.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function() {
             modal.querySelectorAll('.color-option').forEach(opt => 
@@ -103,7 +99,7 @@ function openNoteModal(date, dayElement) {
         });
     });
     
-    // Type selector interaction
+    // Set up type selector interaction
     modal.querySelectorAll('.note-type').forEach(type => {
         type.addEventListener('click', function() {
             modal.querySelectorAll('.note-type').forEach(t => 
@@ -124,7 +120,7 @@ function openNoteModal(date, dayElement) {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const index = parseInt(btn.dataset.index);
-            if (confirm(translations[currentLanguage].confirmDelete)) {
+            if (confirm(translations[currentLanguage]?.confirmDelete || 'Are you sure you want to delete this note?')) {
                 if (window.notes[dateKey] && window.notes[dateKey].length > index) {
                     window.notes[dateKey].splice(index, 1);
                     if (window.notes[dateKey].length === 0) {
@@ -145,7 +141,7 @@ function openNoteModal(date, dayElement) {
             const index = parseInt(btn.dataset.index);
             const note = window.notes[dateKey][index];
             
-            // Update form values
+            // Update form values with selected note's data
             modal.querySelectorAll('.color-option').forEach(option => {
                 const radio = option.querySelector('input');
                 if (radio.value === note.color) {
@@ -171,7 +167,7 @@ function openNoteModal(date, dayElement) {
         });
     });
     
-    // Save handler
+    // Save handler for new/edited notes
     modal.querySelector('.save-note').addEventListener('click', () => {
         const selectedColor = modal.querySelector('input[name="note-color"]:checked')?.value || 'note-color-gray';
         const selectedType = modal.querySelector('input[name="note-type"]:checked')?.value || 'note';
@@ -180,7 +176,7 @@ function openNoteModal(date, dayElement) {
         const dateKey = window.normalizeDateKey(date);
         
         if (!noteText) {
-            alert(translations[currentLanguage].validationError);
+            alert(translations[currentLanguage]?.validationError || 'Please enter note text');
             return;
         }
         
@@ -188,6 +184,7 @@ function openNoteModal(date, dayElement) {
         if (!window.notes[dateKey]) window.notes[dateKey] = [];
         
         if (editingIndex !== undefined) {
+            // Update existing note
             const index = parseInt(editingIndex);
             window.notes[dateKey][index] = {
                 date: dateKey,
@@ -195,16 +192,19 @@ function openNoteModal(date, dayElement) {
                 type: selectedType,
                 text: noteText,
                 time: noteTime,
-                language: currentLanguage
+                language: currentLanguage,
+                currentCalendarSystem: localStorage.getItem('calendarSystem') || 'gregorian'
             };
         } else {
+            // Add new note
             window.notes[dateKey].push({
                 date: dateKey,
                 color: selectedColor,
                 type: selectedType,
                 text: noteText,
                 time: noteTime,
-                language: currentLanguage
+                language: currentLanguage,
+                currentCalendarSystem: localStorage.getItem('calendarSystem') || 'gregorian'
             });
         }
         
@@ -222,6 +222,11 @@ function openNoteModal(date, dayElement) {
     });
 }
 
+/**
+ * Formats a date according to current language settings
+ * @param {Date} date - The date to format
+ * @return {string} Formatted date string
+ */
 function formatNoteDate(date) {
     const options = { 
         weekday: 'long', 
@@ -232,6 +237,11 @@ function formatNoteDate(date) {
     return new Intl.DateTimeFormat(currentLanguage, options).format(date);
 }
 
+/**
+ * Validates and sanitizes note data
+ * @param {object} note - The note object to validate
+ * @return {object} Validated note object
+ */
 function validateNote(note) {
     return {
         date: window.normalizeDateKey(note.date),
@@ -239,10 +249,17 @@ function validateNote(note) {
         type: window.noteTypes.some(t => t.type === note.type) ? note.type : 'note',
         text: window.sanitizeHTML(note.text),
         time: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(note.time) ? note.time : '',
-        language: ['en', 'fr', 'ar'].includes(note.language) ? note.language : 'en'
+        language: ['en', 'fr', 'ar'].includes(note.language) ? note.language : 'en',
+        currentCalendarSystem: ['gregorian', 'otherSystems'].includes(note.currentCalendarSystem) ? 
+                              note.currentCalendarSystem : 'gregorian'
     };
 }
 
+/**
+ * Renders a visual indicator for notes on calendar days
+ * @param {HTMLElement} dayElement - The calendar day element
+ * @param {string} colorClass - The CSS class for the note color
+ */
 function renderNoteIndicator(dayElement, colorClass) {
     // Clear existing indicators
     dayElement.querySelectorAll('.note-indicator').forEach(el => el.remove());
@@ -251,16 +268,11 @@ function renderNoteIndicator(dayElement, colorClass) {
     const indicator = document.createElement('div');
     indicator.className = 'note-indicator';
     
-    // Find the color in our noteColors array
+    // Find and apply the color
     const colorObj = window.noteColors.find(c => c.class === colorClass);
-    if (colorObj) {
-        indicator.style.backgroundColor = colorObj.color;
-    } else {
-        // Default to gray if color not found
-        indicator.style.backgroundColor = '#cccccc';
-    }
+    indicator.style.backgroundColor = colorObj?.color || '#cccccc';
     
-    // Add note count
+    // Add note count if notes exist
     const dateKey = window.normalizeDateKey(new Date(
         currentYear, 
         currentMonth, 
@@ -275,16 +287,30 @@ function renderNoteIndicator(dayElement, colorClass) {
     dayElement.appendChild(indicator);
 }
 
+/**
+ * Loads notes from localStorage
+ */
 function loadNotes() {
     const loadingOverlay = showLoading();
     try {
         const saved = localStorage.getItem('calendarNotes');
         if (saved) {
             window.notes = JSON.parse(saved);
+            
             // Ensure notes is always an object
             if (!window.notes || typeof window.notes !== 'object') {
                 window.notes = {};
             }
+            
+            // Migrate old notes to include calendar system
+            Object.keys(window.notes).forEach(dateKey => {
+                if (window.notes[dateKey] && Array.isArray(window.notes[dateKey])) {
+                    window.notes[dateKey] = window.notes[dateKey].map(note => ({
+                        ...note,
+                        currentCalendarSystem: note.currentCalendarSystem || 'gregorian'
+                    }));
+                }
+            });
         } else {
             window.notes = {};
         }
@@ -296,6 +322,9 @@ function loadNotes() {
     }
 }
 
+/**
+ * Saves notes to localStorage
+ */
 function saveNotes() {
     // Migrate old note keys if needed
     const migratedNotes = {};
@@ -306,6 +335,19 @@ function saveNotes() {
         if (newKey !== key) {
             needsMigration = true;
         }
+        
+        // Ensure each note has calendar system info
+        if (window.notes[key] && Array.isArray(window.notes[key])) {
+            window.notes[key] = window.notes[key].map(note => {
+                return {
+                    ...note,
+                    currentCalendarSystem: note.currentCalendarSystem || 
+                                         localStorage.getItem('calendarSystem') || 
+                                         'gregorian'
+                };
+            });
+        }
+        
         migratedNotes[newKey] = window.notes[key];
     });
     
