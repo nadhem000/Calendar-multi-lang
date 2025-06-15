@@ -1,8 +1,6 @@
 // scripts/config.js
-const APP_VERSION = '9';
 const CACHE_CONFIG = {
-    name: `calendar-cache-v${APP_VERSION.split('.').join('')}`, // uses the version
-	
+	name: 'calendar-cache-v9',
 	assets: [
 		'./',
 		'./manifest.json',
