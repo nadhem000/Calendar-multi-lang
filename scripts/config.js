@@ -56,9 +56,7 @@ const CACHE_CONFIG = {
 		cacheFirst: ['/styles/', '/scripts/', '/assets/']
 	}
 };
-// Make the version available globally
-window.APP_VERSION = APP_VERSION;
-window.CACHE_CONFIG = CACHE_CONFIG;
+
 
 /* // Export the config if using modules
 	if (typeof module !== 'undefined' && module.exports) {
