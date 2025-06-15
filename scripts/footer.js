@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch downloads count with caching
     async function fetchDownloadsCount() {
-        try {
+        /* try {
             // Check cache first
             const cacheKey = 'downloads-count';
             const cached = localStorage.getItem(cacheKey);
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Return cached value if available, even if stale
             const cached = localStorage.getItem('downloads-count');
             return cached ? parseInt(cached) : 0;
-        }
+        } */
     }
 });
 /* // scripts/footer.js

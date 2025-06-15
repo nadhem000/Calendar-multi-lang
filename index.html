@@ -286,32 +286,45 @@
 						<div class="settings-export-import-item">
 							<h4>Export Data</h4>
 							<p class="settings-export-import-description">Export your calendar data to a file</p>
-							<button id="export-json-btn" class="settings-export-import-btn">
-								<span class="export-import-icon">⬇️</span> Export as JSON
-							</button>
-							<button id="export-csv-btn" class="settings-export-import-btn">
-								<span class="export-import-icon">⬇️</span> Export as CSV
-							</button>
-							<button id="export-txt-btn" class="settings-export-import-btn">
-								<span class="export-import-icon">⬇️</span> Export as TXT
-							</button>
+							<div class="settings-export-import-buttons">
+								<button id="export-json-btn" class="settings-export-import-btn">
+									<span class="export-import-icon">⬇️</span> Export as JSON
+								</button>
+								<button id="export-csv-btn" class="settings-export-import-btn">
+									<span class="export-import-icon">⬇️</span> Export as CSV
+								</button>
+								<button id="export-txt-btn" class="settings-export-import-btn">
+									<span class="export-import-icon">⬇️</span> Export as TXT
+								</button>
+								<button id="export-ical-btn" class="settings-export-import-btn">
+									<span class="export-import-icon">⬇️</span> Export as iCal
+								</button>
+							</div>
 						</div>
 						
 						<div class="settings-export-import-item">
 							<h4>Import Data</h4>
 							<p class="settings-export-import-description">Import calendar data from a file</p>
-							<input type="file" id="import-file" class="settings-export-import-file" accept=".json,.csv">
+							<input type="file" id="import-file" class="settings-export-import-file" 
+							accept=".json,.csv,.txt,.ics">
 							<button id="import-btn" class="settings-export-import-btn" disabled>
 								<span class="export-import-icon">⬆️</span> Import Data
 							</button>
 							<div class="settings-export-import-options">
 								<label class="settings-export-import-label">
-									<input type="checkbox" id="import-overwrite" class="settings-export-import-checkbox">
-									Overwrite existing data
+									<input type="radio" id="import-overwrite" name="import-option" 
+									class="settings-export-import-radio">
+									<span>Overwrite existing data</span>
 								</label>
 								<label class="settings-export-import-label">
-									<input type="checkbox" id="import-merge" class="settings-export-import-checkbox" checked>
-									Merge with existing data
+									<input type="radio" id="import-merge" name="import-option" 
+									class="settings-export-import-radio" checked>
+									<span>Merge with existing data</span>
+								</label>
+								<label class="settings-export-import-label">
+									<input type="checkbox" id="import-special-only" 
+									class="settings-export-import-checkbox">
+									<span>Import only special notes</span>
 								</label>
 							</div>
 						</div>
@@ -356,7 +369,6 @@
 		<script src="scripts/settings.js"></script>
 		<script src="scripts/hijri-converter.js"></script>
 		<script src="scripts/calendar_settings.js"></script>
-		<script src="scripts/analytics.js"></script>
 		<script src="scripts/footer.js"></script>
 		<script src="scripts/export_import.js"></script>
 		<script src="scripts/main.js"></script>
